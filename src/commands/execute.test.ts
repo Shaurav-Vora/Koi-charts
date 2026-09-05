@@ -226,3 +226,51 @@ describe("clarification and atomic commands", () => {
     expect(result.outcome).toBe("error"); expect(result.state.graph).toEqual(state().graph);
   });
 });
+
+describe("read-only exploration", () => {
+  it.each([
+    { kind: "describe", scope: "chart" }, { kind: "describe", scope: "focus" },
+    { kind: "inspect", node: null }, { kind: "inspect", node: id("n3") },
+    { kind: "trace_path", start: id("n1"), end: id("n4") },
+    { kind: "trace_path", start: id("n1"), end: null }, { kind: "validate" },
+  ])("explores without changing graph, focus, history, redo, or version: %j", command => {
+    const edited = execute(state(), rename("n1", "Start"), ids()).state;
+    const before = freeze(execute(edited, { kind: "undo" }, ids()).state);
+    const result = execute(before, command, () => { throw new Error("Exploration must not allocate IDs"); });
+    expect(result.outcome).toBe("explored"); expect(result.state).toEqual(before); expect(result.message.length).toBeGreaterThan(0);
+  });
+  it.each([{ kind: "inspect", node: null }, { kind: "describe", scope: "focus" }])("asks for focus when none exists: %j", command => {
+    const before = freeze(createEngineState()); const result = execute(before, command, ids());
+    expect(result.outcome).toBe("error"); expect(result.message).toMatch(/focus/i); expect(result.state).toEqual(before);
+  });
+  it("missing trace references are errors, not successful empty paths", () => {
+    const before = freeze(state()); const result = execute(before, { kind: "trace_path", start: id("missing"), end: null }, ids());
+    expect(result.outcome).toBe("error"); expect(result.state).toEqual(before);
+  });
+  it("resumes an ambiguous inspect without adding history or moving focus", () => {
+    const before = state(); before.graph.nodes[0].label = "Check"; before.graph.nodes[1].label = "Check";
+    const pending = execute(before, { kind: "inspect", node: label("Check") }, ids());
+    expect(pending.outcome).toBe("clarification");
+    const result = resolveClarification(pending.state, "n1", ids());
+    expect(result.outcome).toBe("explored"); expect(result.message).toContain("start, n1"); expect(result.state).toEqual(before);
+  });
+  it("keeps the original trace start pinned while clarifying the target", () => {
+    const before = state(); before.graph.nodes[2].label = "Check"; before.graph.nodes[3].label = "Check";
+    const pending = execute(before, { kind: "trace_path", start: { kind: "focus" }, end: label("Check") }, ids());
+    expect(pending.outcome).toBe("clarification");
+    const changedFocus = execute(pending.state, { kind: "focus", node: id("n1") }, ids()).state;
+    const result = resolveClarification(changedFocus, "n4", ids());
+    expect(result.outcome).toBe("explored"); expect(result.message).toMatch(/^Path: "Validate card"/);
+    expect(result.state.focusedNodeId).toBe("n1"); expect(result.state.history).toEqual(before.history);
+  });
+  it("inspection preserves an outstanding deletion confirmation", () => {
+    const pending = freeze(execute(state(), del("n2"), ids()).state);
+    const inspected = execute(pending, { kind: "inspect", node: id("n2") }, ids());
+    expect(inspected.outcome).toBe("explored"); expect(inspected.state).toEqual(pending);
+    expect(execute(inspected.state, { kind: "confirm" }, ids()).outcome).toBe("committed");
+  });
+  it("reports validation findings instead of treating an incomplete chart as corrupt", () => {
+    const result = execute(createEngineState(), { kind: "validate" }, ids());
+    expect(result.outcome).toBe("explored"); expect(result.message).toContain("No start node."); expect(result.message).toContain("No end node.");
+  });
+});

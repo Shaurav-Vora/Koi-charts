@@ -121,7 +121,7 @@ export function prepareTransaction(
   } else if (command.kind === "compound") {
     command.commands.forEach((edit, index) => apply(edit, `/commands/${index}`)); message = `Applied ${command.commands.length} edits.`;
   } else if (["add_node", "connect", "rename", "move", "delete"].includes(command.kind)) apply(command as EditCommand, "");
-  else throw new Error("Exploration commands will be available in the next milestone.");
+  else throw new Error("This command does not edit or focus the graph.");
   assertSnapshot(working);
   return { prepared: working, command, nodeIds: [...nodeIds], incidentEdgeIds: [...incidentEdgeIds], message };
 }

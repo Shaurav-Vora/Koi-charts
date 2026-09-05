@@ -1,3 +1,4 @@
+import { exploreCommand } from "./explore";
 import { createEmptyGraph } from "../graph/invariants";
 import { assertSnapshot, commit, restoreHistory } from "../graph/history";
 import type { CommandResult, EngineState, Snapshot } from "../graph/types";
@@ -13,6 +14,8 @@ function run(state: EngineState, command: GraphCommand, newId: () => string,
   allocatedIds?: string[], context?: Pick<Snapshot, "focusedNodeId" | "recentNodeId">): CommandResult {
   try {
     assertSnapshot(state);
+    const exploration = exploreCommand(state, command, context);
+    if (exploration) return exploration;
     const result = prepareTransaction(state, command, newId, allocatedIds, context);
     if (command.kind === "focus") return { state: { ...state, focusedNodeId: result.prepared.focusedNodeId }, outcome: "focused", message: result.message };
     if (result.incidentEdgeIds.length) {
@@ -59,7 +62,7 @@ export function resolveClarification(state: EngineState, candidateId: string, ne
     const command = structuredClone(pending.command);
     replaceReference(command, pending.referencePath, pending.elementKind === "node" ? { kind: "id", value: candidateId } : { kind: "edge_id", id: candidateId });
     const result = run(state, commandSchema.parse(command), newId, pending.allocatedIds, pending.context);
-    if (result.outcome === "focused") result.state = { ...result.state, pending: null };
+    if (result.outcome === "focused" || result.outcome === "explored") result.state = { ...result.state, pending: null };
     return result;
   } catch (error) {
     return failure(state, error instanceof Error ? error.message : "Could not resolve the selection. Repeat the command.");

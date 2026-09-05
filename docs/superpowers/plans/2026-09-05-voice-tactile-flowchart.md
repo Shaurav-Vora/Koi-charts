@@ -16,7 +16,7 @@
 - [x] Task 1: Runnable accessible application shell.
 - [x] Task 2: Serializable graph and command contracts.
 - [x] Task 3: Safe edits, references, confirmation, and history.
-- [ ] Task 4: Exploration and structural validation.
+- [x] Task 4: Exploration and structural validation.
 - [ ] Task 5: Visual canvas and keyboard/mouse editing.
 - [ ] Task 6: Tactile simulator and focused viewport.
 - [ ] Task 7: Partial previews and final-turn coordinator.
@@ -182,7 +182,7 @@ expect(commandSchema.safeParse({ kind: 'inspect', node: null }).success).toBe(tr
 
 ## Task 3: Safe edits, references, confirmation, and history
 
-**Completed September 5, 2026.** 58 targeted tests and all 191 current tests pass after an observed failing first run; typecheck and lint pass. Pending deletion stores a validated prepared snapshot so later focus cannot redirect confirmation. Clarification stores replay IDs and original focus/recent context; `resolveClarification(state, candidateId, newId): CommandResult` resumes the stored command. Local pending contracts above were extended to reflect this; the provider command schema is unchanged. Task 4 has not started.
+**Completed September 5, 2026.** 58 targeted tests and all 191 current tests pass after an observed failing first run; typecheck and lint pass. Pending deletion stores a validated prepared snapshot so later focus cannot redirect confirmation. Clarification stores replay IDs and original focus/recent context; `resolveClarification(state, candidateId, newId): CommandResult` resumes the stored command. Local pending contracts above were extended to reflect this; the provider command schema is unchanged.
 
 **Files:** Create `src/commands/resolve.ts`, `src/commands/execute.ts`, `src/commands/execute.test.ts`, `src/commands/resolve.test.ts`, `src/graph/history.ts`, `src/graph/transaction.ts`. Extend `src/graph/types.ts` with engine contracts above.
 
@@ -208,19 +208,21 @@ expect(execute(added.state, { kind: 'undo' }, () => 'unused').state.graph).toEqu
 
 ## Task 4: Exploration and structural validation
 
+**Completed September 5, 2026.** The 89 targeted query/description/executor tests pass after an observed failing run; typecheck and lint pass. `src/commands/explore.ts` keeps read-only routing separate from edit transactions. `describeTrace(graph, startId, endId?): string` explains route labels and stopping reasons. Queries preserve graph/history/focus/version and support the existing clarification flow. Task 5 has not started.
+
 **Files:** Create `src/graph/queries.ts`, `src/graph/queries.test.ts`, `src/feedback/describe.ts`, `src/feedback/describe.test.ts`. Modify `src/commands/execute.ts` and its tests.
 
 **Interfaces:** `validateGraph(graph: FlowGraph): string[]`; `tracePath(graph: FlowGraph, startId: string, endId?: string): string[]`; `describeChart(graph: FlowGraph): string`; `inspectNode(graph: FlowGraph, nodeId: string): string`. Missing references become command errors, not empty success descriptions.
 
-- [ ] Test missing start/end nodes, reachability from all starts, decisions with fewer than two outgoing branches, unlabeled decision edges, cycles, disconnected targets, focused inspection, and history preservation.
+- [x] Test missing start/end nodes, reachability from all starts, decisions with fewer than two outgoing branches, unlabeled decision edges, cycles, disconnected targets, focused inspection, and history preservation.
 
 ```ts
 expect(validateGraph({ schemaVersion: 1, nodes: [], edges: [] }))
   .toEqual(expect.arrayContaining(['No start node.', 'No end node.']));
 ```
 
-- [ ] Run `npm test -- src/graph/queries.test.ts src/feedback/describe.test.ts`; expect fail. Implement visited-set traversal. With a target, choose a shortest directed path with stable ID ordering for ties; without a target, follow a sole successor and stop at an end, branch, or revisited node, describing why. Never invent a branch choice.
-- [ ] Route describe/inspect/trace/validate through executor without modifying graph/history. Keep descriptions explicit about labels, types, and incoming/outgoing edge labels. Run query, description, and command tests; expect pass.
+- [x] Run `npm test -- src/graph/queries.test.ts src/feedback/describe.test.ts`; expect fail. Implement visited-set traversal. With a target, choose a shortest directed path with stable ID ordering for ties; without a target, follow a sole successor and stop at an end, branch, or revisited node, describing why. Never invent a branch choice.
+- [x] Route describe/inspect/trace/validate through executor without modifying graph/history. Keep descriptions explicit about labels, types, and incoming/outgoing edge labels. Run query, description, and command tests; expect pass.
 
 **Owner check:** Run the targeted tests and confirm the cyclic graph test terminates and exploration leaves history unchanged.
 

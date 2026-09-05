@@ -4,7 +4,7 @@ A voice-first flowchart workspace designed for independent blind authorship. The
 
 ## Current milestone
 
-**Task 3: safe editing engine.** Validated add, connect, rename, move, and delete commands now execute against immutable graph snapshots, with clarification, deletion confirmation, and undo/redo. The browser still shows the Task 1 application shell; editing controls arrive in Task 5. The page shows two empty, named display regions, idle status, a Braille information-strip empty state, and an expandable preview guide. It includes a keyboard skip link, focus indicators, responsive panels, and reduced-motion styles.
+**Task 4: chart exploration.** The engine now describes charts, inspects nodes, traces directed paths, and reports structural warnings, alongside the safe editing and history added in Task 3. The browser still shows the Task 1 application shell; editing controls arrive in Task 5. The page shows two empty, named display regions, idle status, a Braille information-strip empty state, and an expandable preview guide. It includes a keyboard skip link, focus indicators, responsive panels, and reduced-motion styles.
 
 Browser editing controls, actual pin rasterization, Braille conversion, microphone capture, and AssemblyAI integration are not implemented yet. The pin background is an empty display illustration. No microphone permission is requested and no API key is needed to run this milestone.
 
@@ -82,7 +82,7 @@ Run from the project directory:
 node .tools/npm/package/bin/npm-cli.js test -- src/commands/execute.test.ts src/commands/resolve.test.ts
 ```
 
-Expect **58 passing tests across two files**. Running `node .tools/npm/package/bin/npm-cli.js test` checks all **191 tests**. With a normal npm installation, use `npm test` instead. Add `--reporter=verbose` to inspect named safety cases. Tests cover frozen input, rollback, connected deletion, ambiguity, stale confirmations, and exact undo/redo restoration. Typecheck and lint also passed.
+Expect **72 passing tests across two files** (including the exploration integration tests added in Task 4). Running `node .tools/npm/package/bin/npm-cli.js test` checks all **236 tests**. With a normal npm installation, use `npm test` instead. Add `--reporter=verbose` to inspect named safety cases. Tests cover frozen input, rollback, connected deletion, ambiguity, stale confirmations, and exact undo/redo restoration. Typecheck and lint also passed.
 
 `src/commands/execute.ts` exports:
 
@@ -96,7 +96,24 @@ Successful edits increment the graph version, add one history snapshot, and clea
 
 Connected-node deletion prepares the entire result without committing it. Confirm checks the graph version and revalidates the prepared graph before one atomic commit; cancel discards it. The prepared snapshot pins the deletion target even if focus changes while waiting. Compound clarification retains its allocated IDs and original focus/recent context so replay cannot redirect references or duplicate provisional additions. Intervening successful edits invalidate pending work. Failed commands preserve the prior graph and history.
 
-No page controls were added in this milestone. Exploration commands return an explicit unavailable result until Task 4; they do not change the graph or history. Check the passing tests now, then continue to Task 4 when ready.
+No page controls were added in Task 3. Task 4 now implements the exploration commands described below; browser editing controls remain planned for Task 5.
+
+## Check Task 4: descriptions, paths, and structural warnings
+
+Run from the project directory:
+
+```powershell
+node .tools/npm/package/bin/npm-cli.js test -- src/graph/queries.test.ts src/feedback/describe.test.ts src/commands/execute.test.ts
+```
+
+Expect **89 passing tests across three files**. The full suite has **236 passing tests**. With npm on your path, use `npm test` followed by the same file arguments. Add `--reporter=verbose` to see tests for cycle termination, branch stops, missing references, and preserved undo/redo history. The browser is still the application shell; interactive controls are next in Task 5.
+
+- `describe` with `scope: "chart"` summarizes node/connection counts, node labels/types/IDs, and labeled connections. `scope: "focus"` inspects the focused node.
+- `inspect` reports node identity plus incoming/outgoing connections and labels. An explicit `node: null` uses focus; no focus produces an actionable error.
+- `trace_path` with a target finds one shortest directed route with stable node-ID ordering for ties. Parallel connections on that route are selected by edge ID and identified in the description. Without a target, tracing follows only one outgoing connection, stopping at an end, a branch, a dead end, or a repeated node. It explains the stopping reason. Missing nodes are errors; an existing but unreachable target gets a clear no-route result.
+- `validate` reports absent start/end nodes, nodes unreachable from any start, decisions with fewer than two outgoing branches, and unlabeled decision connections. With no start node, it reports that absence and defers reachability checks. Loops across different nodes remain valid.
+
+`src/graph/queries.ts` contains pure graph queries; `src/feedback/describe.ts` produces plain-text descriptions. `src/commands/explore.ts` handles exploration routing and references, using the existing clarification flow. Exploration leaves graph, history, redo, focus, recent node, and version unchanged. Unambiguous queries preserve pending deletion confirmations; ambiguous queries ask for a candidate and resume without a history entry. No audio is produced yet; spoken feedback arrives in Task 10.
 
 ## Dependencies
 
