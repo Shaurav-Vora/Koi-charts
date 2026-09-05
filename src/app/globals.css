@@ -171,9 +171,9 @@ main { max-width: none; padding: 20px 24px; }
 .canvas-welcome p { color: var(--muted); font-size: 14px; }
 .keyboard-editor { margin: 16px 0; }
 .keyboard-editor summary { cursor: pointer; padding: 12px 0; font-size: 14px; width: fit-content; }
-.secondary-displays { max-width: 560px; }
-.secondary-displays .tactile-surface { display: flex; align-items: center; gap: 20px; }
-.secondary-displays .pin-matrix { width: 160px; height: 100px; flex: 0 0 160px; }
+.secondary-displays { width: 100%; }
+.secondary-displays .tactile-surface { display: grid; grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr); align-items: center; gap: 32px; padding: 28px; }
+.secondary-displays .pin-matrix { width: 100%; max-width: none; height: clamp(280px, 32vw, 460px); margin: 0; }
 .secondary-displays .tactile-empty { margin: 0; text-align: left; }
 @media (max-width: 650px) {
   main { padding: 16px 12px; }
@@ -184,6 +184,6 @@ main { max-width: none; padding: 20px 24px; }
   .shape-palette p, .shape-palette .palette-tip { margin: 4px 0; }
   .node-inspector { margin-top: 12px; padding-top: 12px; }
   .canvas-area { height: 540px; }
-  .secondary-displays .tactile-surface { flex-wrap: wrap; }
+  .secondary-displays .tactile-surface { grid-template-columns: 1fr; padding: 16px; gap: 20px; }
 }
 .flow-node .react-flow__handle { z-index: 5; width: 14px; height: 14px; }

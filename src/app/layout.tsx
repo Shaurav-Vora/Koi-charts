@@ -9,5 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
-  return <html lang="en"><body>{children}</body></html>;
+  // Recorder extensions can add attributes to html before React hydrates.
+  // Limit suppression to this element; child hydration checks remain enabled.
+  return <html lang="en" suppressHydrationWarning><body>{children}</body></html>;
 }
