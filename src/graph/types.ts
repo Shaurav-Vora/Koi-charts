@@ -24,3 +24,21 @@ export interface FlowGraph {
   nodes: FlowNode[];
   edges: FlowEdge[];
 }
+import type { PendingClarification, PendingDeletion } from "../commands/schema";
+
+export interface Snapshot {
+  graph: FlowGraph;
+  focusedNodeId: NodeId | null;
+  recentNodeId: NodeId | null;
+}
+export interface History { past: Snapshot[]; future: Snapshot[] }
+export interface EngineState extends Snapshot {
+  version: number;
+  history: History;
+  pending: PendingClarification | PendingDeletion | null;
+}
+export interface CommandResult {
+  state: EngineState;
+  outcome: "committed" | "focused" | "explored" | "clarification" | "confirmation" | "cancelled" | "error";
+  message: string;
+}

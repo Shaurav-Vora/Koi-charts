@@ -15,7 +15,7 @@
 - [x] Planning checkpoint: read the complete specification and create this implementation plan.
 - [x] Task 1: Runnable accessible application shell.
 - [x] Task 2: Serializable graph and command contracts.
-- [ ] Task 3: Safe edits, references, confirmation, and history.
+- [x] Task 3: Safe edits, references, confirmation, and history.
 - [ ] Task 4: Exploration and structural validation.
 - [ ] Task 5: Visual canvas and keyboard/mouse editing.
 - [ ] Task 6: Tactile simulator and focused viewport.
@@ -77,10 +77,13 @@ type GraphCommand = EditCommand
 type PendingClarification = {
   kind: 'clarification'; command: GraphCommand; referencePath: string;
   candidates: string[]; graphVersion: number;
+  elementKind: "node" | "edge"; allocatedIds: string[];
+  context: Pick<Snapshot, "focusedNodeId" | "recentNodeId">;
 };
 type PendingDeletion = {
   kind: 'deletion'; command: GraphCommand; nodeIds: string[];
   incidentEdgeIds: string[]; graphVersion: number;
+  prepared: Snapshot;
 };
 ```
 
@@ -156,7 +159,7 @@ expect(screen.getByRole('status')).toHaveTextContent('Idle');
 
 ## Task 2: Serializable graph and command contracts
 
-**Completed September 5, 2026.** All 131 graph/schema tests pass after an observed failing validation run. Typecheck and lint pass. Command types are inferred from strict runtime schemas; graph integrity accepts unknown input for safe boundary validation. Unicode lengths use code points in both validators. The browser remains at the shell milestone. Task 3 has not started.
+**Completed September 5, 2026.** All 131 graph/schema tests pass after an observed failing validation run. Typecheck and lint pass. Command types are inferred from strict runtime schemas; graph integrity accepts unknown input for safe boundary validation. Unicode lengths use code points in both validators. The browser remains at the shell milestone.
 
 **Files:** Create `src/graph/types.ts`, `src/graph/invariants.ts`, `src/graph/invariants.test.ts`, `src/commands/schema.ts`, `src/commands/json-schema.ts`, `src/commands/schema.test.ts`, `src/test/fixtures.ts`. Modify `package.json`, lockfile, README.
 
@@ -179,11 +182,13 @@ expect(commandSchema.safeParse({ kind: 'inspect', node: null }).success).toBe(tr
 
 ## Task 3: Safe edits, references, confirmation, and history
 
+**Completed September 5, 2026.** 58 targeted tests and all 191 current tests pass after an observed failing first run; typecheck and lint pass. Pending deletion stores a validated prepared snapshot so later focus cannot redirect confirmation. Clarification stores replay IDs and original focus/recent context; `resolveClarification(state, candidateId, newId): CommandResult` resumes the stored command. Local pending contracts above were extended to reflect this; the provider command schema is unchanged. Task 4 has not started.
+
 **Files:** Create `src/commands/resolve.ts`, `src/commands/execute.ts`, `src/commands/execute.test.ts`, `src/commands/resolve.test.ts`, `src/graph/history.ts`, `src/graph/transaction.ts`. Extend `src/graph/types.ts` with engine contracts above.
 
 **Interfaces:** `createEngineState(): EngineState`; `execute(state: EngineState, input: unknown, newId: () => string): CommandResult`; `resolveNode(state: EngineState, ref: SpokenRef)` returns `{kind:'resolved',id:string}`, `{kind:'ambiguous',ids:string[]}`, or `{kind:'missing'}`. Execution validates unknown input before resolution.
 
-- [ ] Write immutability tests for all five edits, connected-node confirm/cancel, stale pending versions, duplicate labels, all placement relations, undo/redo, redo invalidation, and atomic compound rollback. Freeze input snapshots to catch accidental mutation.
+- [x] Write immutability tests for all five edits, connected-node confirm/cancel, stale pending versions, duplicate labels, all placement relations, undo/redo, redo invalidation, and atomic compound rollback. Freeze input snapshots to catch accidental mutation.
 
 ```ts
 const before = createEngineState();
@@ -193,9 +198,9 @@ expect(added.state.history.past).toHaveLength(1);
 expect(execute(added.state, { kind: 'undo' }, () => 'unused').state.graph).toEqual(before.graph);
 ```
 
-- [ ] Run `npm test -- src/commands/execute.test.ts src/commands/resolve.test.ts`; expect fail. Implement cloned transactions with result invariant checks, history snapshots, and post-edit focus. Remove placement hints pointing at deleted nodes. Invalidate pending interactions after intervening graph changes; revalidate confirmation rather than executing stale commands.
-- [ ] Resolve exact case-insensitive labels first, then focus pronouns, then normalized unique matches. Use normalized Levenshtein similarity `1 - distance/maxLength`, threshold 0.90 and a 0.10 lead over the next match. Multiple plausible labels require clarification. Resolve explicit recent phrases only as the final rule. Direct IDs must exist. Show at most three candidates with stable IDs to distinguish identical labels; retain the original command and unresolved field path.
-- [ ] Execute all compound edits against a working clone; commit once only after all succeed. If confirmation or clarification is needed, retain the original graph and full command. Run targeted tests and typecheck; expect pass.
+- [x] Run `npm test -- src/commands/execute.test.ts src/commands/resolve.test.ts`; expect fail. Implement cloned transactions with result invariant checks, history snapshots, and post-edit focus. Remove placement hints pointing at deleted nodes. Invalidate pending interactions after intervening graph changes; revalidate confirmation rather than executing stale commands.
+- [x] Resolve exact case-insensitive labels first, then focus pronouns, then normalized unique matches. Use normalized Levenshtein similarity `1 - distance/maxLength`, threshold 0.90 and a 0.10 lead over the next match. Multiple plausible labels require clarification. Resolve explicit recent phrases only as the final rule. Direct IDs must exist. Show at most three candidates with stable IDs to distinguish identical labels; retain the original command and unresolved field path.
+- [x] Execute all compound edits against a working clone; commit once only after all succeed. If confirmation or clarification is needed, retain the original graph and full command. Run targeted tests and typecheck; expect pass.
 
 **Owner check:** Run the two command test files. Read the named passing tests for “connected deletion waits for confirm”, “compound failure preserves graph”, and “new edit clears redo”.
 

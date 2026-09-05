@@ -4,9 +4,9 @@ A voice-first flowchart workspace designed for independent blind authorship. The
 
 ## Current milestone
 
-**Task 2: graph and command contracts.** The graph data model, integrity validation, strict command schemas, and matching provider JSON Schema are now implemented. The browser still shows the Task 1 application shell. The page shows two empty, named display regions, idle status, a Braille information-strip empty state, and an expandable preview guide. It includes a keyboard skip link, focus indicators, responsive panels, and reduced-motion styles.
+**Task 3: safe editing engine.** Validated add, connect, rename, move, and delete commands now execute against immutable graph snapshots, with clarification, deletion confirmation, and undo/redo. The browser still shows the Task 1 application shell; editing controls arrive in Task 5. The page shows two empty, named display regions, idle status, a Braille information-strip empty state, and an expandable preview guide. It includes a keyboard skip link, focus indicators, responsive panels, and reduced-motion styles.
 
-Graph editing, actual pin rasterization, Braille conversion, microphone capture, and AssemblyAI integration are not implemented yet. The pin background is an empty display illustration. No microphone permission is requested and no API key is needed to run this milestone.
+Browser editing controls, actual pin rasterization, Braille conversion, microphone capture, and AssemblyAI integration are not implemented yet. The pin background is an empty display illustration. No microphone permission is requested and no API key is needed to run this milestone.
 
 ## Run locally
 
@@ -70,9 +70,33 @@ Expect **131 passing tests across two files**. Add `--reporter=verbose` to see e
 - `src/commands/schema.ts` exports strict Zod validators and their inferred TypeScript command/reference types. Missing required fields and extra fields at every object depth are rejected. Nullable wire fields must be explicitly `null` when absent, such as `{ kind: "inspect", node: null }`.
 - `src/commands/json-schema.ts` exports the equivalent `{ command: GraphCommand }` envelope for future provider requests. Ajv validates it independently in tests; both validators are checked against valid examples, malformed examples, and mutations at each nested object boundary.
 
-Command text uses 1–200 Unicode code points. Wire parsing does not trim input; whitespace-only labels must be rejected by semantic execution (Task 3), and cannot pass committed graph validation. Compound commands accept 1–10 edits with no nesting, history, or exploration commands. This milestone validates their structure only; atomic execution and deletion confirmation are not implemented yet.
+Command text uses 1–200 Unicode code points. Wire parsing does not trim input; whitespace-only labels must be rejected by semantic execution (Task 3), and cannot pass committed graph validation. Compound commands accept 1–10 edits with no nesting, history, or exploration commands. Task 2 validates their structure only; Task 3 now supplies atomic execution and deletion confirmation.
 
 Zod is a runtime dependency; Ajv is a development dependency used only for contract tests. Exact versions are pinned in the package files. Official [Zod API documentation](https://zod.dev/api) and [Ajv getting-started documentation](https://ajv.js.org/guide/getting-started.html) were checked during implementation. Graph context and request-body limits from the plan will be enforced at the server boundary in Task 8; no API endpoint is implemented here.
+
+## Check Task 3: safe editing and history
+
+Run from the project directory:
+
+```powershell
+node .tools/npm/package/bin/npm-cli.js test -- src/commands/execute.test.ts src/commands/resolve.test.ts
+```
+
+Expect **58 passing tests across two files**. Running `node .tools/npm/package/bin/npm-cli.js test` checks all **191 tests**. With a normal npm installation, use `npm test` instead. Add `--reporter=verbose` to inspect named safety cases. Tests cover frozen input, rollback, connected deletion, ambiguity, stale confirmations, and exact undo/redo restoration. Typecheck and lint also passed.
+
+`src/commands/execute.ts` exports:
+
+- `createEngineState()` for an empty chart with version 0, empty history, and no pending interaction.
+- `execute(state, unknownCommand, newId)` returning a typed outcome, message, and new state. The caller injects an opaque-ID generator, normally `crypto.randomUUID`; colliding IDs are rejected. No UI, speech, or provider code can bypass validation through this API.
+- `resolveClarification(state, candidateId, newId)` for resuming the original command after an exact candidate selection. This is a local interaction API, not a new LLM command kind. Natural-language clarification replies will be mapped to candidate IDs during the later voice milestone.
+
+References resolve by case-insensitive exact label, focus pronouns, normalized label, and high-confidence fuzzy match, with recent-node phrases used only explicitly. Normalization uses Unicode NFKC, lowercase, and punctuation/space folding. Fuzzy matching uses code-point Levenshtein similarity of at least 0.90 with a 0.10 lead; near ties ask for clarification. At most three choices are displayed, with stable IDs to distinguish duplicate labels; the pending state retains all candidates for exact selection. Parallel edge references also require a unique match or exact edge selection.
+
+Successful edits increment the graph version, add one history snapshot, and clear redo and pending state. Focus changes do not create history, change the version, or clear redo. Add/rename/move update focus and recent node; connect uses its target as the primary affected node; deletion clears recent and removes any dangling focus or placement hints. Undo/redo restores graph, focus, and recent from snapshots and increments the version.
+
+Connected-node deletion prepares the entire result without committing it. Confirm checks the graph version and revalidates the prepared graph before one atomic commit; cancel discards it. The prepared snapshot pins the deletion target even if focus changes while waiting. Compound clarification retains its allocated IDs and original focus/recent context so replay cannot redirect references or duplicate provisional additions. Intervening successful edits invalidate pending work. Failed commands preserve the prior graph and history.
+
+No page controls were added in this milestone. Exploration commands return an explicit unavailable result until Task 4; they do not change the graph or history. Check the passing tests now, then continue to Task 4 when ready.
 
 ## Dependencies
 

@@ -1,3 +1,4 @@
+import type { Snapshot } from "../graph/types";
 import { z } from "zod";
 import { nodeTypes, placementRelations } from "../graph/types";
 
@@ -53,8 +54,12 @@ export type GraphCommand = z.infer<typeof commandSchema>;
 export type PendingClarification = {
   kind: "clarification"; command: GraphCommand; referencePath: string;
   candidates: string[]; graphVersion: number;
+  elementKind: "node" | "edge";
+  allocatedIds: string[];
+  context: Pick<Snapshot, "focusedNodeId" | "recentNodeId">;
 };
 export type PendingDeletion = {
   kind: "deletion"; command: GraphCommand; nodeIds: string[];
   incidentEdgeIds: string[]; graphVersion: number;
+  prepared: Snapshot;
 };
