@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { Background, BaseEdge, Controls, EdgeText, MarkerType, ReactFlow, ReactFlowProvider, useNodesInitialized, useReactFlow, type Edge, type EdgeProps } from "@xyflow/react";
+import { Background, BaseEdge, Controls, ConnectionMode, EdgeText, MarkerType, ReactFlow, ReactFlowProvider, useNodesInitialized, useReactFlow, type Edge, type EdgeProps } from "@xyflow/react";
 import { nodeTypes as semanticTypes } from "../graph/types";
 import { placementAt } from "./placement";
 import type { FlowGraph } from "../graph/types";
@@ -39,6 +39,7 @@ function Canvas({ graph, layout, focusedNodeId, onCommand }: { graph: FlowGraph;
     const point = screenToFlowPosition({ x: event.clientX, y: event.clientY });
     onCommand({ kind: "add_node", type: type as typeof semanticTypes[number], label: type[0].toUpperCase() + type.slice(1), placement: placementAt(layout, point) });
   }}><ReactFlow<CanvasNode, RoutedEdge> nodes={nodes.map(node => drag?.id === node.id ? { ...node, position: { x: drag.x, y: drag.y } } : node)} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
+    connectionMode={ConnectionMode.Loose} connectionRadius={32}
     nodesDraggable
     onNodesChange={changes => { for (const change of changes) { if (change.type === "position" && change.position && change.dragging) setDrag({ id: change.id, ...change.position }); } }}
     onNodeDragStop={(_, node) => {
