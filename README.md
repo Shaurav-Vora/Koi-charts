@@ -4,9 +4,9 @@ A voice-first flowchart workspace designed for independent blind authorship. The
 
 ## Current milestone
 
-**Task 5: visual and keyboard editing.** The canvas now uses a shape palette: click or drag a shape to insert it, drag between connector dots, and select a node to rename or delete it. The enlarged canvas is the primary workspace. Keyboard editing and advanced command forms are collapsible below it. Both workflows use the same graph and undo history.
+**Task 6: tactile simulator.** The committed graph now produces a deterministic 120 × 80 raised-pin simulation, with shape outlines, directional arrowheads and a focused-node cross. Auto mode switches dense charts to a neighborhood view; Overview and Focused view remain available. The full focused label, stable session ID and limited Braille demonstration appear below the pins.
 
-Tactile pin rendering, Braille conversion, and voice input are pending. The workspace is held in memory and clears on refresh. No microphone permission or API key is needed.
+The visual palette, keyboard commands and undo/redo remain available. Voice input is still pending. Charts clear on refresh. The simulator is a digital demonstration, not physical hardware or validated Braille.
 
 ## Run locally
 
@@ -164,3 +164,15 @@ Dragging deliberately uses relative placement and automatic spacing; this is not
 Connection fix: either blue dot can start or finish a drag to another shape. The arrow follows drag direction and uses automatic bottom-to-top routing after release. Targets have a larger hit area and a green valid-target indicator. Browser verification reproduced the former bottom-to-bottom rejection, then confirmed bottom-to-bottom and top-to-top connections persist and survive undo/redo. All 256 tests, lint, and production build pass.
 
 Palette insertion update: each click places the new shape to the right of the last surviving added node, regardless of focus or random IDs. Shapes expose top, bottom, left and right dots. Automatic routing uses facing left/right ports for horizontally separated nodes. Verified right-to-left dragging and a three-shape insertion sequence in the browser; 258 tests, lint and production build pass.
+
+## Check Task 6: tactile simulation
+
+1. Add Start, Process, Decision and End. Connect them. The simulator should show the corresponding pin shapes and directional arrowheads.
+2. Focus Decision. Its raised cross and full label/type should agree with the visual focus. Its N-number remains stable when renamed, deleted and restored with Undo.
+3. Switch between Overview and Focused view. Focused view includes the selected node, immediate predecessors/successors, and edges among them. Auto selects focused view when overview would make shapes smaller than 8 × 6 pins.
+4. On an empty chart, click Load large example. Expect 32 nodes visually and automatic focus around Step 15. Overview shows all 32; Focused view shows three. Loading is disabled while a chart exists, and Undo removes the example in one step.
+5. Rename Step 15 to Approved?. The original question mark is retained in text and explicitly listed as unsupported in the limited Braille preview. Undo restores Step 15 and its original simulator frame.
+
+Verification: 271 tests across eleven files, lint, TypeScript (during build), and production build pass. Browser checks confirmed large-example auto focus, manual mode changes, matching graph versions, rename/unsupported-character feedback, undo restoring pins and empty state, and no horizontal overflow at 375 pixels. Adapter failure tests confirm frame isolation. Renderer tests were added alongside implementation; no initial failing renderer run is claimed.
+
+The output adapter receives only a cloned committed TactileFrame. Simulator failures have an independent error boundary and do not replace the editor state. Short IDs are held in the editor session outside undo history. Focus views with unusually many immediate neighbors can still be crowded. Braille support is restricted to English letters, digits and spaces; unsupported characters use a disclosed placeholder. This output has not been validated with tactile hardware or Braille readers.

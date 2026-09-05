@@ -33,7 +33,7 @@ export default function Home() {
           <summary>What can I check in this preview?</summary>
           <div>
             <p>Click or drag shapes from the palette. Connect their dots and select a shape to rename or delete it. Keyboard editing and advanced commands are available below the canvas. Undo and redo let you revisit changes. Refreshing the page clears this local workspace.</p>
-            <p>Every editing action is available using the keyboard. Use the chart outline to focus nodes, and Describe chart or Inspect focus to explore them. Tactile rendering and voice input are coming next.</p>
+            <p>Every editing action is available using the keyboard. Use the chart outline to focus nodes, and Describe chart or Inspect focus to explore them. The tactile simulator follows your chart and focus. Voice input is coming next.</p>
           </div>
         </details>
       </main>

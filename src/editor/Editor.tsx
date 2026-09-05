@@ -1,4 +1,5 @@
 "use client";
+import TactileSimulator from "../tactile/TactileSimulator";
 import { Component, useCallback, useMemo, useReducer, type ReactNode } from "react";
 import type { GraphCommand } from "../commands/schema";
 import type { FlowGraph } from "../graph/types";
@@ -25,7 +26,7 @@ export default function Editor() {
   const status = state.outcome === "idle" ? "Idle" : state.outcome === "error" ? "Command not applied" : state.outcome === "confirmation" ? "Confirmation needed" : state.outcome === "clarification" ? "Clarification needed" : state.outcome === "committed" ? "Change applied" : state.outcome === "focused" ? "Focus updated" : state.outcome === "cancelled" ? "Cancelled" : "Chart explored";
   return <>
     <div className="workspace-heading"><div><h2>Your workspace</h2><p>Build a flowchart, one clear step at a time.</p></div><div className="status" role="status" aria-live="polite"><span className="status-dot" aria-hidden="true" />{status}</div></div>
-    <div className="editor-toolbar"><div className="history-controls"><button disabled={!history.past.length} onClick={() => onCommand({ kind: "undo" })}>Undo</button><button disabled={!history.future.length} onClick={() => onCommand({ kind: "redo" })}>Redo</button></div><div className="query-controls"><button onClick={() => onCommand({ kind: "describe", scope: "chart" })}>Describe chart</button><button disabled={!focused} onClick={() => onCommand({ kind: "inspect", node: null })}>Inspect focus</button><button onClick={() => onCommand({ kind: "validate" })}>Validate chart</button></div></div>
+    <div className="editor-toolbar"><div className="history-controls"><button disabled={!history.past.length} onClick={() => onCommand({ kind: "undo" })}>Undo</button><button disabled={!history.future.length} onClick={() => onCommand({ kind: "redo" })}>Redo</button></div><div className="query-controls"><button disabled={graph.nodes.length > 0 || !!pending} onClick={() => dispatch({type:"example"})}>Load large example</button><button onClick={() => onCommand({ kind: "describe", scope: "chart" })}>Describe chart</button><button disabled={!focused} onClick={() => onCommand({ kind: "inspect", node: null })}>Inspect focus</button><button onClick={() => onCommand({ kind: "validate" })}>Validate chart</button></div></div>
     
     <section className={`command-feedback ${state.outcome === "error" ? "has-error" : ""}`} aria-label="Command feedback">
       <p role={state.outcome === "error" ? "alert" : undefined} aria-live={state.outcome === "error" ? undefined : "polite"}>{state.message}</p>
@@ -41,12 +42,7 @@ export default function Editor() {
         <div className="display-footer"><p>Drag shapes to snap beside a nearby node. Connect their dots. Select a shape to edit its label.</p></div>
       </section>
     </div><details className="keyboard-editor"><summary>Keyboard editing &amp; advanced commands</summary><CommandForm graph={graph} focusedNodeId={focusedNodeId} onCommand={onCommand} /></details><div className="secondary-displays">
-      <section className="display tactile-display" aria-labelledby="tactile-title">
-        <div className="display-heading"><h3 id="tactile-title">Tactile display simulator</h3><span className="simulator-tag">Preview</span></div>
-        <div className="tactile-surface"><div className="pin-matrix" aria-hidden="true" /><div className="tactile-empty"><h4>No pins raised</h4><p>Tactile rendering is not connected yet. Focused node details are shown below in plain text.</p></div></div>
-        <section className="information-strip" aria-label="Focused node"><h4>Braille information strip</h4><p>{focused ? `${focused.label} (${focused.type})` : "No node selected"}</p></section>
-        <p className="simulation-note">Digital demonstration only. This is not a physical tactile display or validated Braille output.</p>
-      </section>
+      <TactileSimulator graph={graph} focus={focusedNodeId} version={version} displayIds={state.displayIds} />
     </div>
     <section className="chart-structure" aria-label="Chart structure"><h3>Chart outline</h3><p className="outline-intro">The same chart, available as text. Node buttons change focus.</p>
       {graph.nodes.length ? <ul className="node-list">{graph.nodes.map(node => <li key={node.id}><button aria-label={`Focus ${node.label}`} aria-pressed={node.id === focusedNodeId} onClick={() => onCommand({ kind: "focus", node: { kind: "id", value: node.id } })}>{node.label}</button><span>{node.type}{node.id === focusedNodeId ? " · Focused" : ""}</span></li>)}</ul> : <p>No nodes yet.</p>}

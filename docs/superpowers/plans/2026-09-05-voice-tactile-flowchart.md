@@ -254,20 +254,22 @@ expect(screen.getByRole('region', { name: 'Chart structure' })).toHaveTextConten
 
 ## Task 6: Tactile simulator and focused viewport
 
+**Completed September 5, 2026.** 271 tests, lint and production build pass. Verified large-chart mode switching, focus/label synchronization and undo in the browser. Tests were added with implementation rather than an initial failing run. Added adapter.ts; stable display-ID registry lives in the editor reducer outside undo snapshots. Await owner checks before Task 7.
+
 **Files:** Create `src/tactile/types.ts`, `src/tactile/viewport.ts`, `src/tactile/rasterize.ts`, `src/tactile/braille.ts`, `src/tactile/TactileSimulator.tsx`, `src/tactile/renderer.test.ts`, `src/test/large-graph.ts`. Modify `src/editor/Editor.tsx` and README.
 
 **Interfaces:** `TactileFrame = { version:number; width:number; height:number; raisedPins:{x:number;y:number}[]; brailleCells:string; text:string; focusedNodeId:string|null; mode:'overview'|'focus' }`; `TactileAdapter = { render(frame:TactileFrame):Promise<void> }`; `makeTactileFrame(graph:FlowGraph, layout:LayoutFrame, focus:string|null, mode:'overview'|'focus', version:number):TactileFrame`.
 
-- [ ] Test viewport neighbors/edges, stable display IDs through renames/deletes/undo, arrowheads, focus marker, all shapes, bounds, and identical frames from identical inputs.
+- [x] Test viewport neighbors/edges, stable display IDs through renames/deletes/undo, arrowheads, focus marker, all shapes, bounds, and identical frames from identical inputs.
 
 ```ts
 expect(frame.raisedPins.every(p => Number.isInteger(p.x) && Number.isInteger(p.y)
   && p.x >= 0 && p.x < frame.width && p.y >= 0 && p.y < frame.height)).toBe(true);
 ```
 
-- [ ] Run `npm test -- src/tactile/renderer.test.ts`; expect fail. Use a 120×80 pin frame with clamped line/shape rasterization. Allocate stable short IDs in an editor-session registry keyed by opaque node ID; preserve registry entries across undo/deletion. Map a supported English letter/digit subset to Unicode Braille with capitalization/number markers; display the full original text and explicitly identify unsupported characters and demonstration limits.
-- [ ] Select focus plus immediate predecessors/successors and edges among that set. Fit overview to the frame; auto-select focus mode if the fit gives any node fewer than 8 pins of width or 6 pins of height. With no focus use the first stable node ID. Always expose mode controls. Keep pin patterns meaningful without color; show full focused label and type in the information strip.
-- [ ] Integrate a simulator adapter consuming only committed frame data. Run tactile tests and editor tests; verify failure of the simulator does not corrupt the graph.
+- [x] Run `npm test -- src/tactile/renderer.test.ts`; expect fail. Use a 120×80 pin frame with clamped line/shape rasterization. Allocate stable short IDs in an editor-session registry keyed by opaque node ID; preserve registry entries across undo/deletion. Map a supported English letter/digit subset to Unicode Braille with capitalization/number markers; display the full original text and explicitly identify unsupported characters and demonstration limits.
+- [x] Select focus plus immediate predecessors/successors and edges among that set. Fit overview to the frame; auto-select focus mode if the fit gives any node fewer than 8 pins of width or 6 pins of height. With no focus use the first stable node ID. Always expose mode controls. Keep pin patterns meaningful without color; show full focused label and type in the information strip.
+- [x] Integrate a simulator adapter consuming only committed frame data. Run tactile tests and editor tests; verify failure of the simulator does not corrupt the graph.
 
 **Owner check:** Add each node type, connect them, focus a decision, and compare visual focus with the pin marker and information strip. Load the bundled large-chart example, switch modes, then Undo an edit; both views must show the restored chart.
 
