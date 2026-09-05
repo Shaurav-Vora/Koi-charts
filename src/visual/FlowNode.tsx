@@ -5,6 +5,8 @@ export type CanvasNode = Node<{ label: string; nodeType: NodeType; focused: bool
 export default function FlowNode({ data }: NodeProps<CanvasNode>) {
   return <div className={`flow-node ${data.nodeType} ${data.focused ? "is-focused" : ""}`}>
     <Handle id="top" type="source" position={Position.Top} title="Drag to a dot on another shape to connect" />
+    <Handle id="left" type="source" position={Position.Left} title="Drag to a dot on another shape to connect" />
+    <Handle id="right" type="source" position={Position.Right} title="Drag to a dot on another shape to connect" />
     <svg className="node-shape" viewBox={data.nodeType === "decision" ? "0 0 230 150" : "0 0 190 86"} aria-hidden="true">
       {data.nodeType === "decision" ? <polygon points="115,2 228,75 115,148 2,75" /> : <rect x="2" y="2" width="186" height="82" rx={data.nodeType === "process" ? 5 : 41} />}
     </svg>

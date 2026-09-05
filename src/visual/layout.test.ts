@@ -45,3 +45,11 @@ describe("deterministic canvas layout", () => {
     expect(() => layoutGraph(graph)).toThrow();
   });
 });
+
+it("routes horizontal connections through facing side ports", () => {
+  const graph: FlowGraph = { schemaVersion: 1, nodes: [{ id: "z", type: "start", label: "Start" }, { id: "a", type: "process", label: "Process", placement: { relation: "right_of", referenceNodeId: "z" } }], edges: [{ id: "edge", source: "z", target: "a" }] };
+  const frame = layoutGraph(graph), start = frame.nodes.find(n => n.id === "z")!, end = frame.nodes.find(n => n.id === "a")!;
+  expect(end.x).toBeGreaterThan(start.x + start.width);
+  expect(frame.edges[0].points[0]).toEqual({ x: start.x + start.width, y: start.y + start.height / 2 });
+  expect(frame.edges[0].points.at(-1)).toEqual({ x: end.x, y: end.y + end.height / 2 });
+});

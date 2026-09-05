@@ -51,6 +51,14 @@ export function layoutGraph(graph: FlowGraph): LayoutFrame {
   nodes.forEach(node => { node.x += dx; node.y += dy; });
   const edges = [...graph.edges].sort(compare).map(edge => {
     const source = positions.get(edge.source)!, target = positions.get(edge.target)!;
+    // Use facing side ports for horizontally separated shapes.
+    if (source.x + source.width < target.x || target.x + target.width < source.x) {
+      const rightward = source.x + source.width < target.x;
+      const from = { x: rightward ? source.x + source.width : source.x, y: source.y + source.height / 2 };
+      const to = { x: rightward ? target.x : target.x + target.width, y: target.y + target.height / 2 };
+      const midX = (from.x + to.x) / 2;
+      return { id: edge.id, points: [from, { x: midX, y: from.y }, { x: midX, y: to.y }, to] };
+    }
     const from = { x: source.x + source.width / 2, y: source.y + source.height };
     const to = { x: target.x + target.width / 2, y: target.y };
     const midY = (from.y + to.y) / 2;

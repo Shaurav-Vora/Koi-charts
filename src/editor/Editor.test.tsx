@@ -63,3 +63,15 @@ it("inserts shapes directly and edits their labels without dropdowns", () => {
   fireEvent.click(screen.getByRole("button", { name: "Undo" }));
   expect(screen.getByRole("region", { name: "Chart structure" })).toHaveTextContent("Decision");
 });
+
+it("palette insertion follows the last added node, not the selected node", () => {
+  render(<Editor />);
+  fireEvent.click(screen.getByRole("button", { name: "Insert start" }));
+  fireEvent.click(screen.getByRole("button", { name: "Insert process" }));
+  fireEvent.click(within(screen.getByRole("region", { name: "Chart structure" })).getByRole("button", { name: "Focus Start" }));
+  fireEvent.click(screen.getByRole("button", { name: "Insert decision" }));
+  const nodes = Array.from(document.querySelectorAll('.react-flow__node'));
+  const x = (label: string) => Number(nodes.find(n => n.textContent?.includes(label))?.getAttribute('style')?.match(/translate\(([-\d.]+)px/)?.[1]);
+  expect(x("Process")).toBeGreaterThan(x("Start"));
+  expect(x("Decision")).toBeGreaterThan(x("Process"));
+});
