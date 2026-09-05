@@ -6,7 +6,7 @@ describe("application shell", () => {
   it("exposes both empty representations and idle status to assistive technology", () => {
     render(<Home />);
 
-    expect(screen.getByRole("heading", { name: "TactiFlow", level: 1 })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Koi charts", level: 1 })).toBeVisible();
     expect(screen.getByRole("region", { name: "Visual flowchart" })).toHaveTextContent("Your chart starts here");
     expect(screen.getByRole("region", { name: "Tactile display simulator" })).toHaveTextContent("No pins raised");
     expect(screen.getByRole("status")).toHaveTextContent("Idle");

@@ -1,11 +1,13 @@
+import Image from "next/image";
+
 export default function Home() {
   return (
     <>
       <a className="skip-link" href="#workspace">Skip to workspace</a>
       <header className="app-header">
         <div className="brand">
-          <span className="brand-mark" aria-hidden="true"><i /><i /><i /><i /></span>
-          <h1>TactiFlow</h1>
+          <Image className="brand-mark" src="/koi.svg" width={42} height={42} alt="" />
+          <h1>Koi charts</h1>
         </div>
         <p className="brand-description">Flowcharts through sight, touch, and voice.</p>
         <span className="build-label">Early preview</span>

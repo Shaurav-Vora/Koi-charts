@@ -1,4 +1,4 @@
-# TactiFlow Implementation Plan
+# Koi charts Implementation Plan
 
 > **For agentic workers:** Use `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkboxes for tracking. The owner requires one milestone per turn, followed by instructions for checking it. Stop at each checkpoint and wait for the owner to continue. Do not execute the whole plan in one turn.
 
@@ -133,14 +133,14 @@ Whitespace-only labels additionally fail semantic validation. Bound graph contex
 
 **Files:** Create `package.json`, `package-lock.json`, `tsconfig.json`, `next-env.d.ts`, `next.config.ts`, `eslint.config.mjs`, `.gitignore`, `.env.example`, `README.md`, `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/globals.css`, `vitest.config.ts`, `src/test/setup.ts`, `src/app/page.test.tsx`.
 
-**Interfaces:** `/` renders TactiFlow, an empty visual region, a clearly labeled tactile simulator region, and idle status. No microphone request on load. Scripts: `dev`, `build`, `start`, `lint`, `typecheck`, `test` (`vitest run`).
+**Interfaces:** `/` renders Koi charts, an empty visual region, a clearly labeled tactile simulator region, and idle status. No microphone request on load. Scripts: `dev`, `build`, `start`, `lint`, `typecheck`, `test` (`vitest run`).
 
 - [x] Inspect `node --version` and `npm --version`. Check current official Next.js setup instructions and resolve stable dependencies; use a temporary scaffold directory if needed to preserve the existing Markdown. Select App Router, `src/`, strict TypeScript, npm, no Tailwind. Record exact installed versions and supported Node requirement.
 - [x] Configure Vitest/jsdom/Testing Library; write the following behavior test before replacing the starter page:
 
 ```tsx
 render(<Home />);
-expect(screen.getByRole('heading', { name: 'TactiFlow', level: 1 })).toBeVisible();
+expect(screen.getByRole('heading', { name: 'Koi charts', level: 1 })).toBeVisible();
 expect(screen.getByRole('region', { name: 'Visual flowchart' })).toBeVisible();
 expect(screen.getByRole('region', { name: 'Tactile display simulator' })).toBeVisible();
 expect(screen.getByRole('status')).toHaveTextContent('Idle');
@@ -152,7 +152,7 @@ expect(screen.getByRole('status')).toHaveTextContent('Idle');
 
 **Owner check:** Run `npm run dev`, open `http://localhost:3000`, confirm the title and two empty labeled panels, press Tab to reveal the skip link, and resize the window. No microphone permission prompt should appear.
 
-**Commit boundary:** `chore: bootstrap accessible TactiFlow shell`.
+**Commit boundary:** `chore: bootstrap accessible Koi charts shell`.
 
 ## Task 2: Serializable graph and command contracts
 

@@ -4,7 +4,7 @@
 >
 > **Status:** Approved conversational design, awaiting review of this written specification.
 >
-> **Working title:** TactiFlow. The name is provisional branding only; it does not affect implementation.
+> **Working title:** Koi charts. The name is provisional branding only; it does not affect implementation.
 >
 > **Last verified:** 2026-09-05 (Asia/Dubai).
 
@@ -76,7 +76,7 @@ Do not claim that voice diagrams, tactile diagrams, refreshable tactile displays
 
 The defensible project claim is:
 
-> TactiFlow explores a real-time, voice-first flowchart editor in which one semantic graph drives synchronized visual, simulated tactile, Braille, and spoken representations, enabling independent blind authorship and laying the foundation for blind/sighted collaboration.
+> Koi charts explores a real-time, voice-first flowchart editor in which one semantic graph drives synchronized visual, simulated tactile, Braille, and spoken representations, enabling independent blind authorship and laying the foundation for blind/sighted collaboration.
 
 Avoid “world’s first,” “never built before,” or equivalent claims unless a later documented prior-art review supports them.
 

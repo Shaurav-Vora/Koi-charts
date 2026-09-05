@@ -1,4 +1,4 @@
-# TactiFlow
+# Koi charts
 
 A voice-first flowchart workspace designed for independent blind authorship. The planned editor uses one semantic graph for a visual flowchart, a digital tactile simulator, and spoken descriptions.
 
@@ -31,7 +31,7 @@ The ignored local npm copy is a convenience for this workspace; fresh checkouts 
 
 ## Check this milestone
 
-1. Open the page. Expect the TactiFlow title, Idle status, and two empty panels named Visual flowchart and Tactile display simulator.
+1. Open the page. Expect the Koi charts title, Idle status, and two empty panels named Visual flowchart and Tactile display simulator.
 2. Confirm the visual panel says “Your chart starts here” and the tactile panel says “No pins raised”. The information strip says “No node selected”.
 3. Reload and press Tab. “Skip to workspace” should become visible with an outline. Press Enter to move focus to the workspace.
 4. Tab to “What can I check in this preview?” and press Enter to open and close its explanation.
