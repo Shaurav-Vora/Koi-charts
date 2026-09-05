@@ -208,7 +208,7 @@ expect(execute(added.state, { kind: 'undo' }, () => 'unused').state.graph).toEqu
 
 ## Task 4: Exploration and structural validation
 
-**Completed September 5, 2026.** The 89 targeted query/description/executor tests pass after an observed failing run; typecheck and lint pass. `src/commands/explore.ts` keeps read-only routing separate from edit transactions. `describeTrace(graph, startId, endId?): string` explains route labels and stopping reasons. Queries preserve graph/history/focus/version and support the existing clarification flow. Task 5 has not started.
+**Completed September 5, 2026.** The 89 targeted query/description/executor tests pass after an observed failing run; typecheck and lint pass. `src/commands/explore.ts` keeps read-only routing separate from edit transactions. `describeTrace(graph, startId, endId?): string` explains route labels and stopping reasons. Queries preserve graph/history/focus/version and support the existing clarification flow. Task 5 is completed below.
 
 **Files:** Create `src/graph/queries.ts`, `src/graph/queries.test.ts`, `src/feedback/describe.ts`, `src/feedback/describe.test.ts`. Modify `src/commands/execute.ts` and its tests.
 
@@ -230,11 +230,13 @@ expect(validateGraph({ schemaVersion: 1, nodes: [], edges: [] }))
 
 ## Task 5: Visual canvas and keyboard/mouse editing
 
+**Completed September 5, 2026.** Includes the requested draw.io-style shape palette, expanded canvas, direct label editing, connector dragging and relative node dragging. Keyboard forms remain available below the canvas. Added ShapePalette.tsx and placement.ts with pointer-placement tests. Preview overlays are deferred to Task 7. Await owner verification before Task 6.
+
 **Files:** Create `src/editor/Editor.tsx`, `src/editor/reducer.ts`, `src/editor/CommandForm.tsx`, `src/editor/Editor.test.tsx`, `src/visual/layout.ts`, `src/visual/layout.test.ts`, `src/visual/VisualCanvas.tsx`, `src/visual/FlowNode.tsx`. Modify `src/app/page.tsx`, CSS, dependencies/lockfile, and README.
 
-**Interfaces:** `layoutGraph(graph: FlowGraph): LayoutFrame`, where `LayoutFrame = { nodes: {id:string;x:number;y:number;width:number;height:number}[]; edges: {id:string;points:{x:number;y:number}[]}[] }`. `VisualCanvas` receives graph, layout, focused ID, preview, and an `onCommand(command: GraphCommand)` callback. `Editor` owns reducer state and dispatches through `execute`.
+**Interfaces:** `layoutGraph(graph: FlowGraph): LayoutFrame`, where `LayoutFrame = { nodes: {id:string;x:number;y:number;width:number;height:number}[]; edges: {id:string;points:{x:number;y:number}[]}[] }`. `VisualCanvas` receives graph, layout, focused ID and an `onCommand(command: GraphCommand)` callback. `Editor` owns reducer state and dispatches through `execute`.
 
-- [ ] Add XYFlow and Dagre using current official docs. Write a component test that fills a labeled node form and submits:
+- [x] Add XYFlow and Dagre using current official docs. Write a component test that fills a labeled node form and submits:
 
 ```tsx
 await user.type(screen.getByLabelText('Node label'), 'Begin');
@@ -242,9 +244,9 @@ await user.click(screen.getByRole('button', { name: 'Add node' }));
 expect(screen.getByRole('region', { name: 'Chart structure' })).toHaveTextContent('Begin');
 ```
 
-- [ ] Run `npm test -- src/editor/Editor.test.tsx src/visual/layout.test.ts`; expect fail. Implement forms for add/connect/rename/move/delete/focus and undo/redo, plus confirm/cancel and clarification candidate buttons. Use stable IDs in selects. Keep a structured node/edge list outside the canvas.
-- [ ] Implement deterministic layout with stable ordering and semantic placement hints; nodes cannot be freely dragged. Lay out connected components with Dagre, then apply hints and collision spacing deterministically; reject self-referential placement and terminate conflicting-hint handling with stable ordering. Route edges from the final positions. Use correct shapes, arrowheads, labeled edges, focus text and outline. Wrap renderer failures in an error boundary preserving editor state.
-- [ ] Run component/layout/domain tests and production build; expect pass. Manually add, connect, move, rename, confirm-delete, and undo using keyboard alone.
+- [x] Run `npm test -- src/editor/Editor.test.tsx src/visual/layout.test.ts`; expect fail. Implement forms for add/connect/rename/move/delete/focus and undo/redo, plus confirm/cancel and clarification candidate buttons. Use stable IDs in selects. Keep a structured node/edge list outside the canvas.
+- [x] Implement deterministic layout with stable ordering and semantic placement hints; dragging commits relative placement beside the nearest node, with automatic spacing. Lay out connected components with Dagre, then apply hints and collision spacing deterministically; reject self-referential placement and terminate conflicting-hint handling with stable ordering. Route edges from the final positions. Use correct shapes, arrowheads, labeled edges, focus text and outline. Wrap renderer failures in an error boundary preserving editor state.
+- [x] Run component/layout/domain tests and production build; expect pass. Manually add, connect, move, rename, confirm-delete, and undo using keyboard alone.
 
 **Owner check:** In the browser add Begin and Validate card, connect them, rename the process, then Undo. The node list and visual canvas must agree. Moving a node must not create an edge. Deleting a connected node must wait for confirmation.
 

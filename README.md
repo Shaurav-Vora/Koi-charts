@@ -4,9 +4,9 @@ A voice-first flowchart workspace designed for independent blind authorship. The
 
 ## Current milestone
 
-**Task 4: chart exploration.** The engine now describes charts, inspects nodes, traces directed paths, and reports structural warnings, alongside the safe editing and history added in Task 3. The browser still shows the Task 1 application shell; editing controls arrive in Task 5. The page shows two empty, named display regions, idle status, a Braille information-strip empty state, and an expandable preview guide. It includes a keyboard skip link, focus indicators, responsive panels, and reduced-motion styles.
+**Task 5: visual and keyboard editing.** The canvas now uses a shape palette: click or drag a shape to insert it, drag between connector dots, and select a node to rename or delete it. The enlarged canvas is the primary workspace. Keyboard editing and advanced command forms are collapsible below it. Both workflows use the same graph and undo history.
 
-Browser editing controls, actual pin rasterization, Braille conversion, microphone capture, and AssemblyAI integration are not implemented yet. The pin background is an empty display illustration. No microphone permission is requested and no API key is needed to run this milestone.
+Tactile pin rendering, Braille conversion, and voice input are pending. The workspace is held in memory and clears on refresh. No microphone permission or API key is needed.
 
 ## Run locally
 
@@ -47,7 +47,7 @@ npm run lint
 npm run build
 ```
 
-`npm start` serves a completed production build. These checks cover the shell only; a full screen-reader and axe audit is planned for Task 10.
+`npm start` serves a completed production build. These checks cover the shell, graph, commands, layout, and editor; a full screen-reader and axe audit is planned for Task 10.
 
 ## Check Task 2: graph and command contracts
 
@@ -130,7 +130,7 @@ Stable versions resolved from npm on September 5, 2026, pinned exactly in `packa
 | Testing Library React | 16.3.3 |
 | Testing Library jest-dom | 7.0.1 |
 
-Setup follows the official [Next.js installation guide](https://nextjs.org/docs/app/getting-started/installation), checked during bootstrap. The application was manually scaffolded to preserve the existing design and plan. CSS uses a small blue/white token palette and local system fonts, so building does not require downloading fonts. No graph or voice packages are installed until their milestones.
+Setup follows the official [Next.js installation guide](https://nextjs.org/docs/app/getting-started/installation), checked during bootstrap. The application was manually scaffolded to preserve the existing design and plan. CSS uses a small blue/white token palette and local system fonts, so building does not require downloading fonts. React Flow 12.11.6 and Dagre 3.1.1 provide the canvas and baseline layout. Voice packages remain deferred.
 
 Compatibility exception: the latest TypeScript 7 release was rejected by Next.js's typescript-eslint dependency, and its React/accessibility/import plugins declare ESLint support only through version 9. TypeScript 6.0.3 and ESLint 9.39.5 are pinned to satisfy those boundaries. npm marks ESLint 9 as out of support; revisit the pin when the Next.js plugin stack supports ESLint 10. Do not upgrade either tool independently without rerunning lint. npm also reports a blocked optional `unrs-resolver` postinstall script; the installed native package resolves successfully and lint passes without enabling that script.
 
@@ -146,3 +146,17 @@ Task 1 verification: two shell tests passed after first failing against the star
 - `src/test/setup.ts`: Testing Library cleanup and assertions.
 
 Work proceeds one milestone at a time, with owner verification before continuing. No physical tactile hardware, validated Braille output, or offline voice capability is claimed.
+
+## Check Task 5: visual authoring
+
+1. Refresh to start an empty workspace. Click Start in the shape palette, then drag Process onto the canvas near it. Expect two shapes in the canvas and Chart outline.
+2. Select Process, change Shape label to Validate card, and choose Apply label. Both views must agree.
+3. Drag the bottom dot of Start to the top dot of Validate card. Expect one arrow and one outline connection.
+4. Drag Validate card to the right of Start. It snaps to a relative position; connection count must remain one. Undo and Redo must restore the placement.
+5. Select Validate card and choose Delete selected. Cancel must retain the node. Confirm deletion must remove the node and connection; Undo must restore both.
+6. Expand Keyboard editing & advanced commands for named connection labels, explicit relative moves, path tracing, and all form actions. Palette buttons and the label editor also work with Tab and Enter.
+7. Narrow the window: the palette moves above the canvas and the page should not scroll horizontally.
+
+Verification: 256 tests across ten files, TypeScript, lint, and production build. Browser checks cover palette click/drop, direct label editing, connector dragging, snapped node dragging, undo/redo, and a 375-pixel viewport. jsdom tests stub ResizeObserver because they verify command behavior and accessible text, not real canvas geometry. Full screen-reader auditing remains Task 10.
+
+Dragging deliberately uses relative placement and automatic spacing; this is not a free-positioned draw.io clone. The first shape is centered automatically. Dense-chart edge routing is basic and does not guarantee obstacle avoidance. Preview overlays remain Task 7; tactile rendering remains Task 6. Charts are not saved across refreshes.
