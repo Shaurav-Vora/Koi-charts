@@ -14,7 +14,7 @@
 
 - [x] Planning checkpoint: read the complete specification and create this implementation plan.
 - [x] Task 1: Runnable accessible application shell.
-- [ ] Task 2: Serializable graph and command contracts.
+- [x] Task 2: Serializable graph and command contracts.
 - [ ] Task 3: Safe edits, references, confirmation, and history.
 - [ ] Task 4: Exploration and structural validation.
 - [ ] Task 5: Visual canvas and keyboard/mouse editing.
@@ -129,7 +129,7 @@ Whitespace-only labels additionally fail semantic validation. Bound graph contex
 
 ## Task 1: Runnable accessible application shell
 
-**Completed September 5, 2026.** Two shell tests passed following an observed failing run. Typecheck, lint, and production build passed. Browser checks covered the skip link, keyboard guide expansion, desktop layout, and a 375-pixel stacked layout without horizontal overflow. See README for the local npm invocation and evidenced TypeScript/ESLint compatibility pins. The owner subsequently requested Git; this milestone is the initial repository checkpoint. Task 2 has not started.
+**Completed September 5, 2026.** Two shell tests passed following an observed failing run. Typecheck, lint, and production build passed. Browser checks covered the skip link, keyboard guide expansion, desktop layout, and a 375-pixel stacked layout without horizontal overflow. See README for the local npm invocation and evidenced TypeScript/ESLint compatibility pins. The owner subsequently requested Git; this milestone is the initial repository checkpoint.
 
 **Files:** Create `package.json`, `package-lock.json`, `tsconfig.json`, `next-env.d.ts`, `next.config.ts`, `eslint.config.mjs`, `.gitignore`, `.env.example`, `README.md`, `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/globals.css`, `vitest.config.ts`, `src/test/setup.ts`, `src/app/page.test.tsx`.
 
@@ -156,11 +156,13 @@ expect(screen.getByRole('status')).toHaveTextContent('Idle');
 
 ## Task 2: Serializable graph and command contracts
 
+**Completed September 5, 2026.** All 131 graph/schema tests pass after an observed failing validation run. Typecheck and lint pass. Command types are inferred from strict runtime schemas; graph integrity accepts unknown input for safe boundary validation. Unicode lengths use code points in both validators. The browser remains at the shell milestone. Task 3 has not started.
+
 **Files:** Create `src/graph/types.ts`, `src/graph/invariants.ts`, `src/graph/invariants.test.ts`, `src/commands/schema.ts`, `src/commands/json-schema.ts`, `src/commands/schema.test.ts`, `src/test/fixtures.ts`. Modify `package.json`, lockfile, README.
 
 **Interfaces:** `createEmptyGraph(): FlowGraph`; `assertGraph(graph: FlowGraph): void`; `commandSchema` validates a command, `commandEnvelopeSchema` validates `{command}`; `commandJsonSchema` is defined above. Export all contract types from their corresponding graph/command modules. Inject ID generation into transactions rather than deriving IDs from labels.
 
-- [ ] Add Zod and development Ajv. Write table tests for every command variant and reference form, required fields, extra properties at every depth, wrong enums, empty strings, compound limits, and wire nulls.
+- [x] Add Zod and development Ajv. Write table tests for every command variant and reference form, required fields, extra properties at every depth, wrong enums, empty strings, compound limits, and wire nulls.
 
 ```ts
 expect(createEmptyGraph()).toEqual({ schemaVersion: 1, nodes: [], edges: [] });
@@ -168,8 +170,8 @@ expect(commandSchema.safeParse({ kind: 'undo', surprise: true }).success).toBe(f
 expect(commandSchema.safeParse({ kind: 'inspect', node: null }).success).toBe(true);
 ```
 
-- [ ] Run `npm test -- src/graph/invariants.test.ts src/commands/schema.test.ts`; expect missing implementations to fail. Implement strict Zod objects matching the schema construction and graph integrity validation, including placement references, finite data, unique node/edge IDs, missing endpoints, and self-edges.
-- [ ] Contract-test identical acceptance/rejection by Ajv and Zod on the complete fixture table. Confirm duplicate labels and multi-node cycles pass graph validation. Run targeted tests and `npm run typecheck`; expect pass.
+- [x] Run `npm test -- src/graph/invariants.test.ts src/commands/schema.test.ts`; expect missing implementations to fail. Implement strict Zod objects matching the schema construction and graph integrity validation, including placement references, finite data, unique node/edge IDs, missing endpoints, and self-edges.
+- [x] Contract-test identical acceptance/rejection by Ajv and Zod on the complete fixture table. Confirm duplicate labels and multi-node cycles pass graph validation. Run targeted tests and `npm run typecheck`; expect pass.
 
 **Owner check:** Run `npm test -- src/graph/invariants.test.ts src/commands/schema.test.ts`. All cases should pass; the browser remains at the shell milestone.
 
