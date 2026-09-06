@@ -38,8 +38,9 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
       <button className={`voice-button${voice.active ? " is-active" : ""}`} aria-pressed={voice.active} onClick={() => voice.active ? voice.stop() : voice.start()}>{voice.active ? "Stop voice" : "Start voice"}</button>
       {/* Beside the button it belongs to, so a sighted user reads the connection state where they act. */}
       <div className="status" role="status" aria-live="polite"><span className="status-dot" aria-hidden="true" />{status}</div>
-      {/* The bar is a sighted cue only; the live status region beside it announces listening state. */}
-      <span className="mic-level" aria-hidden="true"><span className="mic-level-fill" style={{ width: `${Math.round(Math.min(1, voice.level * 4) * 100)}%` }} /></span>
+      {/* A sighted cue only; the live status region beside it announces listening state. An empty
+          bar means nothing while voice is off, so it appears with the session rather than at rest. */}
+      {voice.active && <span className="mic-level" aria-hidden="true"><span className="mic-level-fill" style={{ width: `${Math.round(Math.min(1, voice.level * 4) * 100)}%` }} /></span>}
     </div><div className="history-controls"><button disabled={!history.past.length} onClick={() => onCommand({ kind: "undo" })}>Undo</button><button disabled={!history.future.length} onClick={() => onCommand({ kind: "redo" })}>Redo</button></div><div className="query-controls"><button disabled={graph.nodes.length > 0 || !!pending} onClick={() => dispatch({type:"example"})}>Load large example</button><button onClick={() => onCommand({ kind: "describe", scope: "chart" })}>Describe chart</button><button disabled={!focused} onClick={() => onCommand({ kind: "inspect", node: null })}>Inspect focus</button><button onClick={() => onCommand({ kind: "validate" })}>Validate chart</button></div></div>
     
     <section className={`command-feedback ${hasError ? "has-error" : ""}`} aria-label="Command feedback">
