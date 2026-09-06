@@ -197,3 +197,5 @@ main { max-width: none; padding: 20px 24px; }
 .tactile-key { max-height: 260px; overflow: auto; text-align: left; font-size: 13px; padding-left: 20px; }
 .braille-cells { font-size: 26px !important; letter-spacing: 2px; line-height: 1.7; overflow-wrap: anywhere; }
 .inline-node-label { width: 100%; min-width: 0; padding: 8px; border: 2px solid var(--blue); border-radius: 4px; font: inherit; font-size: 14px; background: white; color: var(--ink); }
+.speech-preview { position: absolute; right: 24px; bottom: 24px; z-index: 6; max-width: min(360px, 85%); display: grid; gap: 8px; padding: 20px; border: 2px dashed #966100; border-radius: 8px; color: #624000; background: #fff4d8; pointer-events: none; overflow-wrap: anywhere; }
+.speech-preview strong { font-size: 13px; }

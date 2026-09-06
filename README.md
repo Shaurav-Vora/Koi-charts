@@ -4,7 +4,9 @@ A voice-first flowchart workspace designed for independent blind authorship. The
 
 ## Current milestone
 
-**Task 6: tactile simulator.** The committed graph now produces a deterministic 120 × 80 raised-pin simulation, with shape outlines, directional arrowheads and a focused-node cross. Auto mode switches dense charts to a neighborhood view; Overview and Focused view remain available. The full focused label, stable session ID and limited Braille demonstration appear below the pins.
+**Task 7: transcript preview and final-command coordination.** Partial transcripts are disposable visual previews; final turns are serialized, deduplicated, locally validated and rejected when their chart context becomes stale. Microphone and server integration remain future milestones. The normal UI still labels voice as disconnected.
+
+**Task 6 remains available: tactile simulator.** The committed graph now produces a deterministic 120 × 80 raised-pin simulation, with shape outlines, directional arrowheads and a focused-node cross. Auto mode switches dense charts to a neighborhood view; Overview and Focused view remain available. The full focused label, stable session ID and limited Braille demonstration appear below the pins.
 
 The visual palette, keyboard commands and undo/redo remain available. Voice input is still pending. Charts clear on refresh. The simulator is a digital demonstration, not physical hardware or validated Braille.
 
@@ -190,3 +192,13 @@ Implementation: optional bounded position coordinates in the graph and a validat
 Adding a shape now preserves existing positions and no longer triggers automatic fit-to-view after the first shape. Use the canvas Fit View control when you want to recenter manually. Click empty canvas space to clear the visual selection without changing the graph or history. Double-click a shape to edit its label inline; Enter saves, Escape or clicking away cancels. The header/favicon logo is now an orange-and-white koi with fins, a forked tail and small mouth bubbles.
 
 Verification: 278 tests, lint and production build pass. Regression tests cover insertion after free movement, clearing focus without touching history, inline rename and cancellation. Live browser verification for this update was unavailable because the browser-control kernel failed to start. Owner check: move a shape, add another and confirm the original stays in place; click blank canvas, double-click to rename, then confirm the new logo after refreshing.
+
+## Check Task 7: transcript lifecycle
+
+Run `node .tools/npm/package/bin/npm-cli.js test -- src/streaming/turns.test.ts` in this workspace (or `npm test -- src/streaming/turns.test.ts` with npm on PATH). Expect 14 passing tests covering partial revisions/clearing, final-only commits, duplicate finals, ordered interpretation, stale manual edits/focus, stop/session resets, exact controls, original-command clarification continuation, malformed responses and failure recovery.
+
+The editor integration test additionally checks that a visual partial leaves the graph/history identity and tactile markup unchanged, then finalization commits once and removes the preview. Fake transcripts are injected only in tests. There is no live microphone, transcript test panel or provider request in the normal application. Server interpretation is Task 8; AssemblyAI streaming is Task 9.
+
+`createEditorCoordinator()` exposes a synchronous editor store and TurnCoordinator for future adapters. Start a session explicitly, deliver its complete Turn messages, and stop on disconnect/unmount. Old-session results are discarded even if a provider ignores abort. Every manual action uses the same editor reducer. A stopped session cannot accept more turns. Exact controls run locally; uncertain edits require the injected interpreter. Preview parsing deliberately recognizes only simple named node additions. All named voice states and required display strings are centralized in editor/status.ts.
+
+Task 7 verification: 293 tests across thirteen files, lint and production build. Tests were added alongside implementation; no initial failing run is claimed. Live browser verification was unavailable in this environment; the component test supplies the preview/final integration check. Owner verification is the targeted test command above. No visible voice-input behavior should be expected yet.

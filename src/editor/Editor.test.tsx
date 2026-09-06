@@ -90,3 +90,21 @@ it("renames a shape inline on double click and allows cancelling",()=>{
  fireEvent.change(input,{target:{value:"Discard me"}});fireEvent.keyDown(input,{key:"Escape"});
  expect(screen.getByRole("region",{name:"Chart structure"})).not.toHaveTextContent("Discard me");
 });
+
+it("speech previews never change committed graph, history or tactile pins",async()=>{
+ const {act}=await import("@testing-library/react");
+ const {createEditorCoordinator}=await import("./coordinator");
+ const coordinator=createEditorCoordinator(async()=>({kind:"add_node",type:"start",label:"Begin",placement:null}));
+ render(<Editor coordinator={coordinator}/>);
+ act(()=>coordinator.turns.start("test"));
+ const before=coordinator.getSnapshot().editor;
+ const tactile=screen.getByRole("region",{name:"Tactile display simulator"}).innerHTML;
+ await act(()=>coordinator.turns.accept({sessionId:"test",turnId:"1",text:"add a start called Begin",final:false}));
+ expect(screen.getByRole("note",{name:"Speech preview"})).toHaveTextContent("Begin");
+ expect(coordinator.getSnapshot().editor).toBe(before);
+ expect(screen.getByRole("region",{name:"Tactile display simulator"}).innerHTML).toBe(tactile);
+ await act(()=>coordinator.turns.accept({sessionId:"test",turnId:"1",text:"add a start called Begin",final:true}));
+ expect(screen.queryByRole("note",{name:"Speech preview"})).not.toBeInTheDocument();
+ expect(screen.getByRole("region",{name:"Chart structure"})).toHaveTextContent("Begin");
+ expect(coordinator.getSnapshot().editor.engine.history.past).toHaveLength(1);
+});

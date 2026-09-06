@@ -277,11 +277,13 @@ expect(frame.raisedPins.every(p => Number.isInteger(p.x) && Number.isInteger(p.y
 
 ## Task 7: Partial previews and final-turn coordinator
 
+**Completed September 6, 2026.** 293 tests, lint and production build pass. Includes the frame-isolation component check and 14 transcript lifecycle tests. Added PreviewOverlay.tsx and a synchronous external editor store for future speech integration. Tests were written alongside implementation rather than an initial failing run. No live speech or fake-turn UI is enabled. Await owner verification before Task 8.
+
 **Files:** Create `src/commands/preview.ts`, `src/commands/fast-path.ts`, `src/streaming/turns.ts`, `src/streaming/turns.test.ts`, `src/editor/status.ts`, `src/editor/coordinator.ts`. Modify editor and canvas modules.
 
 **Interfaces:** `Turn = { sessionId:string; turnId:string; text:string; final:boolean }`; `previewCommand(text:string):GraphCommand|null`; `parseControl(text:string):GraphCommand|null`; coordinator consumes `Turn` and an injected `interpret(text:string,state:EngineState,signal:AbortSignal):Promise<GraphCommand>`, and emits presentation changes or validated executor calls.
 
-- [ ] Write partial revision, partial clearing, final-only dispatch, duplicate-final, ordered-final, stale interpretation, session-change, and clarification-continuation tests.
+- [x] Write partial revision, partial clearing, final-only dispatch, duplicate-final, ordered-final, stale interpretation, session-change, and clarification-continuation tests.
 
 ```ts
 await coordinator.accept({ sessionId:'s1', turnId:'1', text:'Add a start called Begin', final:false });
@@ -289,9 +291,9 @@ expect(executeSpy).not.toHaveBeenCalled();
 expect(tactileSpy).not.toHaveBeenCalled();
 ```
 
-- [ ] Run `npm test -- src/streaming/turns.test.ts`; expect fail. Parse only conservative recognizable previews; incomplete input clears the old preview. Exact controls skip the server. Serialize final interpretation, deduplicate by session/turn, and reject results if their graph version became stale during manual editing. Clear previews on finalization, stop, and errors.
-- [ ] Route clarification replies using pending context; explicit candidate IDs from the UI remain deterministic. Store and revalidate the original command rather than interpreting a selection as an unrelated edit. Preserve all state names from spec section 8.2 and its exact display strings.
-- [ ] Run streaming/domain/component tests. Use injected fake turns in tests only; the normal product must not claim live speech before Task 9.
+- [x] Run `npm test -- src/streaming/turns.test.ts`; expect fail. Parse only conservative recognizable previews; incomplete input clears the old preview. Exact controls skip the server. Serialize final interpretation, deduplicate by session/turn, and reject results if their graph version became stale during manual editing. Clear previews on finalization, stop, and errors.
+- [x] Route clarification replies using pending context; explicit candidate IDs from the UI remain deterministic. Store and revalidate the original command rather than interpreting a selection as an unrelated edit. Preserve all state names from spec section 8.2 and its exact display strings.
+- [x] Run streaming/domain/component tests. Use injected fake turns in tests only; the normal product must not claim live speech before Task 9.
 
 **Owner check:** Run `npm test -- src/streaming/turns.test.ts`. Confirm named tests demonstrate a preview revision never changes graph/history/tactile output and duplicate finals apply only once.
 

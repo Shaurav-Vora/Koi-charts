@@ -1,13 +1,15 @@
 "use client";
 import TactileSimulator from "../tactile/TactileSimulator";
-import { Component, useCallback, useMemo, useReducer, type ReactNode } from "react";
+import { Component, useCallback, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 import type { GraphCommand } from "../commands/schema";
 import type { FlowGraph } from "../graph/types";
 import { layoutGraph } from "../visual/layout";
 import VisualCanvas from "../visual/VisualCanvas";
 import { ShapePalette, NodeInspector } from "./ShapePalette";
 import CommandForm from "./CommandForm";
-import { createEditorState, editorReducer } from "./reducer";
+import { createEditorCoordinator } from "./coordinator";
+import { statusLabels } from "./status";
+import PreviewOverlay from "../visual/PreviewOverlay";
 
 class CanvasBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -18,18 +20,22 @@ function LaidOutCanvas(props: { graph: FlowGraph; focusedNodeId: string | null; 
   const layout = useMemo(() => layoutGraph(props.graph), [props.graph]);
   return <VisualCanvas {...props} layout={layout} />;
 }
-export default function Editor() {
-  const [state, dispatch] = useReducer(editorReducer, undefined, createEditorState);
-  const onCommand = useCallback((command: GraphCommand) => dispatch({ type: "command", command, idSeed: crypto.randomUUID() }), []);
+export default function Editor({ coordinator: supplied }: { coordinator?: ReturnType<typeof createEditorCoordinator> } = {}) {
+  const [local] = useState(() => createEditorCoordinator());
+  const coordinator = supplied ?? local;
+  const { editor: state, presentation } = useSyncExternalStore(coordinator.subscribe, coordinator.getSnapshot, coordinator.getSnapshot);
+  const dispatch = coordinator.dispatch;
+  const onCommand = useCallback((command: GraphCommand) => dispatch({ type: "command", command, idSeed: crypto.randomUUID() }), [dispatch]);
   const { graph, focusedNodeId, pending, history, version } = state.engine;
+  const hasError = presentation ? presentation.status === "error" : state.outcome === "error";
   const focused = graph.nodes.find(node => node.id === focusedNodeId);
-  const status = state.outcome === "idle" ? "Idle" : state.outcome === "error" ? "Command not applied" : state.outcome === "confirmation" ? "Confirmation needed" : state.outcome === "clarification" ? "Clarification needed" : state.outcome === "committed" ? "Change applied" : state.outcome === "focused" ? "Focus updated" : state.outcome === "cancelled" ? "Cancelled" : "Chart explored";
+  const status = presentation ? statusLabels[presentation.status] : state.outcome === "idle" ? "Idle" : state.outcome === "error" ? "Command not applied" : state.outcome === "confirmation" ? "Confirmation needed" : state.outcome === "clarification" ? "Clarification needed" : state.outcome === "committed" ? "Change applied" : state.outcome === "focused" ? "Focus updated" : state.outcome === "cancelled" ? "Cancelled" : "Chart explored";
   return <>
     <div className="workspace-heading"><div><h2>Your workspace</h2><p>Build a flowchart, one clear step at a time.</p></div><div className="status" role="status" aria-live="polite"><span className="status-dot" aria-hidden="true" />{status}</div></div>
     <div className="editor-toolbar"><div className="history-controls"><button disabled={!history.past.length} onClick={() => onCommand({ kind: "undo" })}>Undo</button><button disabled={!history.future.length} onClick={() => onCommand({ kind: "redo" })}>Redo</button></div><div className="query-controls"><button disabled={graph.nodes.length > 0 || !!pending} onClick={() => dispatch({type:"example"})}>Load large example</button><button onClick={() => onCommand({ kind: "describe", scope: "chart" })}>Describe chart</button><button disabled={!focused} onClick={() => onCommand({ kind: "inspect", node: null })}>Inspect focus</button><button onClick={() => onCommand({ kind: "validate" })}>Validate chart</button></div></div>
     
-    <section className={`command-feedback ${state.outcome === "error" ? "has-error" : ""}`} aria-label="Command feedback">
-      <p role={state.outcome === "error" ? "alert" : undefined} aria-live={state.outcome === "error" ? undefined : "polite"}>{state.message}</p>
+    <section className={`command-feedback ${hasError ? "has-error" : ""}`} aria-label="Command feedback">
+      <p role={hasError ? "alert" : undefined} aria-live={hasError ? undefined : "polite"}>{presentation?.error ?? presentation?.text ?? state.message}</p>
       {pending && <div className="pending-actions">
         {pending.kind === "deletion" ? <button className="danger-button" onClick={() => onCommand({ kind: "confirm" })}>Confirm deletion</button> : pending.candidates.slice(0, 3).map(id => <button key={id} onClick={() => dispatch({ type: "choose", candidateId: id, idSeed: crypto.randomUUID() })}>{pending.elementKind === "node" ? graph.nodes.find(node => node.id === id)?.label ?? "New node" : "Connection"} ({id})</button>)}
         <button onClick={() => onCommand({ kind: "cancel" })}>Cancel</button>
@@ -38,7 +44,7 @@ export default function Editor() {
     <div className="diagram-workbench"><div className="palette-column"><ShapePalette lastNodeId={graph.nodes.at(-1)?.id} onCommand={onCommand} />{focused && <NodeInspector key={`${focused.id}-${focused.label}`} node={focused} onCommand={onCommand} />}</div>
       <section className="display visual-display" aria-labelledby="visual-title" data-graph-version={version}>
         <div className="display-heading"><h3 id="visual-title">Visual flowchart</h3><span className="count">{graph.nodes.length} nodes · {graph.edges.length} connections</span></div>
-        <div className="canvas-wrap"><CanvasBoundary><LaidOutCanvas graph={graph} focusedNodeId={focusedNodeId} onCommand={onCommand} /></CanvasBoundary>{!graph.nodes.length && <div className="canvas-welcome"><h4>Your chart starts here</h4><p>Drag a shape from the left, or click one to begin.</p></div>}</div>
+        <div className="canvas-wrap"><CanvasBoundary><LaidOutCanvas graph={graph} focusedNodeId={focusedNodeId} onCommand={onCommand} /></CanvasBoundary><PreviewOverlay command={presentation?.preview ?? null} />{!presentation?.preview && !graph.nodes.length && <div className="canvas-welcome"><h4>Your chart starts here</h4><p>Drag a shape from the left, or click one to begin.</p></div>}</div>
         <div className="display-footer"><p>Drag shapes to place them anywhere. Connect their dots. Select a shape to edit its label.</p></div>
       </section>
     </div><details className="keyboard-editor"><summary>Keyboard editing &amp; advanced commands</summary><CommandForm graph={graph} focusedNodeId={focusedNodeId} onCommand={onCommand} /></details><div className="secondary-displays">
