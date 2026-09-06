@@ -1,6 +1,7 @@
 "use client";
 import TactileSimulator from "../tactile/TactileSimulator";
-import { Component, useCallback, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { Component, useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createSpeaker, speechPreference } from "./speech";
 import type { GraphCommand } from "../commands/schema";
 import type { FlowGraph } from "../graph/types";
 import { layoutGraph } from "../visual/layout";
@@ -31,11 +32,30 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const { graph, focusedNodeId, pending, history, version } = state.engine;
   const hasError = presentation ? presentation.status === "error" : state.outcome === "error";
   const focused = graph.nodes.find(node => node.id === focusedNodeId);
+  const message = presentation?.error ?? presentation?.text ?? state.message;
+  const speaker = useMemo(() => createSpeaker(), []);
+  // On by default: an author who cannot see the chart has no other way to receive a reply.
+  const wanted = useSyncExternalStore(speechPreference.subscribe, speechPreference.read, speechPreference.readOnServer);
+  // A browser with no speech engine must keep its live region, or replies reach nobody at all.
+  const speaks = wanted && speaker.supported;
+  useEffect(() => {
+    if (!speaks) return speaker.cancel();
+    // The machine must not talk over the author: their first syllable stops the reply, so a
+    // correction never has to wait for a position report to finish being read out.
+    if (presentation?.status === "speech_detected" || presentation?.status === "previewing") return speaker.cancel();
+    speaker.speak(message);
+    // Depending on the store objects rather than the text repeats an identical reply, which is
+    // how pressing Back twice at a dead end confirms twice that there is still nothing behind.
+  }, [state, presentation, speaks, speaker, message]);
+  const toggleSpeech = () => { speechPreference.write(!speaks); if (speaks) speaker.cancel(); };
   const status = presentation ? statusLabels[presentation.status] : state.outcome === "idle" ? "Idle" : state.outcome === "error" ? "Command not applied" : state.outcome === "confirmation" ? "Confirmation needed" : state.outcome === "clarification" ? "Clarification needed" : state.outcome === "committed" ? "Change applied" : state.outcome === "focused" ? "Focus updated" : state.outcome === "cancelled" ? "Cancelled" : "Chart explored";
   return <>
     <div className="workspace-heading"><div><h2>Your workspace</h2><p>Build a flowchart, one clear step at a time.</p></div></div>
     <div className="editor-toolbar"><div className="voice-controls">
       <button className={`voice-button${voice.active ? " is-active" : ""}`} aria-pressed={voice.active} onClick={() => voice.active ? voice.stop() : voice.start()}>{voice.active ? "Stop voice" : "Start voice"}</button>
+      {/* Speaking and the live region below say the same words, so exactly one of them is ever
+          active: a screen reader user would otherwise hear every reply twice. */}
+      <button className={`speech-button${speaks ? " is-active" : ""}`} aria-pressed={speaks} disabled={!speaker.supported} title={speaker.supported ? undefined : "This browser has no speech engine."} onClick={toggleSpeech}>{speaks ? "Mute replies" : "Speak replies"}</button>
       {/* Beside the button it belongs to, so a sighted user reads the connection state where they act. */}
       <div className="status" role="status" aria-live="polite"><span className="status-dot" aria-hidden="true" />{status}</div>
       {/* A sighted cue only; the live status region beside it announces listening state. An empty
@@ -51,7 +71,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
     </div><div className="query-controls"><button disabled={graph.nodes.length > 0 || !!pending} onClick={() => dispatch({type:"example"})}>Load large example</button><button onClick={() => onCommand({ kind: "describe", scope: "chart" })}>Describe chart</button><button disabled={!focused} onClick={() => onCommand({ kind: "inspect", node: null })}>Inspect focus</button><button onClick={() => onCommand({ kind: "validate" })}>Validate chart</button></div></div>
     
     <section className={`command-feedback ${hasError ? "has-error" : ""}`} aria-label="Command feedback">
-      <p role={hasError ? "alert" : undefined} aria-live={hasError ? undefined : "polite"}>{presentation?.error ?? presentation?.text ?? state.message}</p>
+      <p role={!speaks && hasError ? "alert" : undefined} aria-live={speaks || hasError ? undefined : "polite"}>{message}</p>
       {pending && <div className="pending-actions">
         {pending.kind === "deletion" ? <button className="danger-button" onClick={() => onCommand({ kind: "confirm" })}>Confirm deletion</button> : pending.candidates.slice(0, 3).map(id => <button key={id} onClick={() => dispatch({ type: "choose", candidateId: id, idSeed: crypto.randomUUID() })}>{pending.elementKind === "node" ? graph.nodes.find(node => node.id === id)?.label ?? "New node" : "Connection"} ({id})</button>)}
         <button onClick={() => onCommand({ kind: "cancel" })}>Cancel</button>

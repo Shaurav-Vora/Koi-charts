@@ -91,7 +91,7 @@ main { max-width: 1600px; margin: 0 auto; padding: 40px 4% 24px; }
 button, input, select { font: inherit; }
 .editor-toolbar, .history-controls, .query-controls, .walk-controls, .pending-actions, .voice-controls { display: flex; flex-wrap: wrap; gap: 10px; }
 .voice-controls { align-items: center; }
-.voice-button.is-active { border-color: var(--blue); background: #edf2fd; font-weight: 600; }
+.voice-button.is-active, .speech-button.is-active { border-color: var(--blue); background: #edf2fd; font-weight: 600; }
 .mic-level { width: 72px; height: 8px; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
 .mic-level-fill { display: block; height: 100%; background: var(--blue); transition: width 80ms linear; }
 @media (prefers-reduced-motion: reduce) { .mic-level-fill { transition: none; } }
