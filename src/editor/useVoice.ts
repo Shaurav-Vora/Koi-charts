@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { StreamingSession } from "../streaming/session";
 import { fetchStreamingToken, openBrowserSocket, openMicrophone } from "../streaming/browser";
 import type { createEditorCoordinator } from "./coordinator";
+import type { VoiceStatus } from "./status";
 
 /**
  * Owns one StreamingSession for the editor. The session is created on first use so
@@ -10,6 +11,7 @@ import type { createEditorCoordinator } from "./coordinator";
  */
 export function useVoice(coordinator: ReturnType<typeof createEditorCoordinator>, isInputSuppressed?: () => boolean) {
   const [active, setActive] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<VoiceStatus>("idle");
   const [level, setLevel] = useState(0);
   const session = useRef<StreamingSession | null>(null);
   const ensure = useCallback(() => {
@@ -20,6 +22,7 @@ export function useVoice(coordinator: ReturnType<typeof createEditorCoordinator>
       onSessionEnd: () => coordinator.turns.stop(),
       onTurn: turn => { void coordinator.turns.accept(turn); },
       onStatus: status => {
+        setConnectionStatus(status);
         setActive(status === "connecting" || status === "listening");
         if (status !== "listening") setLevel(0);
         coordinator.present({ status, preview: null, text: "" });
@@ -37,7 +40,7 @@ export function useVoice(coordinator: ReturnType<typeof createEditorCoordinator>
     return () => { window.removeEventListener("pagehide", release); release(); };
   }, []);
   return {
-    active, level,
+    active, level, connectionStatus,
     start: useCallback(() => { void ensure().start(); }, [ensure]),
     stop: useCallback(() => { void session.current?.stop(); }, []),
   };

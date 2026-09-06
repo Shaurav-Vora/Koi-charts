@@ -91,6 +91,36 @@ main { max-width: 1600px; margin: 0 auto; padding: 40px 4% 24px; }
 button, input, select { font: inherit; }
 .editor-toolbar, .history-controls, .query-controls, .walk-controls, .pending-actions, .voice-controls { display: flex; flex-wrap: wrap; gap: 10px; }
 .voice-controls { align-items: center; }
+.editor-toolbar .voice-controls {
+  --voice-color: #53627a;
+  --voice-tint: #eef2f7;
+  flex-basis: 100%; padding: 16px 20px; gap: 12px;
+  border: 1px solid var(--line); border-left: 4px solid var(--voice-color);
+  border-radius: 10px; background: white; margin-bottom: 4px;
+}
+.voice-controls[data-tone="listening"] { --voice-color: #126544; --voice-tint: #e3f4eb; }
+.voice-controls[data-tone="busy"] { --voice-color: #244ea9; --voice-tint: #e9efff; }
+.voice-controls[data-tone="paused"] { --voice-color: #87500b; --voice-tint: #fff1d8; }
+.voice-controls[data-tone="error"] { --voice-color: #a12f36; --voice-tint: #ffe9e9; }
+.voice-readout { flex: 1 1 260px; min-width: 0; }
+.voice-controls .status { width: fit-content; min-height: 30px; padding: 4px 10px; border-radius: 5px; background: var(--voice-tint); color: var(--voice-color); font-weight: 650; }
+.voice-controls .status-dot { flex: 0 0 8px; background: currentColor; border-color: currentColor; }
+.voice-hint { margin-top: 5px; color: var(--muted); font-size: 13px; }
+.editor-toolbar .voice-button { background: var(--ink); border-color: var(--ink); color: white; font-weight: 600; }
+.editor-toolbar .voice-button:hover:not(:disabled) { background: #314867; color: white; }
+.editor-toolbar .voice-button.is-active { background: var(--voice-tint); border-color: var(--voice-color); color: var(--voice-color); }
+.voice-controls .mic-level { width: 88px; height: 12px; background: var(--voice-tint); border-color: var(--voice-color); }
+.voice-controls .mic-level-fill { background: var(--voice-color); }
+.feedback-label { display: block; font-size: 12px; font-weight: 650; color: var(--muted); margin-bottom: 3px; }
+.command-feedback.has-error .feedback-label { color: #a12f36; }
+.history-controls, .walk-controls, .query-controls { align-items: center; gap: 6px; }
+.editor-toolbar .history-controls, .editor-toolbar .walk-controls { padding-right: 12px; border-right: 1px solid var(--line); }
+@media (max-width: 600px) {
+  .editor-toolbar .voice-controls { padding: 12px; gap: 10px; }
+  .voice-readout { flex-basis: calc(100% - 110px); }
+  .editor-toolbar .voice-controls button { flex: 1; }
+  .editor-toolbar .history-controls, .editor-toolbar .walk-controls { border-right: 0; padding-right: 0; }
+}
 .voice-button.is-active, .speech-button.is-active { border-color: var(--blue); background: #edf2fd; font-weight: 600; }
 .mic-level { width: 72px; height: 8px; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
 .mic-level-fill { display: block; height: 100%; background: var(--blue); transition: width 80ms linear; }
