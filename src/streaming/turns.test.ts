@@ -47,6 +47,23 @@ describe("speech turn coordination",()=>{
  it("aborts stopped sessions and ignores late interpretation and late turns",async()=>{const wait=deferred<GraphCommand>(),h=harness(()=>wait.promise);const final=h.turn("voice",true);await Promise.resolve();h.coordinator.stop();expect(h.interpret.mock.calls[0][2].aborted).toBe(true);wait.resolve(add("Late"));await final;await h.turn("Again",true,"2");expect(h.apply).not.toHaveBeenCalled();expect(h.presentations.at(-1)).toMatchObject({status:"idle",preview:null});});
  it("new sessions do not wait for old requests and may reuse turn IDs",async()=>{const wait=deferred<GraphCommand>(),h=harness(text=>text==="old"?wait.promise:Promise.resolve(add("New")));const old=h.turn("old",true);await Promise.resolve();h.coordinator.start("s2");await h.turn("new",true,"1","s2");wait.resolve(add("Old"));await old;expect(h.getState().graph.nodes.map(n=>n.label)).toEqual(["New"]);});
  it("runs exact controls locally without interpreting them",async()=>{const h=harness();h.apply(add("One"));await h.turn("undo",true);expect(h.getState().graph.nodes).toHaveLength(0);expect(h.interpret).not.toHaveBeenCalled();expect(parseControl("undo and add something")).toBeNull();});
+ // AssemblyAI's formatted finals carry terminal punctuation, so a control word only ever
+ // arrives here spelled "Confirm." — matching the bare word left every one of them unrecognised.
+ it.each([["Confirm.",{kind:"confirm"}],["Undo!",{kind:"undo"}],["Cancel.",{kind:"cancel"}],["Next.",{kind:"walk",direction:"next",branch:null}],["Go to start.",{kind:"walk",direction:"first",branch:null}],["Where am I?",{kind:"walk",direction:"stay",branch:null}],["Take yes.",{kind:"walk",direction:"next",branch:"yes"}]])("recognises %s as spoken, punctuation and all",(text,command)=>{
+  expect(parseControl(text)).toEqual(command);
+ });
+ // A pending deletion that waits on the provider to recognise "Confirm." answers differently
+ // each time, which is why clearing a chart by voice took several attempts.
+ it("completes a spoken deletion in one confirmation, without a provider call",async()=>{
+  const h=harness(async()=>({kind:"compound",commands:[{kind:"delete",target:{kind:"node",node:{kind:"id",value:"n1"}}},{kind:"delete",target:{kind:"node",node:{kind:"id",value:"n2"}}}]}));
+  h.apply(add("One"));h.apply(add("Two"));
+  h.apply({kind:"connect",source:{kind:"id",value:"n1"},target:{kind:"id",value:"n2"},label:null});
+  await h.turn("Delete all nodes.",true,"1");
+  expect(h.getState().pending?.kind).toBe("deletion");
+  await h.turn("Confirm.",true,"2");
+  expect(h.getState().graph.nodes).toHaveLength(0);
+  expect(h.interpret).toHaveBeenCalledTimes(1);
+ });
  it("resumes original clarification using a candidate ID rather than a new interpreted edit",async()=>{const h=harness();h.apply(add("Same"));h.apply(add("Same"));h.apply({kind:"rename",node:{kind:"label",value:"Same"},newLabel:"Resolved"});await h.turn("n2",true);expect(h.choose).toHaveBeenCalledWith("n2");expect(h.interpret).not.toHaveBeenCalled();expect(h.getState().graph.nodes[1].label).toBe("Resolved");});
  it("keeps ambiguous clarification replies pending",async()=>{const h=harness();h.apply(add("Same"));h.apply(add("Same"));h.apply({kind:"focus",node:{kind:"label",value:"Same"}});await h.turn("Same",true);expect(h.getState().pending?.kind).toBe("clarification");expect(h.presentations.at(-1)?.status).toBe("needs_clarification");});
  it("clears previews and preserves graph on malformed provider output",async()=>{const h=harness(async()=>({kind:"erase_everything"}) as unknown as GraphCommand);await h.turn("add a start called Begin");await h.turn("bad",true);expect(h.getState().graph.nodes).toHaveLength(0);expect(h.presentations.at(-1)).toMatchObject({status:"error",preview:null});});
