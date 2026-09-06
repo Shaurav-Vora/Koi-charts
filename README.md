@@ -4,7 +4,7 @@ A voice-first flowchart workspace designed for independent blind authorship. The
 
 ## Current milestone
 
-**Task 7: transcript preview and final-command coordination.** Partial transcripts are disposable visual previews; final turns are serialized, deduplicated, locally validated and rejected when their chart context becomes stale. Microphone and server integration remain future milestones. The normal UI still labels voice as disconnected.
+**Task 8: server authentication and command interpretation.** Server-only endpoints now mint temporary AssemblyAI tokens and interpret final transcripts through a validated command schema. The coordinator uses the local interpretation endpoint. Microphone controls arrive in Task 9; the normal UI still labels voice as disconnected. Task 7 preview, deduplication and stale-context protections remain in place.
 
 **Task 6 remains available: tactile simulator.** The committed graph now produces a deterministic 120 × 80 raised-pin simulation, with shape outlines, directional arrowheads and a focused-node cross. Auto mode switches dense charts to a neighborhood view; Overview and Focused view remain available. The full focused label, stable session ID and limited Braille demonstration appear below the pins.
 
@@ -140,7 +140,7 @@ Task 1 verification: two shell tests passed after first failing against the star
 
 ## Environment and project documents
 
-`.env.example` lists future server configuration. When live integration begins, keep the key in `.env.local`; never prefix it with `NEXT_PUBLIC_` or commit it. Provider model availability will be verified at that milestone.
+`.env.example` lists server configuration. Keep the key in `.env.local`; never prefix it with `NEXT_PUBLIC_` or commit it. Restart the server after configuring it. Task 8 tests use mocked responses and need no live key. Provider signatures and model support were checked against official documentation on September 6, 2026; live account verification remains for Task 9.
 
 - [Authoritative design](2026-09-05-voice-tactile-flowchart-design.md)
 - [Implementation plan and progress](docs/superpowers/plans/2026-09-05-voice-tactile-flowchart.md)
@@ -202,3 +202,24 @@ The editor integration test additionally checks that a visual partial leaves the
 `createEditorCoordinator()` exposes a synchronous editor store and TurnCoordinator for future adapters. Start a session explicitly, deliver its complete Turn messages, and stop on disconnect/unmount. Old-session results are discarded even if a provider ignores abort. Every manual action uses the same editor reducer. A stopped session cannot accept more turns. Exact controls run locally; uncertain edits require the injected interpreter. Preview parsing deliberately recognizes only simple named node additions. All named voice states and required display strings are centralized in editor/status.ts.
 
 Task 7 verification: 293 tests across thirteen files, lint and production build. Tests were added alongside implementation; no initial failing run is claimed. Live browser verification was unavailable in this environment; the component test supplies the preview/final integration check. Owner verification is the targeted test command above. No visible voice-input behavior should be expected yet.
+## Check Task 8: AssemblyAI server endpoints
+
+Run `npm test -- src/server/routes.test.ts` (or `node .tools/npm/package/bin/npm-cli.js test -- src/server/routes.test.ts` in the bundled setup). Expect 20 passing tests covering configuration errors, validation, rate limits, provider failures, timeouts and credential redaction. The full suite has 313 tests.
+
+With no server key configured, the following local request returns HTTP 503 with error code `CONFIGURATION` and a clear setup message:
+
+```powershell
+Invoke-WebRequest -Uri http://127.0.0.1:3000/api/assemblyai/token -Method Post -ContentType 'application/json' -Body '{}'
+```
+
+PowerShell displays non-success HTTP statuses as errors; this 503 is expected. The editor should remain usable. If a key is configured, this request instead mints a real temporary token; the mocked test command above is sufficient for this milestone. No microphone or live provider session was tested here.
+
+API decisions verified September 6, 2026:
+
+- The app accepts `POST /api/assemblyai/token` with `{}`. The server uses AssemblyAI's documented **GET** `/v3/token` with `expires_in_seconds=60` and `max_session_duration_seconds=1800`, returning `{token, expiresAt}`. See [token reference](https://www.assemblyai.com/docs/streaming/api-spec/generate-streaming-token) and [temporary-token authentication](https://www.assemblyai.com/docs/streaming/authenticate-with-a-temporary-token).
+- `POST /api/commands/interpret` accepts the final transcript and current graph/focus/pending context. It calls the Gateway chat-completions endpoint using configurable `gemini-2.5-flash-lite`, strict JSON Schema, JSON repair, a 1,024-token output cap and a 15-second provider timeout. Truncated or schema-invalid output is rejected; successful output is `{command}`. See [structured outputs](https://www.assemblyai.com/docs/llm-gateway/structured-outputs) and [supported models](https://www.assemblyai.com/docs/llm-gateway/available-models).
+- Native server fetch implements these two HTTP calls. A `server-only` guard keeps provider code out of client bundles. The browser adapter only calls the app endpoint and passes cancellation through.
+- Streamed JSON bodies are capped at 64 KiB; transcripts at 2,000 characters; graph context at 100 nodes and 200 edges. Provider context omits visual coordinates. Both routes validate content type and reject cross-origin browser requests. Responses use `Cache-Control: no-store`; logs include only request ID, error category and configured model, never provider bodies, keys or transcripts.
+- Demo limits are per process: 6 token and 30 interpretation requests per minute per client, with global caps of 30 and 120. By default all callers share the local client bucket and forwarded headers are ignored. Set `TRUST_PROXY=1` only behind a proxy that overwrites incoming forwarded headers. These endpoints have no account authentication; public hosting needs access controls and a shared limiter across instances before launch.
+
+Verification: 313 tests, TypeScript, lint and production build passed. Owner verification of Task 8 precedes the Task 9 microphone integration.

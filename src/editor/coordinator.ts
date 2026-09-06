@@ -1,7 +1,8 @@
+import { interpretOnServer } from "./interpret-client";
 import { createEditorState, editorReducer, type EditorAction } from "./reducer";
 import { TurnCoordinator, type Interpret, type Presentation } from "../streaming/turns";
 import type { CommandResult } from "../graph/types";
-export function createEditorCoordinator(interpret:Interpret=async()=>{throw new Error("Voice interpretation is not connected yet.");}) {
+export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
  let state={editor:createEditorState(),presentation:null as Presentation|null};
  const listeners=new Set<()=>void>();
  const publish=()=>listeners.forEach(listener=>listener());

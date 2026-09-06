@@ -305,17 +305,17 @@ expect(tactileSpy).not.toHaveBeenCalled();
 
 **Interfaces:** `POST /api/assemblyai/token` returns `{token:string,expiresAt:string}`; `POST /api/commands/interpret` receives `{transcript:string,graph:FlowGraph,focusedNodeId:string|null,recentNodeId:string|null,pending:PendingClarification|PendingDeletion|null}` and returns `{command:GraphCommand}`. Errors: `{error:{code:'CONFIGURATION'|'INVALID_INPUT'|'RATE_LIMITED'|'UPSTREAM'|'TIMEOUT',message:string,requestId:string}}` with appropriate 503/400/429/502/504 HTTP status.
 
-- [ ] Read the official token, Streaming, Gateway structured-output, and SDK pages listed in the spec. Verify model support and actual request signatures before coding provider adapters; retain the spec's configurable baselines where supported. Record verified API decisions and date in README.
-- [ ] Mock provider fetch/SDK boundaries and test absent key, invalid body, oversized body/context, rate limits, malformed Gateway JSON, schema mismatch, timeout, and upstream errors.
+- [x] Read the official token, Streaming, Gateway structured-output, and SDK pages listed in the spec. Verify model support and actual request signatures before coding provider adapters; retain the spec's configurable baselines where supported. Record verified API decisions and date in README.
+- [x] Mock provider fetch/SDK boundaries and test absent key, invalid body, oversized body/context, rate limits, malformed Gateway JSON, schema mismatch, timeout, and upstream errors.
 
 ```ts
 expect(response.headers.get('cache-control')).toContain('no-store');
 expect(JSON.stringify(await response.json())).not.toContain('test-server-secret');
 ```
 
-- [ ] Run `npm test -- src/server/routes.test.ts`; expect fail. Mark provider modules `server-only`. Reject unsupported content types and cross-origin browser requests. Bound the streamed request body before parsing it. Apply per-process demo rate limits of 6 token requests/minute and 30 interpretation requests/minute per client, plus global limits of 30 and 120; document that multi-instance public hosting needs a shared limiter before launch.
-- [ ] Request 60-second temporary tokens and the 30-minute session limit through documented API fields. Send Gateway strict schema with JSON repair, bounded graph context, a 15-second timeout, and a 1,024-token output cap. Reject truncated/malformed results. Validate again with Zod. Redact upstream bodies and log only correlation ID, error category, and configured model. Return `Cache-Control: no-store`.
-- [ ] Run route/schema tests, typecheck, and production build; expect pass. No live API key is needed for this milestone.
+- [x] Run `npm test -- src/server/routes.test.ts`; implementation and mocked tests were verified together (20 passing tests). Mark provider modules `server-only`. Reject unsupported content types and cross-origin browser requests. Bound the streamed request body before parsing it. Apply per-process demo rate limits of 6 token requests/minute and 30 interpretation requests/minute per client, plus global limits of 30 and 120; document that multi-instance public hosting needs a shared limiter before launch.
+- [x] Request 60-second temporary tokens and the 30-minute session limit through documented API fields. Send Gateway strict schema with JSON repair, bounded graph context, a 15-second timeout, and a 1,024-token output cap. Reject truncated/malformed results. Validate again with Zod. Redact upstream bodies and log only correlation ID, error category, and configured model. Return `Cache-Control: no-store`.
+- [x] Run route/schema tests, typecheck, and production build; expect pass. No live API key is needed for this milestone.
 
 **Owner check:** Run `npm test -- src/server/routes.test.ts`. With no configured key, requests must return a clear configuration error without revealing credentials or crashing the app.
 
