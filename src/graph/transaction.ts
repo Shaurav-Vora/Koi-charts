@@ -64,6 +64,13 @@ export function prepareTransaction(
   const apply = (edit: EditCommand, prefix: string) => {
     switch (edit.kind) {
       case "add_node": {
+        // Adding a shape must not rearrange existing shapes, including auto-laid-out ones.
+        const existing = layoutGraph(working.graph);
+        for (const item of working.graph.nodes) {
+          const box = existing.nodes.find(box => box.id === item.id)!;
+          item.position = { x: box.x, y: box.y };
+          delete item.placement;
+        }
         const placement = edit.placement ? { relation: edit.placement.relation, referenceNodeId: node(edit.placement.reference, `${prefix}/placement/reference`) } : undefined;
         const id = allocate();
         working.graph.nodes.push({ id, type: edit.type, label: edit.label, ...(placement ? { placement } : {}) });

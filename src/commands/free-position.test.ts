@@ -42,3 +42,14 @@ describe("free positioning",()=>{
    expect(commandSchema.safeParse({kind:"move_to",node:{kind:"id",value:"A"},position:{x:NaN,y:0}}).success).toBe(false);
  });
 });
+
+it("inserting after a free move preserves every existing position",()=>{
+ let state=execute(setup(),{kind:"move_to",node:{kind:"id",value:"A"},position:{x:430,y:250}},id).state;
+ const before=layoutGraph(state.graph).nodes;
+ state=execute(state,{kind:"add_node",type:"end",label:"D",placement:{relation:"right_of",reference:{kind:"id",value:"C"}}},()=>"D").state;
+ for(const node of before) expect(layoutGraph(state.graph).nodes.find(n=>n.id===node.id)).toEqual(node);
+});
+it("clearing focus changes neither graph nor undo history",()=>{
+ const state=setup(),result=execute(state,{kind:"clear_focus"},id);
+ expect(result.state.focusedNodeId).toBeNull();expect(result.state.graph).toBe(state.graph);expect(result.state.history).toBe(state.history);expect(result.state.version).toBe(state.version);
+});

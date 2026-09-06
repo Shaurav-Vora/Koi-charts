@@ -19,8 +19,8 @@ function FlowEdge({ id, data, label, markerEnd }: EdgeProps<RoutedEdge>) {
 const nodeTypes = { flowNode: FlowNode }, edgeTypes = { routed: FlowEdge };
 function FitChart({ layout }: { layout: LayoutFrame }) {
   const { fitView } = useReactFlow(); const initialized = useNodesInitialized();
-  const fitted = useRef(0);
-  useEffect(() => { if (initialized && layout.nodes.length !== fitted.current) { fitted.current = layout.nodes.length; void fitView({ padding: 0.25, maxZoom: 1, duration: 0 }); } }, [fitView, initialized, layout.nodes.length]);
+  const fitted = useRef(false);
+  useEffect(() => { if (initialized && layout.nodes.length > 0 && !fitted.current) { fitted.current = true; void fitView({ padding: 0.25, maxZoom: 1, duration: 0 }); } }, [fitView, initialized, layout.nodes.length]);
   return null;
 }
 function Canvas({ graph, layout, focusedNodeId, onCommand }: { graph: FlowGraph; layout: LayoutFrame; focusedNodeId: string | null; onCommand: (command: GraphCommand) => void }) {
@@ -30,6 +30,7 @@ function Canvas({ graph, layout, focusedNodeId, onCommand }: { graph: FlowGraph;
     const box = layout.nodes.find(item => item.id === node.id)!;
     return { id: node.id, type: "flowNode", position: { x: box.x, y: box.y }, width: box.width, height: box.height, measured: { width: box.width, height: box.height },
       style: { width: box.width, height: box.height }, data: { label: node.label, nodeType: node.type, focused: node.id === focusedNodeId,
+        onRename: (newLabel: string) => onCommand({ kind: "rename", node: { kind: "id", value: node.id }, newLabel }),
         onFocus: () => onCommand({ kind: "focus", node: { kind: "id", value: node.id } }) } };
   }), [graph, layout, focusedNodeId, onCommand]);
   const liveLayout = useMemo(() => drag ? routeEdges(graph, layout.nodes.map(node => node.id === drag.id ? { ...node, x: drag.x, y: drag.y } : node)) : layout.edges, [drag, graph, layout]);
@@ -42,6 +43,7 @@ function Canvas({ graph, layout, focusedNodeId, onCommand }: { graph: FlowGraph;
     onCommand({ kind: "compound", commands: [{ kind: "add_node", type: type as typeof semanticTypes[number], label: type[0].toUpperCase() + type.slice(1), placement: null }, { kind: "move_to", node: { kind: "recent" }, position: { x: point.x - (type === "decision" ? 115 : 95), y: point.y - (type === "decision" ? 75 : 43) } }] });
   }}><ReactFlow<CanvasNode, RoutedEdge> nodes={nodes.map(node => drag?.id === node.id ? { ...node, position: { x: drag.x, y: drag.y } } : node)} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
     connectionMode={ConnectionMode.Loose} connectionRadius={32}
+    zoomOnDoubleClick={false} onPaneClick={() => onCommand({ kind: "clear_focus" })}
     nodesDraggable
     onNodesChange={changes => { for (const change of changes) { if (change.type === "position" && change.position && change.dragging) setDrag({ id: change.id, ...change.position }); } }}
     onNodeDragStop={(_, node) => {

@@ -25,7 +25,7 @@ export const commandJsonSchema = obj({ command: { anyOf: [
   ...edits,
   variant("compound", { commands: { type: "array", minItems: 1, maxItems: 10, items: { anyOf: edits } } }),
   variant("focus", { node: ref }),
-  ...["undo", "redo", "validate", "confirm", "cancel"].map(kind => variant(kind)),
+  ...["undo", "redo", "validate", "confirm", "cancel", "clear_focus"].map(kind => variant(kind)),
   variant("describe", { scope: en("chart", "focus") }),
   variant("inspect", { node: nullable(ref) }),
   variant("trace_path", { start: ref, end: nullable(ref) }),

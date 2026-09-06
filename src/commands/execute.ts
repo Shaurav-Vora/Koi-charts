@@ -35,6 +35,7 @@ export function execute(state: EngineState, input: unknown, newId: () => string)
   if (!parsed.success) return failure(state, "Command could not be understood. Check its fields and try again.");
   const command = parsed.data;
   try {
+    if (command.kind === "clear_focus") return { state: { ...state, focusedNodeId: null }, outcome: "focused", message: "Selection cleared." };
     if (command.kind === "cancel") return { state: { ...state, pending: null }, outcome: "cancelled", message: "Cancelled." };
     if (command.kind === "confirm") {
       if (state.pending?.kind !== "deletion") return failure(state, "No deletion to confirm.");

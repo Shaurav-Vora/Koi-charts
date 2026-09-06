@@ -184,3 +184,9 @@ Shapes can now be dragged to exact canvas coordinates, including between existin
 Check: add three shapes, drag the middle one into a gap or below the others, and release. It should stay there without snapping or pulling neighbors along. Connect it and move it again, then Undo and Redo. Compare the visual and tactile displays after release. The keyboard Move node command retains relative placement for nonvisual authoring.
 
 Implementation: optional bounded position coordinates in the graph and a validated move_to command shared by Zod and the provider JSON schema. One move freezes the current arrangement before updating the selected node, preserving undo history. Browser verification confirmed unchanged neighbors, placement persistence, Undo/Redo and matching visual/tactile graph versions. Automated movement tests cover exact coordinates, negative positions, neighbor stability, history and schema agreement.
+
+## Canvas interaction and logo update
+
+Adding a shape now preserves existing positions and no longer triggers automatic fit-to-view after the first shape. Use the canvas Fit View control when you want to recenter manually. Click empty canvas space to clear the visual selection without changing the graph or history. Double-click a shape to edit its label inline; Enter saves, Escape or clicking away cancels. The header/favicon logo is now an orange-and-white koi with fins, a forked tail and small mouth bubbles.
+
+Verification: 278 tests, lint and production build pass. Regression tests cover insertion after free movement, clearing focus without touching history, inline rename and cancellation. Live browser verification for this update was unavailable because the browser-control kernel failed to start. Owner check: move a shape, add another and confirm the original stays in place; click blank canvas, double-click to rename, then confirm the new logo after refreshing.

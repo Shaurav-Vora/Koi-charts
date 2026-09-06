@@ -75,3 +75,18 @@ it("palette insertion follows the last added node, not the selected node", () =>
   expect(x("Process")).toBeGreaterThan(x("Start"));
   expect(x("Decision")).toBeGreaterThan(x("Process"));
 });
+
+it("renames a shape inline on double click and allows cancelling",()=>{
+ render(<Editor />);
+ fireEvent.click(screen.getByRole("button",{name:"Insert process"}));
+ const canvas=within(screen.getByRole("region",{name:"Visual flowchart"}));
+ fireEvent.doubleClick(canvas.getByRole("button",{name:"Focus Process"}));
+ let input=screen.getByRole("textbox",{name:"Rename shape"});
+ fireEvent.change(input,{target:{value:"Validate payment"}});
+ fireEvent.submit(input.closest("form")!);
+ expect(screen.getByRole("region",{name:"Chart structure"})).toHaveTextContent("Validate payment");
+ fireEvent.doubleClick(canvas.getByRole("button",{name:"Focus Validate payment"}));
+ input=screen.getByRole("textbox",{name:"Rename shape"});
+ fireEvent.change(input,{target:{value:"Discard me"}});fireEvent.keyDown(input,{key:"Escape"});
+ expect(screen.getByRole("region",{name:"Chart structure"})).not.toHaveTextContent("Discard me");
+});

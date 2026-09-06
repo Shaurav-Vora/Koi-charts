@@ -36,6 +36,7 @@ export const commandSchema = z.discriminatedUnion("kind", [
   ...editVariants,
   z.strictObject({ kind: z.literal("compound"), commands: z.array(editCommandSchema).min(1).max(10) }),
   z.strictObject({ kind: z.literal("focus"), node: spokenRefSchema }),
+  z.strictObject({ kind: z.literal("clear_focus") }),
   z.strictObject({ kind: z.literal("undo") }),
   z.strictObject({ kind: z.literal("redo") }),
   z.strictObject({ kind: z.literal("validate") }),
