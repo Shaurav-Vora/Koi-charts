@@ -1,4 +1,5 @@
 import { exploreCommand } from "./explore";
+import { walkCommand } from "./walk";
 import { createEmptyGraph } from "../graph/invariants";
 import { assertSnapshot, commit, restoreHistory } from "../graph/history";
 import type { CommandResult, EngineState, Snapshot } from "../graph/types";
@@ -47,6 +48,8 @@ export function execute(state: EngineState, input: unknown, newId: () => string)
     if (command.kind === "undo" || command.kind === "redo") {
       return { state: restoreHistory(state, command.kind), outcome: "committed", message: command.kind === "undo" ? "Undid last edit." : "Redid last edit." };
     }
+    const walked = walkCommand(state, command);
+    if (walked) return walked;
     return run(state, command, newId);
   } catch (error) {
     return failure(state, error instanceof Error ? error.message : "Command failed. Try again.");

@@ -1,5 +1,7 @@
 export const nodeTypes = ["start", "process", "decision", "end"] as const;
 export const placementRelations = ["before", "after", "above", "below", "left_of", "right_of"] as const;
+// Cursor movement, spoken: step along a connection, stand still and listen, or jump to either end.
+export const walkDirections = ["next", "back", "first", "last", "stay"] as const;
 export type NodeId = string;
 export type EdgeId = string;
 export type NodeType = (typeof nodeTypes)[number];

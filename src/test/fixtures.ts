@@ -31,6 +31,8 @@ export const validCommands: { name: string; command: Record<string, unknown> }[]
   ...["focus", "recent"].map(kind => ({ name: `focus by ${kind}`, command: { kind: "focus", node: { kind } } })),
   ...["undo", "redo", "validate", "confirm", "cancel"].map(kind => ({ name: kind, command: { kind } })),
   ...["chart", "focus"].map(scope => ({ name: `describe ${scope}`, command: { kind: "describe", scope } })),
+  ...["next", "back", "first", "last", "stay"].map(direction => ({ name: `walk ${direction}`, command: { kind: "walk", direction, branch: null } })),
+  { name: "walk a named branch", command: { kind: "walk", direction: "next", branch: "yes" } },
   { name: "inspect focused", command: { kind: "inspect", node: null } },
   { name: "inspect named", command: { kind: "inspect", node: { kind: "label", value: "Begin" } } },
   { name: "trace to target", command: { kind: "trace_path", start: { kind: "label", value: "Begin" }, end: { kind: "id", value: "n4" } } },

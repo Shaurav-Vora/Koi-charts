@@ -51,6 +51,17 @@ describe("server routes",()=>{
   expect((await h.routes.interpret(request(body()))).status).toBe(502);
   expect(h.transport).toHaveBeenCalledTimes(1);
  });
+ // Choosing a fork the speaker never named would decide a path for someone who cannot see it.
+ it("drops a branch that the transcript never mentions",async()=>{
+  const h=setup(async()=>completion(JSON.stringify({command:{kind:"walk",direction:"next",branch:"yes"}})));
+  const response=await h.routes.interpret(request({...body(),transcript:"what comes after this one"}));
+  expect(await response.json()).toEqual({command:{kind:"walk",direction:"next",branch:null}});
+ });
+ it("keeps a branch the speaker did name",async()=>{
+  const h=setup(async()=>completion(JSON.stringify({command:{kind:"walk",direction:"next",branch:"yes"}})));
+  const response=await h.routes.interpret(request({...body(),transcript:"take the Yes branch"}));
+  expect(await response.json()).toEqual({command:{kind:"walk",direction:"next",branch:"yes"}});
+ });
  it("accepts a command wrapped in a code fence",async()=>{
   const h=setup(async()=>completion("```json\n"+JSON.stringify({command})+"\n```"));
   expect(await(await h.routes.interpret(request(body()))).json()).toEqual({command});

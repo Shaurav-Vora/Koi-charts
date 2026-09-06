@@ -41,7 +41,14 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
       {/* A sighted cue only; the live status region beside it announces listening state. An empty
           bar means nothing while voice is off, so it appears with the session rather than at rest. */}
       {voice.active && <span className="mic-level" aria-hidden="true"><span className="mic-level-fill" style={{ width: `${Math.round(Math.min(1, voice.level * 4) * 100)}%` }} /></span>}
-    </div><div className="history-controls"><button disabled={!history.past.length} onClick={() => onCommand({ kind: "undo" })}>Undo</button><button disabled={!history.future.length} onClick={() => onCommand({ kind: "redo" })}>Redo</button></div><div className="query-controls"><button disabled={graph.nodes.length > 0 || !!pending} onClick={() => dispatch({type:"example"})}>Load large example</button><button onClick={() => onCommand({ kind: "describe", scope: "chart" })}>Describe chart</button><button disabled={!focused} onClick={() => onCommand({ kind: "inspect", node: null })}>Inspect focus</button><button onClick={() => onCommand({ kind: "validate" })}>Validate chart</button></div></div>
+    </div><div className="history-controls"><button disabled={!history.past.length} onClick={() => onCommand({ kind: "undo" })}>Undo</button><button disabled={!history.future.length} onClick={() => onCommand({ kind: "redo" })}>Redo</button></div><div className="walk-controls" role="group" aria-label="Walk the chart">
+      {/* The same cursor the voice commands move, reachable without speaking. Each step
+          announces where it landed and every way out, through the feedback live region. */}
+      <button disabled={!graph.nodes.length} onClick={() => onCommand({ kind: "walk", direction: "first", branch: null })}>Go to start</button>
+      <button disabled={!focused} onClick={() => onCommand({ kind: "walk", direction: "back", branch: null })}>Back</button>
+      <button disabled={!focused} onClick={() => onCommand({ kind: "walk", direction: "next", branch: null })}>Next</button>
+      <button disabled={!focused} onClick={() => onCommand({ kind: "walk", direction: "stay", branch: null })}>Where am I</button>
+    </div><div className="query-controls"><button disabled={graph.nodes.length > 0 || !!pending} onClick={() => dispatch({type:"example"})}>Load large example</button><button onClick={() => onCommand({ kind: "describe", scope: "chart" })}>Describe chart</button><button disabled={!focused} onClick={() => onCommand({ kind: "inspect", node: null })}>Inspect focus</button><button onClick={() => onCommand({ kind: "validate" })}>Validate chart</button></div></div>
     
     <section className={`command-feedback ${hasError ? "has-error" : ""}`} aria-label="Command feedback">
       <p role={hasError ? "alert" : undefined} aria-live={hasError ? undefined : "polite"}>{presentation?.error ?? presentation?.text ?? state.message}</p>

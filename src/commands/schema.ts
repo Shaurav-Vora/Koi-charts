@@ -1,6 +1,6 @@
 import type { Snapshot } from "../graph/types";
 import { z } from "zod";
-import { nodeTypes, placementRelations } from "../graph/types";
+import { nodeTypes, placementRelations, walkDirections } from "../graph/types";
 
 // Count code points to match JSON Schema minLength/maxLength, including non-BMP text.
 // Whitespace-only labels are a semantic error, not a wire-format transformation.
@@ -38,6 +38,7 @@ export const commandSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("compound"), commands: z.array(editCommandSchema).min(1).max(10) }),
   z.strictObject({ kind: z.literal("focus"), node: spokenRefSchema }),
   z.strictObject({ kind: z.literal("clear_focus") }),
+  z.strictObject({ kind: z.literal("walk"), direction: z.enum(walkDirections), branch: text.nullable() }),
   z.strictObject({ kind: z.literal("undo") }),
   z.strictObject({ kind: z.literal("redo") }),
   z.strictObject({ kind: z.literal("validate") }),
