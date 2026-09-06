@@ -2,6 +2,7 @@ import { layoutGraph } from "../visual/layout";
 import type { EngineState, Snapshot } from "./types";
 import { assertSnapshot, snapshot } from "./history";
 import { resolveNode } from "../commands/resolve";
+import { editKinds } from "../commands/schema";
 import type { EditCommand, GraphCommand, PendingClarification, SpokenRef } from "../commands/schema";
 
 export class ClarificationRequired extends Error {
@@ -81,6 +82,13 @@ export function prepareTransaction(
         working.graph.edges.push({ id: allocate(), source, target, ...(edit.label === null ? {} : { label: edit.label }) });
         affect(target); message = "Connected nodes."; break;
       }
+      case "label_edge": {
+        const edge = working.graph.edges.find(item => item.id === edit.edgeId);
+        if (!edge) throw new Error("Connection not found. Select an existing arrow.");
+        if (edit.label === null) delete edge.label; else edge.label = edit.label;
+        message = edit.label === null ? "Cleared connection label." : `Labeled connection ${edit.label}.`;
+        break;
+      }
       case "rename": {
         const id = node(edit.node, `${prefix}/node`);
         working.graph.nodes.find(item => item.id === id)!.label = edit.newLabel;
@@ -141,7 +149,7 @@ export function prepareTransaction(
     working.focusedNodeId = node(command.node, "/node"); message = `Focused ${working.graph.nodes.find(item => item.id === working.focusedNodeId)!.label}.`;
   } else if (command.kind === "compound") {
     command.commands.forEach((edit, index) => apply(edit, `/commands/${index}`)); message = `Applied ${command.commands.length} edits.`;
-  } else if (["add_node", "connect", "rename", "move", "move_to", "delete"].includes(command.kind)) apply(command as EditCommand, "");
+  } else if (editKinds.includes(command.kind)) apply(command as EditCommand, "");
   else throw new Error("This command does not edit or focus the graph.");
   assertSnapshot(working);
   return { prepared: working, command, nodeIds: [...nodeIds], incidentEdgeIds: [...incidentEdgeIds], message };

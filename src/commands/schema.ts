@@ -24,6 +24,7 @@ export const spokenElementRefSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("edge"), source: spokenRefSchema, target: spokenRefSchema, label: text.nullable() }),
 ]);
 const editVariants = [
+  z.strictObject({ kind: z.literal("label_edge"), edgeId: text, label: text.nullable() }),
   z.strictObject({ kind: z.literal("add_node"), type: z.enum(nodeTypes), label: text, placement: placementRefSchema.nullable() }),
   z.strictObject({ kind: z.literal("connect"), source: spokenRefSchema, target: spokenRefSchema, label: text.nullable() }),
   z.strictObject({ kind: z.literal("rename"), node: spokenRefSchema, newLabel: text }),
@@ -53,6 +54,12 @@ export type PlacementRef = z.infer<typeof placementRefSchema>;
 export type SpokenElementRef = z.infer<typeof spokenElementRefSchema>;
 export type EditCommand = z.infer<typeof editCommandSchema>;
 export type GraphCommand = z.infer<typeof commandSchema>;
+// A Record over the union fails to compile until a newly added edit variant is listed here,
+// so the executor's edit gate cannot silently omit a command the transaction already handles.
+const editKindMap: Record<EditCommand["kind"], true> = {
+  label_edge: true, add_node: true, connect: true, rename: true, move_to: true, move: true, delete: true,
+};
+export const editKinds: readonly string[] = Object.keys(editKindMap);
 export type PendingClarification = {
   kind: "clarification"; command: GraphCommand; referencePath: string;
   candidates: string[]; graphVersion: number;

@@ -15,6 +15,7 @@ const placement = obj({
 const target = { anyOf: [variant("node", { node: ref }), variant("edge_id", { id: str }),
   variant("edge", { source: ref, target: ref, label: nullable(str) })] };
 const edits = [
+  variant("label_edge", { edgeId: str, label: nullable(str) }),
   variant("add_node", { type: en("start", "process", "decision", "end"), label: str, placement: nullable(placement) }),
   variant("connect", { source: ref, target: ref, label: nullable(str) }),
   variant("rename", { node: ref, newLabel: str }),
