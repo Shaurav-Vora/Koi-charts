@@ -7,10 +7,15 @@ export async function fetchStreamingToken(): Promise<{ token: string; expiresAt:
   const response = await fetch("/api/assemblyai/token", {
     method: "POST", headers: { "content-type": "application/json" }, body: "{}",
   });
-  if (!response.ok) throw new Error(
-    response.status === 503 ? "Voice editing is not set up on this server yet."
+  if (!response.ok) {
+    // The route already returns reader-safe messages; a generic fallback here would
+    // hide the one sentence that says what to fix.
+    const detail = await response.json().catch(() => null) as { error?: { message?: unknown; requestId?: unknown } } | null;
+    const message = typeof detail?.error?.message === "string" ? detail.error.message
       : response.status === 429 ? "Too many voice requests. Wait a moment, then start voice again."
-      : "Could not start voice input. Check your connection and try again.");
+      : "Could not start voice input. Check your connection and try again.";
+    throw new Error(typeof detail?.error?.requestId === "string" ? `${message} (request ${detail.error.requestId})` : message);
+  }
   const body = await response.json() as { token?: unknown; expiresAt?: unknown };
   if (typeof body.token !== "string" || !body.token) throw new Error("The server returned an invalid voice token.");
   return { token: body.token, expiresAt: typeof body.expiresAt === "string" ? body.expiresAt : "" };

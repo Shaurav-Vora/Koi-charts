@@ -18,6 +18,20 @@ describe("server routes",()=>{
  it("mints a short-lived token with the session cap in query parameters",async()=>{const h=setup(async()=>Response.json({token:"temporary",expires_in_seconds:60}));const response=await h.routes.token(request());expect(response.status).toBe(200);expect(await response.json()).toMatchObject({token:"temporary",expiresAt:expect.any(String)});const [url,init]=h.transport.mock.calls[0] as unknown as [string,RequestInit];expect(url).toContain("expires_in_seconds=60&max_session_duration_seconds=1800");expect(init.method).toBe("GET");});
  it("uses strict schema, repair and token cap while omitting layout coordinates",async()=>{const h=setup();const input=body();input.graph.nodes.push({id:"a",type:"start",label:"A",position:{x:20,y:30}});const response=await h.routes.interpret(request(input));expect(await response.json()).toEqual({command});const [,init]=h.transport.mock.calls[0] as unknown as [string,RequestInit];const sent=JSON.parse(init.body as string);expect(sent.max_tokens).toBe(1024);expect(sent.response_format.json_schema.strict).toBe(true);expect(sent.post_processing_steps).toEqual([{type:"json-repair"}]);expect(sent.messages[1].content).not.toContain('"position"');});
  it.each([["origin","https://attacker.example"],["content-type","text/plain"],["sec-fetch-site","cross-site"]])("rejects unsafe request header %s",async (name,value)=>{const h=setup();expect((await h.routes.token(request({},{[name]:value}))).status).toBe(400);expect(h.transport).not.toHaveBeenCalled();});
+ // The dev server normalizes request.url to localhost even when bound to 127.0.0.1,
+ // so a same-origin browser request must be judged by the Host header instead.
+ it.each(["http://127.0.0.1:3000","http://localhost:3000"])("accepts a same-origin request from %s",async origin=>{
+  const h=setup(async()=>Response.json({token:"temporary",expires_in_seconds:60}));
+  const host=new URL(origin).host;
+  const response=await h.routes.token(new Request(`${origin}/api/assemblyai/token`,{method:"POST",headers:{"content-type":"application/json",origin,host,"sec-fetch-site":"same-origin"},body:"{}"}));
+  expect(response.status).toBe(200);
+ });
+ it("rejects an origin whose host differs from the requested host",async()=>{
+  const h=setup();
+  const response=await h.routes.token(new Request("http://127.0.0.1:3000/api/assemblyai/token",{method:"POST",headers:{"content-type":"application/json",origin:"http://evil.example:3000",host:"127.0.0.1:3000"},body:"{}"}));
+  expect(response.status).toBe(400);
+  expect(h.transport).not.toHaveBeenCalled();
+ });
  it("rejects oversized streamed bodies without a content-length header",async()=>{const h=setup();const response=await h.routes.interpret(request({payload:"a".repeat(70000)}));expect(response.status).toBe(400);expect(h.transport).not.toHaveBeenCalled();});
  it("rejects oversized graph context and invalid references",async()=>{const h=setup();const input=body();input.graph.nodes=Array.from({length:101},(_,i)=>({id:String(i),type:"process",label:"Node"}));expect((await h.routes.interpret(request(input))).status).toBe(400);expect((await h.routes.interpret(request({...body(),focusedNodeId:"missing"}))).status).toBe(400);});
  it("rejects invalid pending state before reaching a provider",async()=>{const h=setup();expect((await h.routes.interpret(request({...body(),pending:{kind:"deletion"}}))).status).toBe(400);expect(h.transport).not.toHaveBeenCalled();});

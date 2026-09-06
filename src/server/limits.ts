@@ -16,6 +16,14 @@ export async function readJson(body:ReadableStream<Uint8Array>|null,maxBytes=655
 }
 export function checkOrigin(request:Request){
  const origin=request.headers.get("origin");
- if((origin&&origin!==new URL(request.url).origin)||request.headers.get("sec-fetch-site")==="cross-site")throw new ApiError("INVALID_INPUT","Cross-origin requests are not allowed.");
+ // Compare Origin against Host, as Next does for Server Actions. The server normalizes
+ // request.url, so it does not report the host the browser actually used: with
+ // `--hostname 127.0.0.1` it still reads localhost, which rejected every genuine request.
+ if(origin){
+  let originHost:string|null=null;
+  try{originHost=new URL(origin).host;}catch{originHost=null;}
+  if(!originHost||originHost!==request.headers.get("host"))throw new ApiError("INVALID_INPUT","Cross-origin requests are not allowed.");
+ }
+ if(request.headers.get("sec-fetch-site")==="cross-site")throw new ApiError("INVALID_INPUT","Cross-origin requests are not allowed.");
  if(request.headers.get("content-type")?.split(";")[0].trim().toLowerCase()!=="application/json")throw new ApiError("INVALID_INPUT","Use application/json.");
 }
