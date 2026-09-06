@@ -88,6 +88,16 @@ describe("safe edits and history", () => {
     const before = freeze(state()); const result = execute(before, command, ids());
     expect(result.outcome).toBe("error"); expect(result.state).toEqual(before);
   });
+  // Node and reference both default to the focused shape, so a vague utterance resolves to one
+  // node twice. The speaker never heard an internal ID, so the refusal must not quote one.
+  it("refuses a self-placement in the speaker's terms, not by node ID", () => {
+    const before = freeze(state());
+    const result = execute(before, { kind: "move", node: { kind: "focus" }, placement: { relation: "right_of", reference: { kind: "focus" } } }, ids());
+    expect(result.outcome).toBe("error");
+    expect(result.message).toContain("cannot be placed next to itself");
+    expect(result.message).not.toContain("n1");
+    expect(result.state).toEqual(before);
+  });
   it("rejects a colliding generated ID", () => {
     const before = freeze(state());
     expect(execute(before, add(), () => "n1").state).toEqual(before);

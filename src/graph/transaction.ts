@@ -108,9 +108,14 @@ export function prepareTransaction(
       }
       case "move": {
         const id = node(edit.node, `${prefix}/node`);
-        delete working.graph.nodes.find(item => item.id === id)!.position;
         const referenceNodeId = node(edit.placement.reference, `${prefix}/placement/reference`);
-        working.graph.nodes.find(item => item.id === id)!.placement = { relation: edit.placement.relation, referenceNodeId };
+        // Both sides default to the focused node, so an utterance that names neither resolves to
+        // one shape twice. Refuse it in the speaker's own terms, before the graph invariant
+        // reports the same thing as an internal node ID nobody said aloud.
+        const moving = working.graph.nodes.find(item => item.id === id)!;
+        if (referenceNodeId === id) throw new Error(`"${moving.label}" cannot be placed next to itself. Name the shape to place it beside.`);
+        delete moving.position;
+        moving.placement = { relation: edit.placement.relation, referenceNodeId };
         affect(id); message = "Moved node."; break;
       }
       case "delete": {
