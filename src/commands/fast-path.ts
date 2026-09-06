@@ -1,4 +1,15 @@
 import type { GraphCommand } from "./schema";
+
+// Match the whole utterance: modifiers, names, negation and compound requests must
+// still go through interpretation. Basic insertion never needs an existing focus.
+export function parseSimpleAddition(text: string): GraphCommand | null {
+ const match=/^(?:please )?add (?:a |an )?(start|process|decision|end)(?: (?:node|shape))?[.!]?$/i.exec(text.trim().replace(/\s+/g," "));
+ if(!match)return null;
+ const labels={start:"Start",process:"Process",decision:"Decision",end:"End"} as const;
+ const type=match[1].toLowerCase() as keyof typeof labels;
+ return {kind:"add_node",type,label:labels[type],placement:null};
+}
+
 export function parseControl(text: string): GraphCommand | null {
  const clean=text.trim();
  switch(clean.toLowerCase()) {

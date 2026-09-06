@@ -17,6 +17,24 @@ function harness(interpret:Interpret=async text=>add(text)) {
  return {coordinator,apply,choose,interpret:interpretSpy,getState:()=>state,presentations,turn:(text:string,final=false,turnId="1",sessionId="s1")=>coordinator.accept({text,final,turnId,sessionId})};
 }
 describe("speech turn coordination",()=>{
+ it.each(["add a start node", "Add a start node.", "Please add a start node!"])("creates the first start without a focus or provider call: %s",async text=>{
+  const h=harness(async()=>({kind:"focus",node:{kind:"focus"}}));
+  const before=h.getState();await h.turn(text);expect(h.getState()).toBe(before);expect(h.apply).not.toHaveBeenCalled();
+  await h.turn(text,true);await h.turn(text,true);
+  expect(h.getState().graph.nodes).toEqual([{id:"n1",type:"start",label:"Start"}]);
+  expect(h.getState().history.past).toHaveLength(1);expect(h.presentations.at(-1)?.status).toBe("committed");
+  expect(h.interpret).not.toHaveBeenCalled();
+  await h.turn("undo",true,"2");expect(h.getState().graph.nodes).toHaveLength(0);
+  await h.turn("redo",true,"3");expect(h.getState().graph.nodes[0].label).toBe("Start");
+ });
+ it.each(["process","decision","end"])("adds a default %s shape without selecting an existing node",async type=>{
+  const h=harness();h.apply(add("Existing"));h.apply({kind:"clear_focus"});
+  await h.turn(`add a ${type} node`,true);
+  expect(h.getState().graph.nodes.at(-1)).toMatchObject({type,label:type[0].toUpperCase()+type.slice(1)});expect(h.interpret).not.toHaveBeenCalled();
+ });
+ it.each(["add a start node before Finish","add a start node and connect it","do not add a start node","add a start node called Begin"])("leaves richer requests to interpretation: %s",async text=>{
+  const h=harness();await h.turn(text,true);expect(h.interpret).toHaveBeenCalledTimes(1);
+ });
  it("replaces partial previews without changing graph or history",async()=>{
   const h=harness(),before=h.getState();await h.turn("add a start called Begin");await h.turn("add a decision called Approved");
   expect(h.presentations.at(-1)?.preview).toMatchObject({type:"decision",label:"Approved"});expect(h.getState()).toBe(before);expect(h.apply).not.toHaveBeenCalled();expect(h.interpret).not.toHaveBeenCalled();

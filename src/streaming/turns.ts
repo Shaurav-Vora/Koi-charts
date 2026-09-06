@@ -1,7 +1,7 @@
 import type { EngineState, CommandResult } from "../graph/types";
 import { commandSchema, type GraphCommand } from "../commands/schema";
 import { previewCommand } from "../commands/preview";
-import { parseControl } from "../commands/fast-path";
+import { parseControl, parseSimpleAddition } from "../commands/fast-path";
 import type { VoiceStatus } from "../editor/status";
 export type Turn={sessionId:string;turnId:string;text:string;final:boolean};
 export type Presentation={status:VoiceStatus;preview:GraphCommand|null;text:string;error?:string};
@@ -40,7 +40,7 @@ export class TurnCoordinator {
     if(candidates.length!==1) {this.options.present({status:"needs_clarification",preview:null,text:"Choose one matching label or use a candidate button."});return;}
     result=this.options.choose(candidates[0]);
    }else{
-    const command=control ?? await this.options.interpret(turn.text,state,controller.signal);
+    const command=control ?? parseSimpleAddition(turn.text) ?? await this.options.interpret(turn.text,state,controller.signal);
     if(generation!==this.generation || controller.signal.aborted)return;
     if(context(state)!==context(this.options.getState()))throw new Error("The chart or selection changed. Please repeat the command.");
     const parsed=commandSchema.safeParse(command);

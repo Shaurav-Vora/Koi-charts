@@ -14,6 +14,8 @@ The visual palette, keyboard commands and undo/redo remain available, including 
 
 ## Run locally
 
+Basic voice insertion works without an existing selection: “add a start node”, “add a process node”, “add a decision node” and “add an end node” create shapes with their default labels. These exact phrases run locally on finalized transcripts, tolerate capitalization and ending punctuation, and support Undo/Redo. Partial transcripts remain previews only. Requests with custom names, placement instructions or multiple actions continue through the interpreter.
+
 Voice interpretation recovery: the current default Gateway model is `qwen3.5-4b-32k-fast`, overridable with `ASSEMBLYAI_LLM_MODEL`. When a model rejects `response_format`, the server supplies the schema in the prompt and validates the returned JSON locally. Valid bare commands are wrapped in `{command}` only after strict validation; unknown fields, invalid commands and truncated output still fail.
 
 AssemblyAI HTTP 429 responses now stay HTTP 429 instead of becoming generic 502 errors. The UI displays a wait time, the response includes `Retry-After`, and a per-process cooldown prevents further calls to that provider/model until the delay expires (60 seconds when no usable delay is supplied). No automatic command replay occurs: repeat the command after the wait. Explicit billing/quota rejections receive a configuration message instead. Transcription working does not guarantee Gateway availability; [AssemblyAI's account documentation](https://support.assemblyai.com/articles/5370767329-can-i-sign-up-for-free) describes the separate access requirements.
