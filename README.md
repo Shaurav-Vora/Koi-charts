@@ -267,6 +267,14 @@ Streaming decisions verified September 6, 2026:
 - The microphone is opened before the token is minted or the socket is opened, so a denied permission costs neither a credential nor a billable connection.
 - Late results cannot corrupt the graph: turns carry the provider session ID and turn order, and the existing coordinator drops turns from an old session, repeated finals, and any result whose graph version, focus or pending state changed while it was in flight.
 
+## Check canvas selection and arrow editing
+
+Click an arrow to highlight it and open **Selected arrow**, which shows its source and destination. Enter a custom **Arrow label** and press **Apply label**, or use **Clear label**. Arrows leaving a Decision node also offer **Yes** and **No** shortcuts. Changes use the same command engine and undo history as other edits.
+
+Selected shapes have a blue outline and soft halo; hovered shapes have a lighter tint. Valid connection targets turn green. Connecting a shape to itself is blocked while dragging. Clicking empty canvas space clears selection and closes the arrow editor. Escape closes the arrow editor while its controls have focus. Arrows are keyboard focusable and have source/destination labels.
+
+Owner check: create Decision and two Process nodes, connect both branches, click each arrow and assign Yes/No. Confirm labels appear on the canvas and in the chart outline. Try a custom label, clear it, and undo. Click a shape and then empty space to check selection cues. Check the arrow editor at a narrow window width.
+
 ## Check spoken-reply fixes
 
 ### Brief replies

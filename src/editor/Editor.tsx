@@ -88,7 +88,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
       <section className="display visual-display" aria-labelledby="visual-title" data-graph-version={version}>
         <div className="display-heading"><h3 id="visual-title">Visual flowchart</h3><span className="count">{graph.nodes.length} nodes · {graph.edges.length} connections</span></div>
         <div className="canvas-wrap"><CanvasBoundary><LaidOutCanvas graph={graph} focusedNodeId={focusedNodeId} onCommand={onCommand} /></CanvasBoundary><PreviewOverlay command={presentation?.preview ?? null} />{!presentation?.preview && !graph.nodes.length && <div className="canvas-welcome"><h4>Your chart starts here</h4><p>Drag a shape from the left, or click one to begin.</p></div>}</div>
-        <div className="display-footer"><p>Drag shapes to place them anywhere. Point at one to reveal its connection dots. Select a shape to edit its label.</p></div>
+        <div className="display-footer"><p>Drag shapes to move them. Use the dots to connect. Double-click a shape to rename it, or click an arrow to label it.</p></div>
       </section>
     </div><details className="keyboard-editor"><summary>Keyboard editing &amp; advanced commands</summary><CommandForm graph={graph} focusedNodeId={focusedNodeId} onCommand={onCommand} /></details><div className="secondary-displays">
       <TactileSimulator graph={graph} focus={focusedNodeId} version={version} displayIds={state.displayIds} />
