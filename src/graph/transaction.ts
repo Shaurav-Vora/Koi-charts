@@ -81,6 +81,7 @@ export function prepareTransaction(
       }
       case "connect": {
         const source = node(edit.source, `${prefix}/source`), target = node(edit.target, `${prefix}/target`);
+        if (source === target) throw new Error("A node cannot connect to itself. Name a different source or destination node.");
         working.graph.edges.push({ id: allocate(), source, target, ...(edit.label === null ? {} : { label: edit.label }) });
         affect(target); message = "Connected nodes."; break;
       }

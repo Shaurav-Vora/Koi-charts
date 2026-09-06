@@ -2,7 +2,36 @@
 import { afterEach, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 import { createRoutes } from "./routes";
+import { createEngineState, execute } from "../commands/execute";
+it.each(["add-only", "compound"] as const)("anchors connect-it to the original node for %s output", async variant => {
+ const add = {kind:"add_node",type:"process",label:"Process",placement:null};
+ const proposed = variant === "add-only" ? add : {kind:"compound",commands:[add,{kind:"connect",source:{kind:"focus"},target:{kind:"recent"},label:null}]};
+ const transport=vi.fn().mockResolvedValue(Response.json({candidates:[{finishReason:"STOP",content:{parts:[{text:JSON.stringify({command:proposed})}]}}]}));
+ const graph={schemaVersion:1 as const,nodes:[{id:"original-start",type:"start" as const,label:"Start"}],edges:[]};
+ const response=await createRoutes({transport,env:()=>({GEMINI_API_KEY:"test"})}).interpret(new Request("http://localhost/api/commands/interpret",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({transcript:"connect it to a process node",graph,focusedNodeId:"original-start",recentNodeId:"original-start",pending:null})}));
+ expect(response.status).toBe(200);
+ let serial=0;
+ const result=execute({...createEngineState(),graph,focusedNodeId:"original-start",recentNodeId:"original-start"},(await response.json()).command,()=>`generated-${++serial}`);
+ expect(result.outcome).toBe("committed");
+ expect(result.state.graph.nodes).toHaveLength(2);
+ expect(result.state.graph.edges).toEqual([{id:"generated-2",source:"original-start",target:"generated-1"}]);
+});
 const command={kind:"add_node",type:"start",label:"Begin",placement:null};
+it.each([
+ ["connect it to Process", "original-start", 200, "original-start"],
+ ["connect Start to Process", "process-node", 200, "original-start"],
+ ["connect it to Process", null, 400, null],
+] as const)("handles selection safely for %s with focus %s", async (transcript, focus, status, source) => {
+ vi.spyOn(console,"warn").mockImplementation(()=>{});
+ const proposed={kind:"connect",source:{kind:"id",value:"original-start"},target:{kind:"id",value:"process-node"},label:null};
+ const transport=vi.fn().mockResolvedValue(Response.json({candidates:[{finishReason:"STOP",content:{parts:[{text:JSON.stringify({command:proposed})}]}}]}));
+ const graph={schemaVersion:1,nodes:[{id:"original-start",type:"start",label:"Start"},{id:"process-node",type:"process",label:"Process"}],edges:[]};
+ const response=await createRoutes({transport,env:()=>({GEMINI_API_KEY:"test"})}).interpret(new Request("http://localhost/api/commands/interpret",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({transcript,graph,focusedNodeId:focus,recentNodeId:"process-node",pending:null})}));
+ expect(response.status).toBe(status);
+ const result=await response.json();
+ if (source) expect(result.command).toEqual({...proposed,source:{kind:"id",value:source}});
+ else expect(result.error.message).toContain("Select the node");
+});
 const completion=(overrides={})=>Response.json({candidates:[{finishReason:"STOP",content:{parts:[{text:JSON.stringify({command})}]}}],...overrides});
 const request=()=>new Request("http://localhost/api/commands/interpret",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({transcript:"Add a start called Begin",graph:{schemaVersion:1,nodes:[],edges:[]},focusedNodeId:null,recentNodeId:null,pending:null})});
 afterEach(()=>vi.restoreAllMocks());

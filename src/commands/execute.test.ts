@@ -11,6 +11,14 @@ const del = (value: string) => ({ kind: "delete", target: { kind: "node", node: 
 const rename = (value: string, newLabel: string) => ({ kind: "rename", node: id(value), newLabel });
 const ids = () => { let n = 0; return () => `generated-${++n}`; };
 function state(): EngineState { return { ...createEngineState(), graph: graphFixture(), focusedNodeId: "n2", recentNodeId: "n2" }; }
+it("describes a self-connection without speaking internal IDs", () => {
+ const before=state();
+ const result=execute(before,{kind:"connect",source:id("n2"),target:id("n2"),label:null},()=>"opaque-edge-id");
+ expect(result.outcome).toBe("error");
+ expect(result.message).toContain("cannot connect to itself");
+ expect(result.message).not.toContain("opaque-edge-id");
+ expect(result.state).toEqual(before);
+});
 function freeze<T>(value: T): T {
   if (value && typeof value === "object") { Object.values(value).forEach(freeze); Object.freeze(value); }
   return value;
