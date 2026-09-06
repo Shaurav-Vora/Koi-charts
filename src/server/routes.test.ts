@@ -32,6 +32,29 @@ describe("server routes",()=>{
   expect(response.status).toBe(400);
   expect(h.transport).not.toHaveBeenCalled();
  });
+ // Structured output depends on the account, not only the model, so it is discovered at runtime.
+ it("retries without response_format when the model rejects it, then reuses that choice",async()=>{
+  const unsupported=()=>Response.json({metadata:{errors:["model does not support response_format"]}},{status:400});
+  const transport=vi.fn(async(_url:unknown,init:RequestInit)=>JSON.parse(init.body as string).response_format?unsupported():completion());
+  const routes=createRoutes({transport:transport as unknown as typeof fetch,env:()=>({ASSEMBLYAI_API_KEY:"k"})});
+  expect(await(await routes.interpret(request(body()))).json()).toEqual({command});
+  expect(transport).toHaveBeenCalledTimes(2);
+  const retry=JSON.parse((transport.mock.calls[1][1] as RequestInit).body as string);
+  expect(retry.response_format).toBeUndefined();
+  expect(retry.messages[0].content).toContain("JSON Schema");
+  // A second command must not pay for the rejected attempt again.
+  expect((await routes.interpret(request(body()))).status).toBe(200);
+  expect(transport).toHaveBeenCalledTimes(3);
+ });
+ it("does not retry when the provider fails for any other reason",async()=>{
+  const h=setup(async()=>Response.json({metadata:{errors:["insufficient credits"]}},{status:400}));
+  expect((await h.routes.interpret(request(body()))).status).toBe(502);
+  expect(h.transport).toHaveBeenCalledTimes(1);
+ });
+ it("accepts a command wrapped in a code fence",async()=>{
+  const h=setup(async()=>completion("```json\n"+JSON.stringify({command})+"\n```"));
+  expect(await(await h.routes.interpret(request(body()))).json()).toEqual({command});
+ });
  it("rejects oversized streamed bodies without a content-length header",async()=>{const h=setup();const response=await h.routes.interpret(request({payload:"a".repeat(70000)}));expect(response.status).toBe(400);expect(h.transport).not.toHaveBeenCalled();});
  it("rejects oversized graph context and invalid references",async()=>{const h=setup();const input=body();input.graph.nodes=Array.from({length:101},(_,i)=>({id:String(i),type:"process",label:"Node"}));expect((await h.routes.interpret(request(input))).status).toBe(400);expect((await h.routes.interpret(request({...body(),focusedNodeId:"missing"}))).status).toBe(400);});
  it("rejects invalid pending state before reaching a provider",async()=>{const h=setup();expect((await h.routes.interpret(request({...body(),pending:{kind:"deletion"}}))).status).toBe(400);expect(h.transport).not.toHaveBeenCalled();});
