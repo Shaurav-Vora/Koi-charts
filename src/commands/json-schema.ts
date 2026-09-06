@@ -18,6 +18,7 @@ const edits = [
   variant("add_node", { type: en("start", "process", "decision", "end"), label: str, placement: nullable(placement) }),
   variant("connect", { source: ref, target: ref, label: nullable(str) }),
   variant("rename", { node: ref, newLabel: str }),
+  variant("move_to", { node: ref, position: obj({ x: { type: "number", minimum: -100000, maximum: 100000 }, y: { type: "number", minimum: -100000, maximum: 100000 } }) }),
   variant("move", { node: ref, placement }), variant("delete", { target }),
 ];
 export const commandJsonSchema = obj({ command: { anyOf: [

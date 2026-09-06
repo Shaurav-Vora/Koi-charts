@@ -24,6 +24,7 @@ export function layoutGraph(graph: FlowGraph): LayoutFrame {
     visiting.add(id);
     const node = ordered.find(item => item.id === id)!;
     const box = positions.get(id)!;
+    if (node.position) { box.x = node.position.x; box.y = node.position.y; visiting.delete(id); placed.add(id); return; }
     const relation = node.placement?.relation;
     if (node.placement) {
       // Cyclic hints use the stable existing position when a dependency is already being visited.
@@ -48,7 +49,11 @@ export function layoutGraph(graph: FlowGraph): LayoutFrame {
   ordered.forEach(node => place(node.id));
   const nodes = [...positions.values()];
   const dx = 32 - Math.min(...nodes.map(n => n.x)), dy = 32 - Math.min(...nodes.map(n => n.y));
-  nodes.forEach(node => { node.x += dx; node.y += dy; });
+  if (!graph.nodes.some(node => node.position)) nodes.forEach(node => { node.x += dx; node.y += dy; });
+  return { nodes, edges: routeEdges(graph, nodes) };
+}
+export function routeEdges(graph: FlowGraph, nodes: LayoutNode[]): LayoutFrame["edges"] {
+  const positions = new Map(nodes.map(node => [node.id, node]));
   const edges = [...graph.edges].sort(compare).map(edge => {
     const source = positions.get(edge.source)!, target = positions.get(edge.target)!;
     // Use facing side ports for horizontally separated shapes.
@@ -68,5 +73,5 @@ export function layoutGraph(graph: FlowGraph): LayoutFrame {
       : [from, { x: from.x, y: from.y + 24 }, { x: outsideX, y: from.y + 24 }, { x: outsideX, y: to.y - 24 }, { x: to.x, y: to.y - 24 }, to];
     return { id: edge.id, points };
   });
-  return { nodes, edges };
+  return edges;
 }

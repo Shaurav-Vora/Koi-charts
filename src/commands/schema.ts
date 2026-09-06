@@ -27,6 +27,7 @@ const editVariants = [
   z.strictObject({ kind: z.literal("add_node"), type: z.enum(nodeTypes), label: text, placement: placementRefSchema.nullable() }),
   z.strictObject({ kind: z.literal("connect"), source: spokenRefSchema, target: spokenRefSchema, label: text.nullable() }),
   z.strictObject({ kind: z.literal("rename"), node: spokenRefSchema, newLabel: text }),
+  z.strictObject({ kind: z.literal("move_to"), node: spokenRefSchema, position: z.strictObject({ x: z.number().min(-100000).max(100000), y: z.number().min(-100000).max(100000) }) }),
   z.strictObject({ kind: z.literal("move"), node: spokenRefSchema, placement: placementRefSchema }),
   z.strictObject({ kind: z.literal("delete"), target: spokenElementRefSchema }),
 ] as const;

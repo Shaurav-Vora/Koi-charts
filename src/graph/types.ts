@@ -9,6 +9,7 @@ export interface FlowNode {
   id: NodeId;
   type: NodeType;
   label: string;
+  position?: { x: number; y: number };
   placement?: { relation: PlacementRelation; referenceNodeId: NodeId };
 }
 

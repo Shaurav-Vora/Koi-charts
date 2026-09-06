@@ -176,3 +176,11 @@ Palette insertion update: each click places the new shape to the right of the la
 Verification: 271 tests across eleven files, lint, TypeScript (during build), and production build pass. Browser checks confirmed large-example auto focus, manual mode changes, matching graph versions, rename/unsupported-character feedback, undo restoring pins and empty state, and no horizontal overflow at 375 pixels. Adapter failure tests confirm frame isolation. Renderer tests were added alongside implementation; no initial failing renderer run is claimed.
 
 The output adapter receives only a cloned committed TactileFrame. Simulator failures have an independent error boundary and do not replace the editor state. Short IDs are held in the editor session outside undo history. Focus views with unusually many immediate neighbors can still be crowded. Braille support is restricted to English letters, digits and spaces; unsupported characters use a disclosed placeholder. This output has not been validated with tactile hardware or Braille readers.
+
+## Free positioning update
+
+Shapes can now be dragged to exact canvas coordinates, including between existing blocks. Moving one shape preserves the other shapes' positions, and the canvas no longer automatically refits after each move. Connections reroute while dragging; the tactile display updates when the move is committed. Undo/Redo restores positions alongside the rest of the chart. Palette dragging also supports exact placement; palette clicks still add to the right.
+
+Check: add three shapes, drag the middle one into a gap or below the others, and release. It should stay there without snapping or pulling neighbors along. Connect it and move it again, then Undo and Redo. Compare the visual and tactile displays after release. The keyboard Move node command retains relative placement for nonvisual authoring.
+
+Implementation: optional bounded position coordinates in the graph and a validated move_to command shared by Zod and the provider JSON schema. One move freezes the current arrangement before updating the selected node, preserving undo history. Browser verification confirmed unchanged neighbors, placement persistence, Undo/Redo and matching visual/tactile graph versions. Automated movement tests cover exact coordinates, negative positions, neighbor stability, history and schema agreement.

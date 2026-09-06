@@ -1,8 +1,8 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { Background, BaseEdge, Controls, ConnectionMode, EdgeText, MarkerType, ReactFlow, ReactFlowProvider, useNodesInitialized, useReactFlow, type Edge, type EdgeProps } from "@xyflow/react";
 import { nodeTypes as semanticTypes } from "../graph/types";
-import { placementAt } from "./placement";
+import { routeEdges } from "./layout";
 import type { FlowGraph } from "../graph/types";
 import type { GraphCommand } from "../commands/schema";
 import FlowNode, { type CanvasNode } from "./FlowNode";
@@ -19,7 +19,8 @@ function FlowEdge({ id, data, label, markerEnd }: EdgeProps<RoutedEdge>) {
 const nodeTypes = { flowNode: FlowNode }, edgeTypes = { routed: FlowEdge };
 function FitChart({ layout }: { layout: LayoutFrame }) {
   const { fitView } = useReactFlow(); const initialized = useNodesInitialized();
-  useEffect(() => { if (initialized) void fitView({ padding: 0.25, maxZoom: 1, duration: 0 }); }, [fitView, initialized, layout]);
+  const fitted = useRef(0);
+  useEffect(() => { if (initialized && layout.nodes.length !== fitted.current) { fitted.current = layout.nodes.length; void fitView({ padding: 0.25, maxZoom: 1, duration: 0 }); } }, [fitView, initialized, layout.nodes.length]);
   return null;
 }
 function Canvas({ graph, layout, focusedNodeId, onCommand }: { graph: FlowGraph; layout: LayoutFrame; focusedNodeId: string | null; onCommand: (command: GraphCommand) => void }) {
@@ -31,21 +32,21 @@ function Canvas({ graph, layout, focusedNodeId, onCommand }: { graph: FlowGraph;
       style: { width: box.width, height: box.height }, data: { label: node.label, nodeType: node.type, focused: node.id === focusedNodeId,
         onFocus: () => onCommand({ kind: "focus", node: { kind: "id", value: node.id } }) } };
   }), [graph, layout, focusedNodeId, onCommand]);
-  const edges: RoutedEdge[] = useMemo(() => graph.edges.map(edge => ({ ...edge, type: "routed", data: { points: layout.edges.find(item => item.id === edge.id)!.points }, markerEnd: { type: MarkerType.ArrowClosed, color: "#536b99" } })), [graph, layout]);
+  const liveLayout = useMemo(() => drag ? routeEdges(graph, layout.nodes.map(node => node.id === drag.id ? { ...node, x: drag.x, y: drag.y } : node)) : layout.edges, [drag, graph, layout]);
+  const edges: RoutedEdge[] = useMemo(() => graph.edges.map(edge => ({ ...edge, type: "routed", data: { points: liveLayout.find(item => item.id === edge.id)!.points }, markerEnd: { type: MarkerType.ArrowClosed, color: "#536b99" } })), [graph, liveLayout]);
   return <div className="canvas-area" onDragOver={event => { event.preventDefault(); event.dataTransfer.dropEffect = "copy"; }} onDrop={event => {
     event.preventDefault();
     const type = event.dataTransfer.getData("application/koi-node");
     if (!semanticTypes.includes(type as typeof semanticTypes[number])) return;
     const point = screenToFlowPosition({ x: event.clientX, y: event.clientY });
-    onCommand({ kind: "add_node", type: type as typeof semanticTypes[number], label: type[0].toUpperCase() + type.slice(1), placement: placementAt(layout, point) });
+    onCommand({ kind: "compound", commands: [{ kind: "add_node", type: type as typeof semanticTypes[number], label: type[0].toUpperCase() + type.slice(1), placement: null }, { kind: "move_to", node: { kind: "recent" }, position: { x: point.x - (type === "decision" ? 115 : 95), y: point.y - (type === "decision" ? 75 : 43) } }] });
   }}><ReactFlow<CanvasNode, RoutedEdge> nodes={nodes.map(node => drag?.id === node.id ? { ...node, position: { x: drag.x, y: drag.y } } : node)} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
     connectionMode={ConnectionMode.Loose} connectionRadius={32}
     nodesDraggable
     onNodesChange={changes => { for (const change of changes) { if (change.type === "position" && change.position && change.dragging) setDrag({ id: change.id, ...change.position }); } }}
     onNodeDragStop={(_, node) => {
-      const placement = placementAt(layout, { x: node.position.x + (node.width ?? 190) / 2, y: node.position.y + (node.height ?? 86) / 2 }, node.id);
+      onCommand({ kind: "move_to", node: { kind: "id", value: node.id }, position: node.position });
       setDrag(null);
-      if (placement) onCommand({ kind: "move", node: { kind: "id", value: node.id }, placement });
     }} nodesFocusable={false} edgesFocusable={false} elementsSelectable={false} edgesReconnectable={false} deleteKeyCode={null}
     onConnect={({ source, target }) => onCommand({ kind: "connect", source: { kind: "id", value: source }, target: { kind: "id", value: target }, label: null })}
     ariaLabelConfig={{ "node.a11yDescription.default": "Select a node to focus it. Use the editing form for keyboard movement and deletion.", "edge.a11yDescription.default": "Connections are available in the chart outline." }}

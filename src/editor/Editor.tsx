@@ -38,8 +38,8 @@ export default function Editor() {
     <div className="diagram-workbench"><div className="palette-column"><ShapePalette lastNodeId={graph.nodes.at(-1)?.id} onCommand={onCommand} />{focused && <NodeInspector key={`${focused.id}-${focused.label}`} node={focused} onCommand={onCommand} />}</div>
       <section className="display visual-display" aria-labelledby="visual-title" data-graph-version={version}>
         <div className="display-heading"><h3 id="visual-title">Visual flowchart</h3><span className="count">{graph.nodes.length} nodes · {graph.edges.length} connections</span></div>
-        <div className="canvas-wrap"><CanvasBoundary key={version}><LaidOutCanvas graph={graph} focusedNodeId={focusedNodeId} onCommand={onCommand} /></CanvasBoundary>{!graph.nodes.length && <div className="canvas-welcome"><h4>Your chart starts here</h4><p>Drag a shape from the left, or click one to begin.</p></div>}</div>
-        <div className="display-footer"><p>Drag shapes to snap beside a nearby node. Connect their dots. Select a shape to edit its label.</p></div>
+        <div className="canvas-wrap"><CanvasBoundary><LaidOutCanvas graph={graph} focusedNodeId={focusedNodeId} onCommand={onCommand} /></CanvasBoundary>{!graph.nodes.length && <div className="canvas-welcome"><h4>Your chart starts here</h4><p>Drag a shape from the left, or click one to begin.</p></div>}</div>
+        <div className="display-footer"><p>Drag shapes to place them anywhere. Connect their dots. Select a shape to edit its label.</p></div>
       </section>
     </div><details className="keyboard-editor"><summary>Keyboard editing &amp; advanced commands</summary><CommandForm graph={graph} focusedNodeId={focusedNodeId} onCommand={onCommand} /></details><div className="secondary-displays">
       <TactileSimulator graph={graph} focus={focusedNodeId} version={version} displayIds={state.displayIds} />

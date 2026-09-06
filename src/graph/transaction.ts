@@ -1,3 +1,4 @@
+import { layoutGraph } from "../visual/layout";
 import type { EngineState, Snapshot } from "./types";
 import { assertSnapshot, snapshot } from "./history";
 import { resolveNode } from "../commands/resolve";
@@ -78,8 +79,21 @@ export function prepareTransaction(
         working.graph.nodes.find(item => item.id === id)!.label = edit.newLabel;
         affect(id); message = `Renamed node to ${edit.newLabel}.`; break;
       }
+      case "move_to": {
+        const id = node(edit.node, `${prefix}/node`);
+        // Freeze the current arrangement so moving one shape cannot pull its neighbors along.
+        const layout = layoutGraph(working.graph);
+        for (const item of working.graph.nodes) {
+          const box = layout.nodes.find(box => box.id === item.id)!;
+          item.position = { x: box.x, y: box.y };
+          delete item.placement;
+        }
+        working.graph.nodes.find(item => item.id === id)!.position = { ...edit.position };
+        affect(id); message = "Moved node."; break;
+      }
       case "move": {
         const id = node(edit.node, `${prefix}/node`);
+        delete working.graph.nodes.find(item => item.id === id)!.position;
         const referenceNodeId = node(edit.placement.reference, `${prefix}/placement/reference`);
         working.graph.nodes.find(item => item.id === id)!.placement = { relation: edit.placement.relation, referenceNodeId };
         affect(id); message = "Moved node."; break;
@@ -120,7 +134,7 @@ export function prepareTransaction(
     working.focusedNodeId = node(command.node, "/node"); message = `Focused ${working.graph.nodes.find(item => item.id === working.focusedNodeId)!.label}.`;
   } else if (command.kind === "compound") {
     command.commands.forEach((edit, index) => apply(edit, `/commands/${index}`)); message = `Applied ${command.commands.length} edits.`;
-  } else if (["add_node", "connect", "rename", "move", "delete"].includes(command.kind)) apply(command as EditCommand, "");
+  } else if (["add_node", "connect", "rename", "move", "move_to", "delete"].includes(command.kind)) apply(command as EditCommand, "");
   else throw new Error("This command does not edit or focus the graph.");
   assertSnapshot(working);
   return { prepared: working, command, nodeIds: [...nodeIds], incidentEdgeIds: [...incidentEdgeIds], message };

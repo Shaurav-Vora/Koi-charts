@@ -9,6 +9,7 @@ const graphSchema = z.strictObject({
     id: text,
     type: z.enum(nodeTypes),
     label: text,
+    position: z.strictObject({ x: z.number().min(-100000).max(100000), y: z.number().min(-100000).max(100000) }).optional(),
     placement: z.strictObject({ relation: z.enum(placementRelations), referenceNodeId: text }).optional(),
   })),
   edges: z.array(z.strictObject({ id: text, source: text, target: text, label: text.optional() })),
