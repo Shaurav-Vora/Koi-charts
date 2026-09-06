@@ -252,10 +252,10 @@ Live check, which needs a real key and a working microphone:
 1. Put a real key in `.env.local` (ignored by Git) as `ASSEMBLYAI_API_KEY=...`. Never place it in `.env.example`, which is tracked, and never prefix it with `NEXT_PUBLIC_`, which would publish it in the browser bundle.
 2. Run `npm run dev` and open `http://127.0.0.1:3000`.
 3. Press **Start voice** and allow microphone access. The status line should move from *Connecting* to *Listening*, and the level bar beside the button should respond to your voice.
-4. Say `add a process called review draft`. While you speak the status shows *Speech detected* or *Preview—not yet applied* with a ghosted shape on the canvas; nothing is committed yet. When you stop, the status moves to *Applying command* and then *Change applied*, and the node appears in the canvas, the outline and the tactile simulator.
+4. Say `add a process called review draft`. The voice strip shows green **Hearing you**, then blue **Processing command**. A preview may appear before the edit commits. The command feedback shows **Change applied** when the node appears in the canvas, outline and tactile simulator. The voice strip turns amber while a spoken reply pauses microphone input, then returns to green **Listening**.
 5. Say `connect start to review draft`, then `undo`, then `redo`.
-6. Press **Stop voice**. The status returns to *Idle* and the browser's microphone indicator switches off.
-7. Turn off Wi-Fi mid-session. The status becomes *Voice editing unavailable—connection lost*, the microphone is released, and the existing chart plus the palette, keyboard commands and undo/redo all keep working. Press **Start voice** again after reconnecting.
+6. Press **Stop voice**. The voice strip shows gray **Microphone off** and the browser's microphone indicator switches off.
+7. Turn off Wi-Fi mid-session. The voice strip shows red **Connection lost**, the microphone is released, and the existing chart plus the palette, keyboard commands and undo/redo all keep working. Press **Start voice** again after reconnecting.
 
 Streaming decisions verified September 6, 2026:
 
@@ -268,6 +268,14 @@ Streaming decisions verified September 6, 2026:
 - Late results cannot corrupt the graph: turns carry the provider session ID and turn order, and the existing coordinator drops turns from an old session, repeated finals, and any result whose graph version, focus or pending state changed while it was in flight.
 
 ## Check spoken-reply fixes
+
+### Brief replies
+
+Successful navigation and selecting a node speak only its label, such as **Process** or **Review draft**. Routine edits retain their short confirmations, such as **Added Start node.** Full feedback remains visible on screen. **Describe chart**, **Inspect focus**, and **Where am I** still speak detailed information. Errors, branch choices, confirmations, and navigation fallback warnings retain their full instructions.
+
+To check: create Start and Process with a connection, then use **Go to start** and **Next**. Expect only **Start** and **Process** spoken. Use **Inspect focus** or **Where am I** to hear details. At a fork, expect the branch choices rather than a silently chosen destination.
+
+This milestone changes reply length only. The microphone still pauses during TTS; interruption and longer speaking time remain separate work.
 
 The speech toggle now hydrates with the same initial markup on the server and browser. Only chart replies are spoken; intermediate transcripts are not. While a reply plays, microphone frames are replaced with silence until 400 ms after speech ends or is cancelled. Wait for the pause indicator to disappear before your next spoken command, or use **Mute replies**. **Stop voice** also cancels the current reply.
 

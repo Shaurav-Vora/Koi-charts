@@ -35,3 +35,15 @@ it("uses natural default-label feedback and keeps custom labels",()=>{
  render(<Editor/>);fireEvent.click(screen.getByRole("button",{name:"Insert start"}));
  expect(screen.getByRole("region",{name:"Command feedback"})).toHaveTextContent("Added Start node.");
 });
+it("speaks a short navigation reply but retains visible and requested details",()=>{
+ const speech=browserSpeech();
+ render(<Editor/>);
+ fireEvent.click(screen.getByRole("button",{name:"Insert process"}));
+ fireEvent.click(screen.getByRole("button",{name:"Where am I"}));
+ expect(speech.speak.mock.calls.at(-1)?.[0].text).toContain("Nothing attached");
+ fireEvent.click(screen.getByRole("button",{name:"Focus Process"}));
+ expect(speech.speak.mock.calls.at(-1)?.[0].text).toBe("Process");
+ expect(screen.getByRole("region",{name:"Command feedback"})).toHaveTextContent("Focused Process.");
+ fireEvent.click(screen.getByRole("button",{name:"Inspect focus"}));
+ expect(speech.speak.mock.calls.at(-1)?.[0].text).not.toBe("Process");
+});

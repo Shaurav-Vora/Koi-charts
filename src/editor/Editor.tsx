@@ -12,6 +12,7 @@ import { createEditorCoordinator } from "./coordinator";
 import { useVoice } from "./useVoice";
 import { statusLabels } from "./status";
 import { voiceIndicator } from "./voice-status";
+import { briefReply } from "./brief-reply";
 import PreviewOverlay from "../visual/PreviewOverlay";
 
 class CanvasBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -35,6 +36,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const hasError = presentation ? presentation.status === "error" : state.outcome === "error";
   const focused = graph.nodes.find(node => node.id === focusedNodeId);
   const message = presentation?.error ?? presentation?.text ?? state.message;
+  const spokenMessage = briefReply(state, message);
   const supported = useSyncExternalStore(speaker.subscribe, () => speaker.supported, () => false);
   const inputPaused = useSyncExternalStore(speaker.subscribe, speaker.getSnapshot, () => false);
   // On by default: an author who cannot see the chart has no other way to receive a reply.
@@ -46,10 +48,10 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
     if (!speaks) return speaker.cancel();
     // These states contain the author's transcript, not a reply from the chart.
     if (presentation?.status === "speech_detected" || presentation?.status === "previewing" || presentation?.status === "interpreting") return speaker.cancel();
-    speaker.speak(message);
+    speaker.speak(spokenMessage);
     // Depending on the store objects rather than the text repeats an identical reply, which is
     // how pressing Back twice at a dead end confirms twice that there is still nothing behind.
-  }, [state, presentation, speaks, speaker, message]);
+  }, [state, presentation, speaks, speaker, spokenMessage]);
   const toggleSpeech = () => { speechPreference.write(!speaks); if (speaks) speaker.cancel(); };
   const indicator = voiceIndicator(voice.connectionStatus, inputPaused, presentation?.status);
   const status = presentation ? statusLabels[presentation.status] : state.outcome === "idle" ? "Idle" : state.outcome === "error" ? "Command not applied" : state.outcome === "confirmation" ? "Confirmation needed" : state.outcome === "clarification" ? "Clarification needed" : state.outcome === "committed" ? "Change applied" : state.outcome === "focused" ? "Focus updated" : state.outcome === "cancelled" ? "Cancelled" : "Chart explored";
