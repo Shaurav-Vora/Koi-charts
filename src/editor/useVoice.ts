@@ -8,13 +8,14 @@ import type { createEditorCoordinator } from "./coordinator";
  * Owns one StreamingSession for the editor. The session is created on first use so
  * loading the page never opens a microphone, a socket, or a billed provider session.
  */
-export function useVoice(coordinator: ReturnType<typeof createEditorCoordinator>) {
+export function useVoice(coordinator: ReturnType<typeof createEditorCoordinator>, isInputSuppressed?: () => boolean) {
   const [active, setActive] = useState(false);
   const [level, setLevel] = useState(0);
   const session = useRef<StreamingSession | null>(null);
   const ensure = useCallback(() => {
     session.current ??= new StreamingSession({
       fetchToken: fetchStreamingToken, openSocket: openBrowserSocket, openMicrophone,
+      isInputSuppressed,
       onSessionStart: id => coordinator.turns.start(id),
       onSessionEnd: () => coordinator.turns.stop(),
       onTurn: turn => { void coordinator.turns.accept(turn); },
@@ -27,7 +28,7 @@ export function useVoice(coordinator: ReturnType<typeof createEditorCoordinator>
       onError: message => coordinator.present({ status: "error", preview: null, text: "", error: message }),
     });
     return session.current;
-  }, [coordinator]);
+  }, [coordinator, isInputSuppressed]);
   // Streaming is billed for how long the socket stays open, so release it on unmount and on
   // the page going away — a closed tab must not leave a session running.
   useEffect(() => {

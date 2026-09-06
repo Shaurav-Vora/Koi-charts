@@ -27,22 +27,24 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const coordinator = supplied ?? local;
   const { editor: state, presentation } = useSyncExternalStore(coordinator.subscribe, coordinator.getSnapshot, coordinator.getSnapshot);
   const dispatch = coordinator.dispatch;
-  const voice = useVoice(coordinator);
+  const speaker = useMemo(() => createSpeaker(), []);
+  const voice = useVoice(coordinator, speaker.getSnapshot);
   const onCommand = useCallback((command: GraphCommand) => dispatch({ type: "command", command, idSeed: crypto.randomUUID() }), [dispatch]);
   const { graph, focusedNodeId, pending, history, version } = state.engine;
   const hasError = presentation ? presentation.status === "error" : state.outcome === "error";
   const focused = graph.nodes.find(node => node.id === focusedNodeId);
   const message = presentation?.error ?? presentation?.text ?? state.message;
-  const speaker = useMemo(() => createSpeaker(), []);
+  const supported = useSyncExternalStore(speaker.subscribe, () => speaker.supported, () => false);
+  const inputPaused = useSyncExternalStore(speaker.subscribe, speaker.getSnapshot, () => false);
   // On by default: an author who cannot see the chart has no other way to receive a reply.
   const wanted = useSyncExternalStore(speechPreference.subscribe, speechPreference.read, speechPreference.readOnServer);
   // A browser with no speech engine must keep its live region, or replies reach nobody at all.
-  const speaks = wanted && speaker.supported;
+  const speaks = wanted && supported;
+  useEffect(() => () => speaker.dispose(), [speaker]);
   useEffect(() => {
     if (!speaks) return speaker.cancel();
-    // The machine must not talk over the author: their first syllable stops the reply, so a
-    // correction never has to wait for a position report to finish being read out.
-    if (presentation?.status === "speech_detected" || presentation?.status === "previewing") return speaker.cancel();
+    // These states contain the author's transcript, not a reply from the chart.
+    if (presentation?.status === "speech_detected" || presentation?.status === "previewing" || presentation?.status === "interpreting") return speaker.cancel();
     speaker.speak(message);
     // Depending on the store objects rather than the text repeats an identical reply, which is
     // how pressing Back twice at a dead end confirms twice that there is still nothing behind.
@@ -52,10 +54,11 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   return <>
     <div className="workspace-heading"><div><h2>Your workspace</h2><p>Build a flowchart, one clear step at a time.</p></div></div>
     <div className="editor-toolbar"><div className="voice-controls">
-      <button className={`voice-button${voice.active ? " is-active" : ""}`} aria-pressed={voice.active} onClick={() => voice.active ? voice.stop() : voice.start()}>{voice.active ? "Stop voice" : "Start voice"}</button>
+      <button className={`voice-button${voice.active ? " is-active" : ""}`} aria-pressed={voice.active} onClick={() => { if (voice.active) { speaker.cancel(); voice.stop(); } else voice.start(); }}>{voice.active ? "Stop voice" : "Start voice"}</button>
       {/* Speaking and the live region below say the same words, so exactly one of them is ever
           active: a screen reader user would otherwise hear every reply twice. */}
-      <button className={`speech-button${speaks ? " is-active" : ""}`} aria-pressed={speaks} disabled={!speaker.supported} title={speaker.supported ? undefined : "This browser has no speech engine."} onClick={toggleSpeech}>{speaks ? "Mute replies" : "Speak replies"}</button>
+      <button className={`speech-button${speaks ? " is-active" : ""}`} aria-pressed={speaks} disabled={!supported} title={supported ? undefined : "This browser has no speech engine."} onClick={toggleSpeech}>{speaks ? "Mute replies" : "Speak replies"}</button>
+      {voice.active && inputPaused && <span>Microphone input paused while replies are spoken.</span>}
       {/* Beside the button it belongs to, so a sighted user reads the connection state where they act. */}
       <div className="status" role="status" aria-live="polite"><span className="status-dot" aria-hidden="true" />{status}</div>
       {/* A sighted cue only; the live status region beside it announces listening state. An empty

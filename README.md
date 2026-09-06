@@ -266,3 +266,15 @@ Streaming decisions verified September 6, 2026:
 - Streaming is billed for how long the socket stays open, not for how much audio is sent. Every exit path — Stop, unmount, `pagehide`, connection loss, the thirty-minute cap, and a failure part-way through startup — sends `{"type":"Terminate"}`, closes the socket, stops the media tracks and closes the `AudioContext`.
 - The microphone is opened before the token is minted or the socket is opened, so a denied permission costs neither a credential nor a billable connection.
 - Late results cannot corrupt the graph: turns carry the provider session ID and turn order, and the existing coordinator drops turns from an old session, repeated finals, and any result whose graph version, focus or pending state changed while it was in flight.
+
+## Check spoken-reply fixes
+
+The speech toggle now hydrates with the same initial markup on the server and browser. Only chart replies are spoken; intermediate transcripts are not. While a reply plays, microphone frames are replaced with silence until 400 ms after speech ends or is cancelled. Wait for the pause indicator to disappear before your next spoken command, or use **Mute replies**. **Stop voice** also cancels the current reply.
+
+1. Reload with replies enabled, then with replies muted. Neither should show a hydration error.
+2. Start voice and say **add a start node**. Expect **Added Start node.**
+3. Leave the speakers audible and stay quiet after the reply. No repeated commands or extra nodes should appear.
+4. After the microphone pause ends, say **add a process node**, then **connect Start to Process**. Expect one connection.
+5. Mute replies or stop voice during a reply. Speech should stop; after muting, microphone input should resume after the short echo guard.
+
+Verification: 434 tests, lint, TypeScript and production build passed. A live Gemini request for connecting Start to Process returned a valid connect command. Physical microphone/speaker behavior still needs the owner check above.

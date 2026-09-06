@@ -1,9 +1,10 @@
 // @vitest-environment node
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createSpeaker } from "./speech";
 
 type Voice = { name: string; localService: boolean; default: boolean };
-class FakeUtterance { voice: unknown = null; constructor(public text: string) {} }
+class FakeUtterance { voice: unknown = null; onend?: () => void; onerror?: () => void; constructor(public text: string) {} }
+afterEach(() => vi.useRealTimers());
 function fakeSynth(voices: Voice[] = []) {
   const spoken: FakeUtterance[] = [];
   const cancel = vi.fn();
@@ -16,6 +17,34 @@ const make = (voices?: Voice[]) => {
 };
 
 describe("speaking replies", () => {
+  it.each(["onend", "onerror"] as const)("resumes microphone input after %s and the echo tail", event => {
+    vi.useFakeTimers();
+    const h = make();
+    h.speaker.speak("Reply");
+    expect(h.speaker.getSnapshot()).toBe(true);
+    h.spoken[0][event]?.();
+    vi.advanceTimersByTime(399);
+    expect(h.speaker.getSnapshot()).toBe(true);
+    vi.advanceTimersByTime(1);
+    expect(h.speaker.getSnapshot()).toBe(false);
+    h.speaker.dispose();
+  });
+  it("ignores stale completion events and releases input after cancellation", () => {
+    vi.useFakeTimers();
+    const h = make();
+    h.speaker.speak("First");
+    h.speaker.speak("Second");
+    h.spoken[0].onend?.();
+    vi.advanceTimersByTime(500);
+    expect(h.speaker.getSnapshot()).toBe(true);
+    h.speaker.cancel();
+    vi.advanceTimersByTime(400);
+    expect(h.speaker.getSnapshot()).toBe(false);
+    h.speaker.speak("Third");
+    h.speaker.dispose();
+    expect(h.speaker.getSnapshot()).toBe(false);
+    expect(vi.getTimerCount()).toBe(0);
+  });
   it("reports itself unsupported rather than throwing where there is no speech engine", () => {
     const speaker = createSpeaker(undefined, undefined);
     expect(speaker.supported).toBe(false);

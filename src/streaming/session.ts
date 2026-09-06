@@ -30,6 +30,7 @@ export interface SessionOptions {
   onError: (message: string) => void;
   onSessionStart?: (sessionId: string) => void;
   onSessionEnd?: () => void;
+  isInputSuppressed?: () => boolean;
 }
 
 /**
@@ -97,10 +98,12 @@ export class StreamingSession {
 
     microphone.onFrame((buffer, level) => {
       if (generation !== this.generation) return;
-      this.options.onLevel(level);
+      const suppressed = this.options.isInputSuppressed?.() ?? false;
+      this.options.onLevel(suppressed ? 0 : level);
       // Frames sent before Begin are rejected by the provider, so hold them until the session is ready.
       if (!this.ready || this.stopping) return;
-      try { socket.send(buffer); } catch { /* a closing socket is handled by onclose */ }
+      // Maintain PCM timing while keeping spoken replies out of transcription.
+      try { socket.send(suppressed ? new ArrayBuffer(buffer.byteLength) : buffer); } catch { /* a closing socket is handled by onclose */ }
     });
 
     this.timer = setTimeout(() => { void this.stop(); }, MAX_SESSION_MS);

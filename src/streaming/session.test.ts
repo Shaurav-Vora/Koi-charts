@@ -29,7 +29,7 @@ class FakeMicrophone implements MicrophoneLike {
  async stop(){this.stopped=true;}
 }
 
-function harness(overrides:{token?:()=>Promise<{token:string;expiresAt:string}>}={}) {
+function harness(overrides:{token?:()=>Promise<{token:string;expiresAt:string}>;suppressed?:()=>boolean}={}) {
  const sockets:FakeSocket[]=[];const microphones:FakeMicrophone[]=[];
  const turns:Turn[]=[];const statuses:VoiceStatus[]=[];const errors:string[]=[];
  let tokenCalls=0;
@@ -41,11 +41,18 @@ function harness(overrides:{token?:()=>Promise<{token:string;expiresAt:string}>}
   onStatus:status=>statuses.push(status),
   onLevel:()=>{},
   onError:message=>errors.push(message),
+  isInputSuppressed:overrides.suppressed,
  });
  return {session,sockets,microphones,turns,statuses,errors,tokenCount:()=>tokenCalls};
 }
 
 describe("streaming session",()=>{
+ it("sends silence during spoken replies and resumes real microphone audio afterward",async()=>{
+  let suppressed=false;const h=harness({suppressed:()=>suppressed});await h.session.start();h.sockets[0].begin();
+  h.microphones[0].emit(7);suppressed=true;h.microphones[0].emit(9);suppressed=false;h.microphones[0].emit(11);
+  expect(h.sockets[0].audio.map(buffer=>[...new Uint8Array(buffer)])).toEqual([[7,0],[0,0],[11,0]]);
+  await h.session.stop();
+ });
  it("connects with a temporary token and 16 kHz sample rate in the query string",async()=>{
   const h=harness();await h.session.start();
   const url=new URL(h.sockets[0].url);

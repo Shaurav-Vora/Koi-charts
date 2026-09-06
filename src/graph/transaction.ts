@@ -75,7 +75,9 @@ export function prepareTransaction(
         const placement = edit.placement ? { relation: edit.placement.relation, referenceNodeId: node(edit.placement.reference, `${prefix}/placement/reference`) } : undefined;
         const id = allocate();
         working.graph.nodes.push({ id, type: edit.type, label: edit.label, ...(placement ? { placement } : {}) });
-        affect(id); message = `Added ${edit.type} ${edit.label}.`; break;
+        affect(id); message = edit.label.toLowerCase() === edit.type
+          ? `Added ${edit.type[0].toUpperCase()}${edit.type.slice(1)} node.`
+          : `Added ${edit.type} ${edit.label}.`; break;
       }
       case "connect": {
         const source = node(edit.source, `${prefix}/source`), target = node(edit.target, `${prefix}/target`);

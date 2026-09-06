@@ -1,4 +1,11 @@
-export type Speaker = { supported: boolean; speak: (text: string) => void; cancel: () => void };
+export type Speaker = {
+  supported: boolean;
+  speak: (text: string) => void;
+  cancel: () => void;
+  subscribe: (listener: () => void) => () => void;
+  getSnapshot: () => boolean;
+  dispose: () => void;
+};
 
 const listeners = new Set<() => void>();
 /**
@@ -23,7 +30,26 @@ export function createSpeaker(
   synth: SpeechSynthesis | undefined = typeof window === "undefined" ? undefined : window.speechSynthesis,
   Utterance: UtteranceConstructor | undefined = typeof window === "undefined" ? undefined : window.SpeechSynthesisUtterance,
 ): Speaker {
-  if (!synth || !Utterance) return { supported: false, speak: () => {}, cancel: () => {} };
+  const subscribers = new Set<() => void>();
+  let blocked = false;
+  let generation = 0;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const setBlocked = (value: boolean) => {
+    if (blocked === value) return;
+    blocked = value;
+    subscribers.forEach(listener => listener());
+  };
+  const store = {
+    subscribe(listener: () => void) { subscribers.add(listener); return () => { subscribers.delete(listener); }; },
+    getSnapshot: () => blocked,
+  };
+  if (!synth || !Utterance) return { ...store, supported: false, speak: () => {}, cancel: () => {}, dispose: () => {} };
+  // Keep the final audio chunk and speaker echo out of the microphone stream.
+  const release = (current: number) => {
+    if (current !== generation) return;
+    clearTimeout(timer);
+    timer = setTimeout(() => { if (current === generation) setBlocked(false); }, 400);
+  };
 
   // Chrome's higher-quality voices are localService: false, meaning every utterance is sent to
   // Google to be synthesized. A chart is the author's private work, so an on-device voice wins
@@ -34,17 +60,32 @@ export function createSpeaker(
   };
 
   return {
+    ...store,
     supported: true,
     speak(text) {
       if (!text.trim()) return;
       // Each reply replaces the last rather than queueing behind it. Stepping outruns speech,
       // and a queued position report would describe a node the cursor has already left.
+      const current = ++generation;
+      clearTimeout(timer);
+      setBlocked(true);
       synth.cancel();
       const utterance = new Utterance(text);
+      utterance.onend = utterance.onerror = () => release(current);
       const voice = pick();
       if (voice) utterance.voice = voice;
-      synth.speak(utterance);
+      try { synth.speak(utterance); } catch { release(current); }
     },
-    cancel: () => synth.cancel(),
+    cancel() {
+      const current = ++generation;
+      synth.cancel();
+      if (blocked) release(current);
+    },
+    dispose() {
+      generation++;
+      clearTimeout(timer);
+      synth.cancel();
+      setBlocked(false);
+    },
   };
 }
