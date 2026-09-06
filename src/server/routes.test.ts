@@ -17,6 +17,15 @@ describe("server routes",()=>{
  it.each(["token","interpret"] as const)("returns safe configuration errors for %s without a key",async kind=>{const h=setup(undefined,"");const result=await h.routes[kind](request(kind==="token"?{}:body()));expect(result.status).toBe(503);expect(result.headers.get("cache-control")).toBe("no-store");expect((await result.json()).error.code).toBe("CONFIGURATION");expect(h.transport).not.toHaveBeenCalled();});
  it("mints a short-lived token with the session cap in query parameters",async()=>{const h=setup(async()=>Response.json({token:"temporary",expires_in_seconds:60}));const response=await h.routes.token(request());expect(response.status).toBe(200);expect(await response.json()).toMatchObject({token:"temporary",expiresAt:expect.any(String)});const [url,init]=h.transport.mock.calls[0] as unknown as [string,RequestInit];expect(url).toContain("expires_in_seconds=60&max_session_duration_seconds=1800");expect(init.method).toBe("GET");});
  it("uses Google's JSON schema and token cap while omitting layout coordinates",async()=>{const h=setup();const input=body();input.graph.nodes.push({id:"a",type:"start",label:"A",position:{x:20,y:30}});const response=await h.routes.interpret(request(input));expect(await response.json()).toEqual({command});const [,init]=h.transport.mock.calls[0] as unknown as [string,RequestInit];const sent=JSON.parse(init.body as string);expect(sent.generationConfig.maxOutputTokens).toBe(1024);expect(sent.generationConfig.responseJsonSchema.additionalProperties).toBe(false);expect(sent.generationConfig.responseJsonSchema.properties.command.anyOf[0].properties.kind.enum).toEqual(["label_edge"]);expect(sent.contents[0].parts[0].text).not.toContain('"position"');});
+ // Google rejects the entire request with an unexplained 400 when maxItems appears anywhere,
+ // so it is translated away while every other constraint stays on the wire.
+ it("sends no maxItems to Google but keeps the remaining constraints",async()=>{
+  const h=setup();await h.routes.interpret(request(body()));
+  const [,init]=h.transport.mock.calls[0] as unknown as [string,RequestInit];
+  const schema=JSON.stringify(JSON.parse(init.body as string).generationConfig.responseJsonSchema);
+  expect(schema).not.toContain("maxItems");
+  for(const keyword of ["minItems","minLength","maxLength","minimum","maximum"])expect(schema).toContain(keyword);
+ });
  it.each([["origin","https://attacker.example"],["content-type","text/plain"],["sec-fetch-site","cross-site"]])("rejects unsafe request header %s",async (name,value)=>{const h=setup();expect((await h.routes.token(request({},{[name]:value}))).status).toBe(400);expect(h.transport).not.toHaveBeenCalled();});
  // The dev server normalizes request.url to localhost even when bound to 127.0.0.1,
  // so a same-origin browser request must be judged by the Host header instead.
