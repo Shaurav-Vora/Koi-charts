@@ -33,10 +33,12 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const focused = graph.nodes.find(node => node.id === focusedNodeId);
   const status = presentation ? statusLabels[presentation.status] : state.outcome === "idle" ? "Idle" : state.outcome === "error" ? "Command not applied" : state.outcome === "confirmation" ? "Confirmation needed" : state.outcome === "clarification" ? "Clarification needed" : state.outcome === "committed" ? "Change applied" : state.outcome === "focused" ? "Focus updated" : state.outcome === "cancelled" ? "Cancelled" : "Chart explored";
   return <>
-    <div className="workspace-heading"><div><h2>Your workspace</h2><p>Build a flowchart, one clear step at a time.</p></div><div className="status" role="status" aria-live="polite"><span className="status-dot" aria-hidden="true" />{status}</div></div>
+    <div className="workspace-heading"><div><h2>Your workspace</h2><p>Build a flowchart, one clear step at a time.</p></div></div>
     <div className="editor-toolbar"><div className="voice-controls">
       <button className={`voice-button${voice.active ? " is-active" : ""}`} aria-pressed={voice.active} onClick={() => voice.active ? voice.stop() : voice.start()}>{voice.active ? "Stop voice" : "Start voice"}</button>
-      {/* The bar is a sighted cue only; the live status region above announces listening state. */}
+      {/* Beside the button it belongs to, so a sighted user reads the connection state where they act. */}
+      <div className="status" role="status" aria-live="polite"><span className="status-dot" aria-hidden="true" />{status}</div>
+      {/* The bar is a sighted cue only; the live status region beside it announces listening state. */}
       <span className="mic-level" aria-hidden="true"><span className="mic-level-fill" style={{ width: `${Math.round(Math.min(1, voice.level * 4) * 100)}%` }} /></span>
     </div><div className="history-controls"><button disabled={!history.past.length} onClick={() => onCommand({ kind: "undo" })}>Undo</button><button disabled={!history.future.length} onClick={() => onCommand({ kind: "redo" })}>Redo</button></div><div className="query-controls"><button disabled={graph.nodes.length > 0 || !!pending} onClick={() => dispatch({type:"example"})}>Load large example</button><button onClick={() => onCommand({ kind: "describe", scope: "chart" })}>Describe chart</button><button disabled={!focused} onClick={() => onCommand({ kind: "inspect", node: null })}>Inspect focus</button><button onClick={() => onCommand({ kind: "validate" })}>Validate chart</button></div></div>
     
@@ -51,7 +53,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
       <section className="display visual-display" aria-labelledby="visual-title" data-graph-version={version}>
         <div className="display-heading"><h3 id="visual-title">Visual flowchart</h3><span className="count">{graph.nodes.length} nodes · {graph.edges.length} connections</span></div>
         <div className="canvas-wrap"><CanvasBoundary><LaidOutCanvas graph={graph} focusedNodeId={focusedNodeId} onCommand={onCommand} /></CanvasBoundary><PreviewOverlay command={presentation?.preview ?? null} />{!presentation?.preview && !graph.nodes.length && <div className="canvas-welcome"><h4>Your chart starts here</h4><p>Drag a shape from the left, or click one to begin.</p></div>}</div>
-        <div className="display-footer"><p>Drag shapes to place them anywhere. Connect their dots. Select a shape to edit its label.</p></div>
+        <div className="display-footer"><p>Drag shapes to place them anywhere. Point at one to reveal its connection dots. Select a shape to edit its label.</p></div>
       </section>
     </div><details className="keyboard-editor"><summary>Keyboard editing &amp; advanced commands</summary><CommandForm graph={graph} focusedNodeId={focusedNodeId} onCommand={onCommand} /></details><div className="secondary-displays">
       <TactileSimulator graph={graph} focus={focusedNodeId} version={version} displayIds={state.displayIds} />
