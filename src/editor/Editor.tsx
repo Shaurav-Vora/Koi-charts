@@ -8,6 +8,7 @@ import VisualCanvas from "../visual/VisualCanvas";
 import { ShapePalette, NodeInspector } from "./ShapePalette";
 import CommandForm from "./CommandForm";
 import { createEditorCoordinator } from "./coordinator";
+import { useVoice } from "./useVoice";
 import { statusLabels } from "./status";
 import PreviewOverlay from "../visual/PreviewOverlay";
 
@@ -25,6 +26,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const coordinator = supplied ?? local;
   const { editor: state, presentation } = useSyncExternalStore(coordinator.subscribe, coordinator.getSnapshot, coordinator.getSnapshot);
   const dispatch = coordinator.dispatch;
+  const voice = useVoice(coordinator);
   const onCommand = useCallback((command: GraphCommand) => dispatch({ type: "command", command, idSeed: crypto.randomUUID() }), [dispatch]);
   const { graph, focusedNodeId, pending, history, version } = state.engine;
   const hasError = presentation ? presentation.status === "error" : state.outcome === "error";
@@ -32,7 +34,11 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const status = presentation ? statusLabels[presentation.status] : state.outcome === "idle" ? "Idle" : state.outcome === "error" ? "Command not applied" : state.outcome === "confirmation" ? "Confirmation needed" : state.outcome === "clarification" ? "Clarification needed" : state.outcome === "committed" ? "Change applied" : state.outcome === "focused" ? "Focus updated" : state.outcome === "cancelled" ? "Cancelled" : "Chart explored";
   return <>
     <div className="workspace-heading"><div><h2>Your workspace</h2><p>Build a flowchart, one clear step at a time.</p></div><div className="status" role="status" aria-live="polite"><span className="status-dot" aria-hidden="true" />{status}</div></div>
-    <div className="editor-toolbar"><div className="history-controls"><button disabled={!history.past.length} onClick={() => onCommand({ kind: "undo" })}>Undo</button><button disabled={!history.future.length} onClick={() => onCommand({ kind: "redo" })}>Redo</button></div><div className="query-controls"><button disabled={graph.nodes.length > 0 || !!pending} onClick={() => dispatch({type:"example"})}>Load large example</button><button onClick={() => onCommand({ kind: "describe", scope: "chart" })}>Describe chart</button><button disabled={!focused} onClick={() => onCommand({ kind: "inspect", node: null })}>Inspect focus</button><button onClick={() => onCommand({ kind: "validate" })}>Validate chart</button></div></div>
+    <div className="editor-toolbar"><div className="voice-controls">
+      <button className={`voice-button${voice.active ? " is-active" : ""}`} aria-pressed={voice.active} onClick={() => voice.active ? voice.stop() : voice.start()}>{voice.active ? "Stop voice" : "Start voice"}</button>
+      {/* The bar is a sighted cue only; the live status region above announces listening state. */}
+      <span className="mic-level" aria-hidden="true"><span className="mic-level-fill" style={{ width: `${Math.round(Math.min(1, voice.level * 4) * 100)}%` }} /></span>
+    </div><div className="history-controls"><button disabled={!history.past.length} onClick={() => onCommand({ kind: "undo" })}>Undo</button><button disabled={!history.future.length} onClick={() => onCommand({ kind: "redo" })}>Redo</button></div><div className="query-controls"><button disabled={graph.nodes.length > 0 || !!pending} onClick={() => dispatch({type:"example"})}>Load large example</button><button onClick={() => onCommand({ kind: "describe", scope: "chart" })}>Describe chart</button><button disabled={!focused} onClick={() => onCommand({ kind: "inspect", node: null })}>Inspect focus</button><button onClick={() => onCommand({ kind: "validate" })}>Validate chart</button></div></div>
     
     <section className={`command-feedback ${hasError ? "has-error" : ""}`} aria-label="Command feedback">
       <p role={hasError ? "alert" : undefined} aria-live={hasError ? undefined : "polite"}>{presentation?.error ?? presentation?.text ?? state.message}</p>

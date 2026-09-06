@@ -4,11 +4,13 @@ A voice-first flowchart workspace designed for independent blind authorship. The
 
 ## Current milestone
 
-**Task 8: server authentication and command interpretation.** Server-only endpoints now mint temporary AssemblyAI tokens and interpret final transcripts through a validated command schema. The coordinator uses the local interpretation endpoint. Microphone controls arrive in Task 9; the normal UI still labels voice as disconnected. Task 7 preview, deduplication and stale-context protections remain in place.
+**Task 9: microphone capture and live streaming session.** A **Start voice** control in the editor toolbar now opens the real microphone, mints a fresh temporary token, and streams mono 16 kHz PCM16 to AssemblyAI Streaming v3. Partial transcripts drive the local preview; only final transcripts reach the interpretation endpoint. Stopping, closing the tab, losing the connection, or reaching the thirty-minute cap all terminate the session and release the microphone. Awaiting owner verification with a live microphone.
+
+**Task 8 remains available: server authentication and command interpretation.** Server-only endpoints mint temporary AssemblyAI tokens and interpret final transcripts through a validated command schema. Task 7 preview, deduplication and stale-context protections remain in place.
 
 **Task 6 remains available: tactile simulator.** The committed graph now produces a deterministic 120 × 80 raised-pin simulation, with shape outlines, directional arrowheads and a focused-node cross. Auto mode switches dense charts to a neighborhood view; Overview and Focused view remain available. The full focused label, stable session ID and limited Braille demonstration appear below the pins.
 
-The visual palette, keyboard commands and undo/redo remain available. Voice input is still pending. Charts clear on refresh. The simulator is a digital demonstration, not physical hardware or validated Braille.
+The visual palette, keyboard commands and undo/redo remain available, including while voice is unavailable. Charts clear on refresh. The simulator is a digital demonstration, not physical hardware or validated Braille.
 
 ## Run locally
 
@@ -223,3 +225,27 @@ API decisions verified September 6, 2026:
 - Demo limits are per process: 6 token and 30 interpretation requests per minute per client, with global caps of 30 and 120. By default all callers share the local client bucket and forwarded headers are ignored. Set `TRUST_PROXY=1` only behind a proxy that overwrites incoming forwarded headers. These endpoints have no account authentication; public hosting needs access controls and a shared limiter across instances before launch.
 
 Verification: 313 tests, TypeScript, lint and production build passed. Owner verification of Task 8 precedes the Task 9 microphone integration.
+
+## Check Task 9: microphone and live streaming
+
+Run `npm test -- src/streaming/session.test.ts src/streaming/audio.test.ts`. Expect 14 passing tests covering the connection query string, holding audio until the session begins, turn translation, explicit termination, a fresh token per start, denied microphone permission, lost connections, the thirty-minute cap, and turns arriving after stop. The full suite has 329 tests.
+
+Live check, which needs a real key and a working microphone:
+
+1. Put a real key in `.env.local` (ignored by Git) as `ASSEMBLYAI_API_KEY=...`. Never place it in `.env.example`, which is tracked, and never prefix it with `NEXT_PUBLIC_`, which would publish it in the browser bundle.
+2. Run `npm run dev` and open `http://127.0.0.1:3000`.
+3. Press **Start voice** and allow microphone access. The status line should move from *Connecting* to *Listening*, and the level bar beside the button should respond to your voice.
+4. Say `add a process called review draft`. While you speak the status shows *Speech detected* or *Preview—not yet applied* with a ghosted shape on the canvas; nothing is committed yet. When you stop, the status moves to *Applying command* and then *Change applied*, and the node appears in the canvas, the outline and the tactile simulator.
+5. Say `connect start to review draft`, then `undo`, then `redo`.
+6. Press **Stop voice**. The status returns to *Idle* and the browser's microphone indicator switches off.
+7. Turn off Wi-Fi mid-session. The status becomes *Voice editing unavailable—connection lost*, the microphone is released, and the existing chart plus the palette, keyboard commands and undo/redo all keep working. Press **Start voice** again after reconnecting.
+
+Streaming decisions verified September 6, 2026:
+
+- The browser connects to `wss://streaming.assemblyai.com/v3/ws` with `token`, `sample_rate=16000` and `speech_model=universal-3-5-pro`. Browsers cannot set the `Authorization` header used in the server-side examples, so the temporary token travels as a query parameter. See [streaming authentication](https://www.assemblyai.com/docs/streaming/authenticate-with-a-temporary-token).
+- Audio is raw mono 16-bit PCM, which the documented default already describes, so no `encoding` parameter is sent. Capture runs in an `AudioWorklet` at `/audio/pcm16-worklet.js` that low-pass filters and resamples the device rate to 16 kHz and emits 100 ms chunks without dropping samples between blocks. `getUserMedia` requests echo cancellation so spoken feedback is not transcribed back as a command.
+- **Turn detection is left at the provider default.** The plan mentions a `balanced` turn mode, but no query-parameter name for it could be confirmed in the current documentation, so nothing is sent rather than guessing at a parameter. Revisit if turn boundaries feel wrong during the demo.
+- A fresh token is minted on every start; tokens expire in 60 seconds and are never reused. Sessions are capped at thirty minutes both in the minted token and by a client-side timer.
+- Streaming is billed for how long the socket stays open, not for how much audio is sent. Every exit path — Stop, unmount, `pagehide`, connection loss, the thirty-minute cap, and a failure part-way through startup — sends `{"type":"Terminate"}`, closes the socket, stops the media tracks and closes the `AudioContext`.
+- The microphone is opened before the token is minted or the socket is opened, so a denied permission costs neither a credential nor a billable connection.
+- Late results cannot corrupt the graph: turns carry the provider session ID and turn order, and the existing coordinator drops turns from an old session, repeated finals, and any result whose graph version, focus or pending state changed while it was in flight.

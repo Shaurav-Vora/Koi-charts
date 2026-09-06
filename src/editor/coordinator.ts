@@ -13,5 +13,7 @@ export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
   choose:candidateId=>{dispatch({type:"choose",candidateId,idSeed:crypto.randomUUID()});return result();},
   present:presentation=>{state={...state,presentation};publish();},
  });
- return {turns,dispatch,getSnapshot:()=>state,subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener);};}};
+ // The connection layer reports through the same channel as turns, so one status line covers both.
+ const present=(value:Presentation)=>{state={...state,presentation:value};publish();};
+ return {turns,dispatch,present,getSnapshot:()=>state,subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener);};}};
 }
