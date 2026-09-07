@@ -1,7 +1,7 @@
 import type { EngineState, CommandResult } from "../graph/types";
 import { commandSchema, type GraphCommand } from "../commands/schema";
 import { previewCommand } from "../commands/preview";
-import { parseControl, parseSimpleAddition } from "../commands/fast-path";
+import { parseControl, parseFuzzyControl, parseSimpleAddition } from "../commands/fast-path";
 import { parseTemplate } from "../commands/templates";
 import type { VoiceStatus } from "../editor/status";
 export type Turn={sessionId:string;turnId:string;text:string;final:boolean};
@@ -48,7 +48,8 @@ export class TurnCoordinator {
     if(candidates.length!==1) {this.options.present({status:"needs_clarification",preview:null,text:"Choose one matching label or use a candidate button."});return;}
     result=this.options.choose(candidates[0]);
    }else{
-    const templates=this.options.preferLocal?.()===false?null:parseSimpleAddition(turn.text) ?? parseTemplate(turn.text);
+    // Exact rules first, always: approximation only ever sees what nothing else could read.
+    const templates=this.options.preferLocal?.()===false?null:parseSimpleAddition(turn.text) ?? parseTemplate(turn.text) ?? parseFuzzyControl(turn.text);
     const local=control ?? templates;
     source=local?"local":"model";
     const command=local ?? await this.options.interpret(turn.text,state,controller.signal);

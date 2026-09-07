@@ -70,6 +70,22 @@ describe("speech turn coordination",()=>{
   expect(h.getState().graph.edges[0]).toMatchObject({label:"next"});
   expect(h.interpret).not.toHaveBeenCalled();
  });
+ // Approximation may walk a deletion back, but never commit one: "Confirmed." is close enough to
+ // "confirm" to match by ratio, and that is exactly the guess that must not be made locally.
+ it("recovers a garbled cancellation locally, and refuses to guess a confirmation",async()=>{
+  const h=harness();
+  h.apply(add("One"));h.apply(add("Two"));
+  h.apply({kind:"connect",source:{kind:"label",value:"One"},target:{kind:"label",value:"Two"},label:null});
+  await h.turn("Delete One.",true,"1");
+  expect(h.getState().pending?.kind).toBe("deletion");
+  await h.turn("Cancelled.",true,"2");
+  expect(h.getState().pending).toBeNull();
+  expect(h.getState().graph.nodes).toHaveLength(2);
+  expect(h.interpret).not.toHaveBeenCalled();
+  await h.turn("Delete One.",true,"3");
+  await h.turn("Confirmed.",true,"4");
+  expect(h.interpret).toHaveBeenCalledTimes(1);
+ });
  // Templates must not make deletion any easier than the model path does.
  it("still requires confirmation for a deletion recognised locally",async()=>{
   const h=harness();
