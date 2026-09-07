@@ -372,4 +372,13 @@ Owner check with voice on:
 called Review" all reach the shape labelled Review. The words around a name are only stripped after
 the whole phrase fails to match, so a shape genuinely called "Review node" still wins.
 
-Verification: 691 tests, lint, TypeScript and production build passed.
+**Talking over a reply.** The microphone is muted while a reply plays, so anything said during one
+used to be discarded. Speaking for about a third of a second now cuts the reply short and the words
+are transmitted, the same as pressing **Stop speaking**. A single loud frame does not count, so a
+cough or a door will not interrupt.
+
+**Deleting a connected shape** asks a short question that can be answered aloud: "Delete Review and
+1 connection? Say confirm or cancel." The old wording counted nodes instead of naming them and ran
+long enough that "confirm", said over it, was swallowed.
+
+Verification: 694 tests, lint, TypeScript and production build passed.

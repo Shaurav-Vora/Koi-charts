@@ -33,7 +33,9 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const { editor: state, presentation } = useSyncExternalStore(coordinator.subscribe, coordinator.getSnapshot, coordinator.getSnapshot);
   const dispatch = coordinator.dispatch;
   const speaker = useMemo(() => createSpeaker(), []);
-  const voice = useVoice(coordinator, speaker.getSnapshot);
+  // Talking over a reply stops it: the microphone is muted while one plays, so without this
+  // the author's next command is discarded and they are left repeating themselves.
+  const voice = useVoice(coordinator, speaker.getSnapshot, speaker.interrupt);
   const onCommand = useCallback((command: GraphCommand) => dispatch({ type: "command", command, idSeed: crypto.randomUUID() }), [dispatch]);
   const { graph, focusedNodeId, pending, history, version } = state.engine;
   const hasError = presentation ? presentation.status === "error" : state.outcome === "error";
@@ -70,7 +72,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
       <button className={`voice-button${voice.active ? " is-active" : ""}`} aria-pressed={voice.active} onClick={() => { if (voice.active) { speaker.cancel(); voice.stop(); } else voice.start(); }}>{voice.active ? "Stop voice" : "Start voice"}</button>
       {/* Interrupting matters more than it sounds: a long reply blocks the microphone until it
           finishes, so without this the author must wait out a description they no longer want. */}
-      <button className="stop-speech-button" disabled={!inputPaused} onClick={() => speaker.cancel()}>Stop speaking</button>
+      <button className="stop-speech-button" disabled={!inputPaused} onClick={() => speaker.interrupt()}>Stop speaking</button>
       {/* An escape hatch, not a feature switch: if a template ever reads a phrase wrongly, the
           author hands everything back to the model without losing voice editing entirely. */}
       <ToggleSwitch className="local-switch" label="Fast local commands" checked={fastLocal} title="Recognise common phrases on this device instead of sending them to be interpreted." onChange={next => localCommandPreference.write(next)} />

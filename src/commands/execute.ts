@@ -10,6 +10,16 @@ export function createEngineState(): EngineState {
   return { graph: createEmptyGraph(), focusedNodeId: null, recentNodeId: null, version: 0,
     history: { past: [], future: [] }, pending: null };
 }
+/**
+ * The question the author answers by voice. It names the shapes rather than counting them, and
+ * stays short: the microphone is muted while a reply plays, so a long question swallows the
+ * "confirm" said over it and looks to the author like deletion simply not working.
+ */
+function confirmationQuestion(state: EngineState, nodeIds: string[], connections: number): string {
+  const names = nodeIds.map(id => state.graph.nodes.find(node => node.id === id)?.label).filter(Boolean);
+  const subject = names.length === 1 ? names[0] : `${names.length} shapes`;
+  return `Delete ${subject} and ${connections} ${connections === 1 ? "connection" : "connections"}? Say confirm or cancel.`;
+}
 function failure(state: EngineState, message: string): CommandResult { return { state, outcome: "error", message }; }
 function run(state: EngineState, command: GraphCommand, newId: () => string,
   allocatedIds?: string[], context?: Pick<Snapshot, "focusedNodeId" | "recentNodeId">): CommandResult {
@@ -22,7 +32,7 @@ function run(state: EngineState, command: GraphCommand, newId: () => string,
     if (result.incidentEdgeIds.length) {
       return { state: { ...state, pending: { kind: "deletion", command: result.command, nodeIds: result.nodeIds,
         incidentEdgeIds: result.incidentEdgeIds, graphVersion: state.version, prepared: result.prepared } },
-        outcome: "confirmation", message: `Delete ${result.nodeIds.length} connected node(s) and ${result.incidentEdgeIds.length} connections? Confirm to apply the entire command, or cancel.` };
+        outcome: "confirmation", message: confirmationQuestion(state, result.nodeIds, result.incidentEdgeIds.length) };
     }
     return { state: commit(state, result.prepared), outcome: "committed", message: result.message };
   } catch (error) {

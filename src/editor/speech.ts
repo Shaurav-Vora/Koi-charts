@@ -4,6 +4,7 @@ export type Speaker = {
   supported: boolean;
   speak: (text: string) => void;
   cancel: () => void;
+  interrupt: () => void;
   subscribe: (listener: () => void) => () => void;
   getSnapshot: () => boolean;
   dispose: () => void;
@@ -36,7 +37,7 @@ export function createSpeaker(
     subscribe(listener: () => void) { subscribers.add(listener); return () => { subscribers.delete(listener); }; },
     getSnapshot: () => blocked,
   };
-  if (!synth || !Utterance) return { ...store, supported: false, speak: () => {}, cancel: () => {}, dispose: () => {} };
+  if (!synth || !Utterance) return { ...store, supported: false, speak: () => {}, cancel: () => {}, interrupt: () => {}, dispose: () => {} };
   // Keep the final audio chunk and speaker echo out of the microphone stream.
   const release = (current: number) => {
     if (current !== generation) return;
@@ -73,6 +74,17 @@ export function createSpeaker(
       const current = ++generation;
       synth.cancel();
       if (blocked) release(current);
+    },
+    /**
+     * Cancelling because the author has started talking. The 400 ms guard exists to keep the
+     * tail of a finished reply out of the microphone; here there is no tail, and holding input
+     * shut for another 400 ms would swallow the first word of what they came to say.
+     */
+    interrupt() {
+      generation++;
+      clearTimeout(timer);
+      synth.cancel();
+      setBlocked(false);
     },
     dispose() {
       generation++;

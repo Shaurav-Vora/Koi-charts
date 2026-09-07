@@ -133,6 +133,16 @@ describe("speech turn coordination",()=>{
  it("keeps unresolvable clarification replies pending",async()=>{const h=harness();h.apply(add("Check payment"));h.apply(add("Check payments"));h.apply({kind:"focus",node:{kind:"label",value:"Check paymentz"}});await h.turn("Check paymentz",true);expect(h.getState().pending?.kind).toBe("clarification");expect(h.presentations.at(-1)?.status).toBe("needs_clarification");});
  // The reported failure: two default shapes, then a rename that could not be answered, because
  // both candidates were spoken identically and the reply was read back as a pair of UUIDs.
+ it("asks a short, spoken-answerable question before deleting a connected shape",async()=>{const h=harness();
+  await h.turn("Add a start.",true,"1");
+  await h.turn("Add a process called Review.",true,"2");
+  await h.turn("Connect Start to Review.",true,"3");
+  await h.turn("Delete Review.",true,"4");
+  expect(h.presentations.at(-1)?.text).toBe("Delete Review and 1 connection? Say confirm or cancel.");
+  await h.turn("Confirm.",true,"5");
+  expect(h.getState().graph.nodes.map(node=>node.label)).toEqual(["Start"]);
+  expect(h.interpret).not.toHaveBeenCalled();
+ });
  it.each(["Delete the Review node.","Remove Review shape.","Delete the node called Review."])("deletes a shape named in passing: %s",async text=>{const h=harness();
   await h.turn("Add a process called Review.",true,"1");
   await h.turn(text,true,"2");
