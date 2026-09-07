@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useMemo, useState, useRef } from "react";
-import { Background, BaseEdge, Controls, ConnectionMode, EdgeText, MarkerType, ReactFlow, ReactFlowProvider, useNodesInitialized, useReactFlow, type Edge, type EdgeProps } from "@xyflow/react";
+import { Background, BaseEdge, ConnectionMode, EdgeText, MarkerType, ReactFlow, ReactFlowProvider, useNodesInitialized, useReactFlow, type Edge, type EdgeProps } from "@xyflow/react";
 import { nodeTypes as semanticTypes } from "../graph/types";
 import { routeEdges } from "./layout";
 import type { FlowGraph } from "../graph/types";
 import type { GraphCommand } from "../commands/schema";
 import FlowNode, { type CanvasNode } from "./FlowNode";
 import ArrowInspector from "./ArrowInspector";
+import CanvasControls from "./CanvasControls";
 import type { LayoutFrame } from "./layout";
 import "@xyflow/react/dist/style.css";
 
@@ -25,10 +26,13 @@ function FitChart({ layout }: { layout: LayoutFrame }) {
   return null;
 }
 function Canvas({ graph, layout, focusedNodeId, onCommand }: { graph: FlowGraph; layout: LayoutFrame; focusedNodeId: string | null; onCommand: (command: GraphCommand) => void }) {
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, zoomIn, zoomOut, fitView, setCenter, getZoom } = useReactFlow();
   const [drag, setDrag] = useState<{ id: string; x: number; y: number } | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const selectedEdge = graph.edges.find(edge => edge.id === selectedEdgeId);
+  const focusedBox = layout.nodes.find(box => box.id === focusedNodeId);
+  // Never zoom out to centre: an author who has zoomed in to read a label keeps that reading size.
+  const centerOnFocus = () => { if (focusedBox) void setCenter(focusedBox.x + focusedBox.width / 2, focusedBox.y + focusedBox.height / 2, { zoom: Math.max(getZoom(), 1), duration: 220 }); };
   const nodes: CanvasNode[] = useMemo(() => graph.nodes.map(node => {
     const box = layout.nodes.find(item => item.id === node.id)!;
     return { id: node.id, type: "flowNode", selectable: false, position: { x: box.x, y: box.y }, width: box.width, height: box.height, measured: { width: box.width, height: box.height },
@@ -59,8 +63,11 @@ function Canvas({ graph, layout, focusedNodeId, onCommand }: { graph: FlowGraph;
     onConnect={({ source, target }) => onCommand({ kind: "connect", source: { kind: "id", value: source }, target: { kind: "id", value: target }, label: null })}
     ariaLabelConfig={{ "node.a11yDescription.default": "Select a node to focus it. Use the editing form for keyboard movement and deletion.", "edge.a11yDescription.default": "Connections are available in the chart outline." }}
     fitView fitViewOptions={{ maxZoom: 1, padding: 0.25 }} minZoom={0.1} maxZoom={2}>
-    <Background gap={20} color="#d4ddea" /><Controls showInteractive={false} /><FitChart layout={layout} />
-  </ReactFlow>{selectedEdge && <ArrowInspector key={`${selectedEdge.id}-${selectedEdge.label ?? ""}`} edge={selectedEdge}
+    <Background gap={20} color="#d4ddea" /><FitChart layout={layout} />
+  </ReactFlow><CanvasControls canFit={layout.nodes.length > 0} canCenter={!!focusedBox}
+    onZoomIn={() => void zoomIn({ duration: 160 })} onZoomOut={() => void zoomOut({ duration: 160 })}
+    onFit={() => void fitView({ padding: 0.25, maxZoom: 1, duration: 220 })} onCenter={centerOnFocus} />
+  {selectedEdge && <ArrowInspector key={`${selectedEdge.id}-${selectedEdge.label ?? ""}`} edge={selectedEdge}
     source={graph.nodes.find(node => node.id === selectedEdge.source)!} target={graph.nodes.find(node => node.id === selectedEdge.target)!}
     onCommand={onCommand} onClose={() => setSelectedEdgeId(null)} />}</div>;
 }

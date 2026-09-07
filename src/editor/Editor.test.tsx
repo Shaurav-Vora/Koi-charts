@@ -108,3 +108,13 @@ it("speech previews never change committed graph, history or tactile pins",async
  expect(screen.getByRole("region",{name:"Chart structure"})).toHaveTextContent("Begin");
  expect(coordinator.getSnapshot().editor.engine.history.past).toHaveLength(1);
 });
+
+// The view controls sit on the canvas, so they must follow the same focus the voice cursor moves.
+it("enables fitting once shapes exist and centring once one is selected", () => {
+  render(<Editor />);
+  expect(screen.getByRole("button", { name: "Fit chart" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Center selection" })).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "Load large example" }));
+  expect(screen.getByRole("button", { name: "Fit chart" })).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Center selection" })).toBeEnabled();
+});

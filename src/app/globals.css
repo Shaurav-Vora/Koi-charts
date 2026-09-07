@@ -152,6 +152,10 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .react-flow__edge:focus-visible { outline: none; }
 .react-flow__edge:focus-visible .react-flow__edge-path { stroke: #315ac8 !important; stroke-width: 4 !important; stroke-dasharray: 6 3; }
 .canvas-area { position: relative; }
+.canvas-controls { position: absolute; left: 16px; top: 16px; z-index: 5; display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; border: 1px solid var(--line); border-radius: 8px; background: #ffffffee; box-shadow: 0 2px 8px #1c2c4914; }
+.canvas-controls button { min-height: 36px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 5px; background: white; color: var(--ink); font-size: 13px; cursor: pointer; }
+.canvas-controls button:hover:not(:disabled) { border-color: var(--blue); background: #edf2fd; }
+.canvas-controls button:disabled { opacity: 0.5; cursor: not-allowed; }
 .arrow-inspector { position: absolute; right: 16px; top: 16px; z-index: 6; width: min(290px, calc(100% - 32px)); padding: 16px; border: 1px solid #a8b9dc; border-top: 3px solid var(--blue); border-radius: 8px; background: white; box-shadow: 0 8px 24px #1c2c491a; }
 .arrow-inspector-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .arrow-inspector h3 { font-size: 15px; }
