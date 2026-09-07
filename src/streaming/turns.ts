@@ -3,6 +3,8 @@ import { commandSchema, type GraphCommand } from "../commands/schema";
 import { previewCommand } from "../commands/preview";
 import { parseControl } from "../commands/fast-path";
 import { parseLocal } from "../commands/local";
+import { parseChoice } from "../commands/choice";
+import { describeChoices } from "../feedback/choices";
 import type { VoiceStatus } from "../editor/status";
 export type Turn={sessionId:string;turnId:string;text:string;final:boolean};
 // Which path produced the command. Shown to the author so a surprising result can be traced to
@@ -43,9 +45,15 @@ export class TurnCoordinator {
    let result:CommandResult;
    if(control)source="local";
    if(state.pending?.kind==="clarification" && !control){
+    const pending=state.pending;
     const reply=turn.text.trim();
-    const candidates=state.pending.candidates.filter(id=>id===reply || (state.pending?.kind==="clarification" && state.pending.elementKind==="node" && state.graph.nodes.find(n=>n.id===id)?.label.toLowerCase()===reply.toLowerCase()));
-    if(candidates.length!==1) {this.options.present({status:"needs_clarification",preview:null,text:"Choose one matching label or use a candidate button."});return;}
+    // The question was asked as numbers, so a number answers it. An exact label or ID still
+    // works for anyone typing, but nothing spoken has to carry a UUID.
+    const chosen=parseChoice(reply,pending.candidates.length);
+    const candidates=chosen===null
+     ? pending.candidates.filter(id=>id===reply || (pending.elementKind==="node" && state.graph.nodes.find(n=>n.id===id)?.label.toLowerCase()===reply.toLowerCase()))
+     : [pending.candidates[chosen]];
+    if(candidates.length!==1) {this.options.present({status:"needs_clarification",preview:null,text:`${describeChoices(state.graph,pending.candidates,pending.elementKind)} Or say cancel.`});return;}
     result=this.options.choose(candidates[0]);
    }else{
     const local=control ?? (this.options.preferLocal?.()===false?null:parseLocal(turn.text));

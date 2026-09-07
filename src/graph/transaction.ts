@@ -2,6 +2,7 @@ import { layoutGraph } from "../visual/layout";
 import type { EngineState, Snapshot } from "./types";
 import { assertSnapshot, snapshot } from "./history";
 import { resolveNode } from "../commands/resolve";
+import { describeChoices } from "../feedback/choices";
 import { editKinds } from "../commands/schema";
 import type { EditCommand, GraphCommand, PendingClarification, SpokenRef } from "../commands/schema";
 
@@ -68,13 +69,8 @@ export function prepareTransaction(
     usedIds.add(id); allocatedIds[allocationIndex++] = id; return id;
   };
   const clarify = (candidates: string[], path: string, elementKind: "node" | "edge"): never => {
-    const choices = candidates.slice(0, 3).map(id => {
-      if (elementKind === "node") return `${working.graph.nodes.find(node => node.id === id)?.label} (${id})`;
-      const edge = working.graph.edges.find(item => item.id === id);
-      return `${edge?.label ?? "Unlabeled connection"} (${id})`;
-    });
     throw new ClarificationRequired({ kind: "clarification", command, referencePath: path, candidates,
-      graphVersion: state.version, elementKind, allocatedIds, context }, `Clarification needed: choose ${choices.join(", ")}.${candidates.length > 3 ? " More matches exist; specify an exact ID." : ""}`);
+      graphVersion: state.version, elementKind, allocatedIds, context }, describeChoices(working.graph, candidates, elementKind));
   };
   const node = (ref: SpokenRef, path: string): string => {
     const result = resolveNode(working, ref);

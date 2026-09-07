@@ -131,6 +131,19 @@ describe("speech turn coordination",()=>{
  // dropping a plural leaves a word equally close to two real shapes.
  it("resumes original clarification using a candidate ID rather than a new interpreted edit",async()=>{const h=harness();h.apply(add("Check payment"));h.apply(add("Check payments"));h.apply({kind:"rename",node:{kind:"label",value:"Check paymentz"},newLabel:"Resolved"});await h.turn("n2",true);expect(h.choose).toHaveBeenCalledWith("n2");expect(h.interpret).not.toHaveBeenCalled();expect(h.getState().graph.nodes[1].label).toBe("Resolved");});
  it("keeps unresolvable clarification replies pending",async()=>{const h=harness();h.apply(add("Check payment"));h.apply(add("Check payments"));h.apply({kind:"focus",node:{kind:"label",value:"Check paymentz"}});await h.turn("Check paymentz",true);expect(h.getState().pending?.kind).toBe("clarification");expect(h.presentations.at(-1)?.status).toBe("needs_clarification");});
+ it("answers a clarification by number and never speaks an ID",async()=>{const h=harness();h.apply(add("Check payment"));h.apply(add("Check payments"));h.apply({kind:"rename",node:{kind:"label",value:"Check paymentz"},newLabel:"Resolved"});
+  expect(h.getState().pending?.kind).toBe("clarification");
+  await h.turn("Two.",true,"1");
+  expect(h.choose).toHaveBeenCalledWith("n2");
+  expect(h.interpret).not.toHaveBeenCalled();
+ });
+ it("repeats the numbered question when the reply is neither a choice nor a label",async()=>{const h=harness();h.apply(add("Check payment"));h.apply(add("Check payments"));h.apply({kind:"focus",node:{kind:"label",value:"Check paymentz"}});
+  await h.turn("something else entirely",true,"1");
+  const text=h.presentations.at(-1)?.text ?? "";
+  expect(text).toContain("Say one for Check payment");
+  expect(text).toContain("Or say cancel.");
+  expect(text).not.toContain("n1");
+ });
  it("clears previews and preserves graph on malformed provider output",async()=>{const h=harness(async()=>({kind:"erase_everything"}) as unknown as GraphCommand);await h.turn("add a start called Begin");await h.turn("bad",true);expect(h.getState().graph.nodes).toHaveLength(0);expect(h.presentations.at(-1)).toMatchObject({status:"error",preview:null});});
  it("recovers the queue after provider failure",async()=>{const h=harness(async text=>{if(text==="bad")throw new Error("Unavailable");return add("Good");});await h.turn("bad",true,"1");await h.turn("good",true,"2");expect(h.getState().graph.nodes[0].label).toBe("Good");});
  it("previews conservatively and never treats controls as edits",()=>{expect(previewCommand("delete Begin")).toBeNull();expect(previewCommand("add a start called Begin and connect it")).toBeNull();expect(previewCommand('add a start called "Begin"')).toMatchObject({label:"Begin"});});

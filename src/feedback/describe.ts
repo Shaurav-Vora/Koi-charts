@@ -3,7 +3,10 @@ import { tracePath } from "../graph/queries";
 import type { FlowEdge, FlowGraph, FlowNode } from "../graph/types";
 
 const byId = (a: { id: string }, b: { id: string }) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
-const identity = (node: FlowNode) => `"${node.label}" (${node.type}, ${node.id})`;
+// Descriptions are heard far more often than they are read, and a UUID read aloud is both
+// meaningless and long enough to hold the microphone shut while it plays. Labels are unique
+// (see uniqueLabel), so a label and a shape name one another.
+const identity = (node: FlowNode) => `"${node.label}" (${node.type})`;
 const edgeLabel = (edge: FlowEdge) => edge.label === undefined ? "unlabeled" : `label "${edge.label}"`;
 const count = (amount: number, noun: string) => `${amount} ${noun}${amount === 1 ? "" : "s"}`;
 function getNode(graph: FlowGraph, id: string): FlowNode {
@@ -17,7 +20,7 @@ export function describeChart(graph: FlowGraph): string {
   if (!graph.nodes.length) return "The chart is empty.";
   const nodes = [...graph.nodes].sort(byId).map(identity).join("; ");
   const edges = [...graph.edges].sort(byId).map(edge =>
-    `"${getNode(graph, edge.source).label}" (${edge.source}) to "${getNode(graph, edge.target).label}" (${edge.target}), ${edgeLabel(edge)} (${edge.id})`).join("; ");
+    `"${getNode(graph, edge.source).label}" to "${getNode(graph, edge.target).label}", ${edgeLabel(edge)}`).join("; ");
   return `The chart has ${count(graph.nodes.length, "node")} and ${count(graph.edges.length, "connection")}. Nodes: ${nodes}. ${edges ? `Connections: ${edges}.` : "No connections yet."}`;
 }
 
@@ -25,9 +28,9 @@ export function inspectNode(graph: FlowGraph, nodeId: string): string {
   assertGraph(graph);
   const node = getNode(graph, nodeId);
   const incoming = graph.edges.filter(edge => edge.target === nodeId).sort(byId)
-    .map(edge => `${identity(getNode(graph, edge.source))}, ${edgeLabel(edge)} (${edge.id})`);
+    .map(edge => `${identity(getNode(graph, edge.source))}, ${edgeLabel(edge)}`);
   const outgoing = graph.edges.filter(edge => edge.source === nodeId).sort(byId)
-    .map(edge => `${identity(getNode(graph, edge.target))}, ${edgeLabel(edge)} (${edge.id})`);
+    .map(edge => `${identity(getNode(graph, edge.target))}, ${edgeLabel(edge)}`);
   return `${identity(node)}. ${incoming.length ? `Incoming: ${incoming.join("; ")}.` : "No incoming connections."} ${outgoing.length ? `Outgoing: ${outgoing.join("; ")}.` : "No outgoing connections."}`;
 }
 
@@ -38,7 +41,7 @@ export function describeTrace(graph: FlowGraph, startId: string, endId?: string)
   for (let index = 1; index < path.length; index++) {
     // Parallel connections to the same target are selected deterministically by edge ID.
     const edge = graph.edges.filter(edge => edge.source === path[index - 1] && edge.target === path[index]).sort(byId)[0];
-    text += `; via ${edgeLabel(edge)} connection (${edge.id}) to ${identity(getNode(graph, path[index]))}`;
+    text += `; via ${edgeLabel(edge)} connection to ${identity(getNode(graph, path[index]))}`;
   }
   const last = getNode(graph, path.at(-1)!);
   let stop: string;

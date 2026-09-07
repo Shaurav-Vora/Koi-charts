@@ -1,6 +1,7 @@
 import { describeChart, describeTrace, inspectNode } from "../feedback/describe";
 import { validateGraph } from "../graph/queries";
 import { ClarificationRequired, replaceReference } from "../graph/transaction";
+import { describeChoices } from "../feedback/choices";
 import type { CommandResult, EngineState, Snapshot } from "../graph/types";
 import { resolveNode } from "./resolve";
 import type { GraphCommand, SpokenRef } from "./schema";
@@ -22,11 +23,10 @@ export function exploreCommand(
     const result = resolveNode(working, ref);
     if (result.kind === "missing") throw new Error(`Node not found: ${"value" in ref ? ref.value : ref.kind}. Choose an existing label or ID.`);
     if (result.kind === "ambiguous") {
-      const choices = result.ids.slice(0, 3).map(id => `"${state.graph.nodes.find(node => node.id === id)!.label}" (${id})`);
       throw new ClarificationRequired({ kind: "clarification", command, referencePath: path, candidates: result.ids,
         graphVersion: state.version, elementKind: "node", allocatedIds: [],
         context: { focusedNodeId: context.focusedNodeId, recentNodeId: context.recentNodeId } },
-        `Clarification needed: choose ${choices.join(", ")}.${result.ids.length > 3 ? " More matches exist; specify an exact ID." : ""}`);
+        describeChoices(state.graph, result.ids, "node"));
     }
     replaceReference(command, path, { kind: "id", value: result.id });
     return result.id;

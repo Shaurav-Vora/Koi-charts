@@ -185,7 +185,9 @@ describe("clarification and atomic commands", () => {
   it("duplicate labels ask for clarification and selection executes the stored command once", () => {
     const before = freeze(ambiguous()); const pending = execute(before, { kind: "rename", node: label("Check"), newLabel: "Chosen" }, ids());
     expect(pending.outcome).toBe("clarification"); expect(pending.state.graph).toEqual(before.graph);
-    expect(pending.message).toContain("n1"); expect(pending.message).toContain("n2");
+    // Numbered, never by ID: a spoken reply cannot carry a UUID, and reading one aloud holds
+    // the microphone shut for the length of it.
+    expect(pending.message).toBe("Two shapes match. Say one for Check, or two for Check.");
     const result = resolveClarification(freeze(pending.state), "n2", ids());
     expect(result.outcome).toBe("committed"); expect(result.state.graph.nodes[1].label).toBe("Chosen"); expect(result.state.graph.nodes[0].label).toBe("Check");
     expect(result.state.history.past).toHaveLength(1); expect(resolveClarification(result.state, "n2", ids()).outcome).toBe("error");
@@ -270,7 +272,7 @@ describe("read-only exploration", () => {
     const pending = execute(before, { kind: "inspect", node: label("Check") }, ids());
     expect(pending.outcome).toBe("clarification");
     const result = resolveClarification(pending.state, "n1", ids());
-    expect(result.outcome).toBe("explored"); expect(result.message).toContain("start, n1"); expect(result.state).toEqual(before);
+    expect(result.outcome).toBe("explored"); expect(result.message).toContain("(start)"); expect(result.state).toEqual(before);
   });
   it("keeps the original trace start pinned while clarifying the target", () => {
     const before = state(); before.graph.nodes[2].label = "Check"; before.graph.nodes[3].label = "Check";

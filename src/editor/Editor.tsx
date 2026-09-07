@@ -15,6 +15,7 @@ import { useVoice } from "./useVoice";
 import { statusLabels } from "./status";
 import { voiceIndicator } from "./voice-status";
 import { briefReply } from "./brief-reply";
+import { choiceLabels } from "../feedback/choices";
 import PreviewOverlay from "../visual/PreviewOverlay";
 
 class CanvasBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -90,7 +91,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
       {presentation?.source && <span className="feedback-source" data-source={presentation.source}>{presentation.source === "local" ? "Local command" : "Gemini"}</span>}
       <p role={!speaks && hasError ? "alert" : undefined} aria-live={speaks || hasError ? undefined : "polite"}>{message}</p>
       {pending && <div className="pending-actions">
-        {pending.kind === "deletion" ? <button className="danger-button" onClick={() => onCommand({ kind: "confirm" })}>Confirm deletion</button> : pending.candidates.slice(0, 3).map(id => <button key={id} onClick={() => dispatch({ type: "choose", candidateId: id, idSeed: crypto.randomUUID() })}>{pending.elementKind === "node" ? graph.nodes.find(node => node.id === id)?.label ?? "New node" : "Connection"} ({id})</button>)}
+        {pending.kind === "deletion" ? <button className="danger-button" onClick={() => onCommand({ kind: "confirm" })}>Confirm deletion</button> : choiceLabels(graph, pending.candidates, pending.elementKind).map((label, index) => <button key={pending.candidates[index]} onClick={() => dispatch({ type: "choose", candidateId: pending.candidates[index], idSeed: crypto.randomUUID() })}>{`${index + 1}. ${label}`}</button>)}
         <button onClick={() => onCommand({ kind: "cancel" })}>Cancel</button>
       </div>}
     </section>

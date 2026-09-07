@@ -7,12 +7,12 @@ describe("nonvisual descriptions", () => {
   it("describes an empty chart clearly", () => { expect(describeChart({ schemaVersion: 1, nodes: [], edges: [] })).toBe("The chart is empty."); });
   it("summarizes chart size, nodes, types, and labeled connections", () => {
     const text = describeChart(graphFixture());
-    expect(text).toContain("4 nodes and 3 connections"); expect(text).toContain('"Begin" (start, n1)');
-    expect(text).toContain('"Payment approved" (decision, n3)'); expect(text).toContain('label "yes"');
+    expect(text).toContain("4 nodes and 3 connections"); expect(text).toContain('"Begin" (start)');
+    expect(text).toContain('"Payment approved" (decision)'); expect(text).toContain('label "yes"');
   });
   it("inspects the node with incoming and outgoing context", () => {
     const text = inspectNode(graphFixture(), "n3");
-    expect(text).toContain('"Payment approved" (decision, n3)'); expect(text).toContain('Incoming: "Validate card"');
+    expect(text).toContain('"Payment approved" (decision)'); expect(text).toContain('Incoming: "Validate card"');
     expect(text).toContain('Outgoing: "Show receipt"'); expect(text).toContain('label "yes"');
   });
   it("reports no connections without omitting node identity", () => {
@@ -22,7 +22,7 @@ describe("nonvisual descriptions", () => {
   it("rejects an unknown inspected node", () => { expect(() => inspectNode(graphFixture(), "missing")).toThrow(/not found/i); });
   it("describes an ordered route and its branch label", () => {
     const text = describeTrace(graphFixture(), "n1", "n4");
-    expect(text).toContain('"Begin" (start, n1)'); expect(text).toContain('label "yes"'); expect(text).toContain("Reached the requested target.");
+    expect(text).toContain('"Begin" (start)'); expect(text).toContain('label "yes"'); expect(text).toContain("Reached the requested target.");
     expect(text.indexOf('"Validate card"')).toBeLessThan(text.indexOf('"Payment approved"'));
   });
   it("explains why tracing stopped at a branch", () => {
