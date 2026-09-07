@@ -368,4 +368,8 @@ Owner check with voice on:
 4. During that reply, press **Stop speaking**. Speech should stop and the microphone should resume.
 5. Toggle **Speak replies** off and on; the knob should move and a screen reader should say off/on.
 
-Verification: 679 tests, lint, TypeScript and production build passed.
+**Naming a shape in passing.** "Delete the Review node", "remove Review shape" and "delete the node
+called Review" all reach the shape labelled Review. The words around a name are only stripped after
+the whole phrase fails to match, so a shape genuinely called "Review node" still wins.
+
+Verification: 691 tests, lint, TypeScript and production build passed.

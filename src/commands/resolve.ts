@@ -20,6 +20,22 @@ function similarity(a: string, b: string): number {
   return 1 - row[right.length] / Math.max(left.length, right.length, 1);
 }
 
+/**
+ * Words that surround a name in speech without being part of it: "delete the Review node",
+ * "delete the node called Review", "delete the process Review". Stripping them is only ever a
+ * second attempt — a shape actually labelled "Review node" matches exactly first, so relaxing
+ * can never take a name away from the shape that really has it.
+ */
+const LEADING = new Set(["the", "a", "an", "node", "shape", "box", "called", "named", "labeled", "labelled", "titled",
+  "start", "process", "decision", "end", "step", "task", "action", "choice", "question"]);
+const TRAILING = new Set(["node", "shape", "box"]);
+function relax(query: string): string {
+  let words = query.split(" ");
+  while (words.length > 1 && LEADING.has(words[0])) words = words.slice(1);
+  while (words.length > 1 && TRAILING.has(words[words.length - 1])) words = words.slice(0, -1);
+  return words.join(" ");
+}
+
 export function resolveNode(state: Snapshot, ref: SpokenRef): NodeResolution {
   const existing = (id: string | null) => matches(state.graph.nodes.filter(node => node.id === id).map(node => node.id));
   if (ref.kind === "id") return existing(ref.value);
@@ -32,7 +48,12 @@ export function resolveNode(state: Snapshot, ref: SpokenRef): NodeResolution {
   if (!query) return { kind: "missing" };
   const normalized = state.graph.nodes.filter(node => normalize(node.label) === query);
   if (normalized.length) return matches(normalized.map(node => node.id));
-  const ranked = state.graph.nodes.map(node => ({ id: node.id, score: similarity(query, normalize(node.label)) }))
+  const relaxed = relax(query);
+  if (relaxed !== query) {
+    const bare = state.graph.nodes.filter(node => normalize(node.label) === relaxed);
+    if (bare.length) return matches(bare.map(node => node.id));
+  }
+  const ranked = state.graph.nodes.map(node => ({ id: node.id, score: similarity(relaxed, normalize(node.label)) }))
     .sort((a, b) => b.score - a.score || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   if (ranked[0]?.score >= 0.9) {
     const close = ranked.filter(candidate => ranked[0].score - candidate.score < 0.1 - Number.EPSILON);

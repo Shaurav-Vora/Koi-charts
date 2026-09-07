@@ -20,6 +20,22 @@ describe("node references", () => {
     const input = state(); input.graph.nodes[1].label = "Begin";
     expect(resolveNode(input, { kind: "label", value: "begin" })).toEqual({ kind: "ambiguous", ids: ["n1", "n2"] });
   });
+  // Speech surrounds a name with words that are not part of it. Everyday phrasings that
+  // previously resolved to nothing: "delete the Validate card node", "the node called ...".
+  it.each(["Validate card node", "the Validate card node", "node called Validate card",
+    "the shape named Validate card", "process Validate card", "Validate card shape"])(
+    "reads past the words around a name: %s", value => {
+      expect(resolveNode(state(), { kind: "label", value })).toEqual({ kind: "resolved", id: "n2" });
+    });
+  it("prefers a shape that really is called that, over the relaxed reading", () => {
+    const input = state(); input.graph.nodes[3].label = "Validate card node";
+    expect(resolveNode(input, { kind: "label", value: "Validate card node" })).toEqual({ kind: "resolved", id: "n4" });
+  });
+  it("still refuses a name that matches nothing once the surrounding words are gone", () => {
+    expect(resolveNode(state(), { kind: "label", value: "the missing node" })).toEqual({ kind: "missing" });
+    // A bare shape word names no shape at all: it must not be stripped down to nothing.
+    expect(resolveNode(state(), { kind: "label", value: "node" })).toEqual({ kind: "missing" });
+  });
   it.each(["this", "it", "this node"])("resolves pronoun %s to focus", value => {
     expect(resolveNode(state(), { kind: "label", value })).toEqual({ kind: "resolved", id: "n2" });
   });
