@@ -32,8 +32,32 @@ describe("speech turn coordination",()=>{
   await h.turn(`add a ${type} node`,true);
   expect(h.getState().graph.nodes.at(-1)).toMatchObject({type,label:type[0].toUpperCase()+type.slice(1)});expect(h.interpret).not.toHaveBeenCalled();
  });
- it.each(["add a start node before Finish","add a start node and connect it","do not add a start node","add a start node called Begin"])("leaves richer requests to interpretation: %s",async text=>{
+ it.each(["add a start node before Finish","add a start node and connect it to a new decision","do not add a start node","move Start above Finish"])("leaves richer requests to interpretation: %s",async text=>{
   const h=harness();await h.turn(text,true);expect(h.interpret).toHaveBeenCalledTimes(1);
+ });
+ // Named shapes, renames and connections are the everyday phrases; sending each to the model
+ // costs a round trip, a rate-limit slot and a chance of a different answer to the same words.
+ it("commits an everyday named request from a template, without a provider call",async()=>{
+  const h=harness();
+  await h.turn("Add a start called Begin.",true,"1");
+  await h.turn("Add a process called Review and approve.",true,"2");
+  await h.turn("Connect Begin to Review and approve labelled next.",true,"3");
+  await h.turn("Rename Begin to Kick off.",true,"4");
+  expect(h.getState().graph.nodes.map(n=>n.label)).toEqual(["Kick off","Review and approve"]);
+  expect(h.getState().graph.edges[0]).toMatchObject({label:"next"});
+  expect(h.interpret).not.toHaveBeenCalled();
+ });
+ // Templates must not make deletion any easier than the model path does.
+ it("still requires confirmation for a deletion recognised locally",async()=>{
+  const h=harness();
+  h.apply(add("One"));h.apply(add("Two"));
+  h.apply({kind:"connect",source:{kind:"label",value:"One"},target:{kind:"label",value:"Two"},label:null});
+  await h.turn("Delete One.",true,"1");
+  expect(h.getState().pending?.kind).toBe("deletion");
+  expect(h.getState().graph.nodes).toHaveLength(2);
+  await h.turn("Confirm.",true,"2");
+  expect(h.getState().graph.nodes.map(n=>n.label)).toEqual(["Two"]);
+  expect(h.interpret).not.toHaveBeenCalled();
  });
  it("replaces partial previews without changing graph or history",async()=>{
   const h=harness(),before=h.getState();await h.turn("add a start called Begin");await h.turn("add a decision called Approved");
