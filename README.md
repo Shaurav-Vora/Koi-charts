@@ -340,3 +340,32 @@ read **Local command**. Then say **"Add an end below Check payment."** and **"Co
 to End."** Say **"Add three steps for onboarding."** and expect the badge to read **Gemini**.
 
 Verification: 649 tests, lint, TypeScript and production build passed.
+
+## Check the voice repairs and toggle switches
+
+**Switches.** "Fast local commands" and "Speak replies" are now switches: a knob slides left and
+right, and a screen reader announces "on" or "off" rather than "pressed". Their labels no longer
+change with the state, so "Speak replies" always names the setting, never the action.
+
+**Stop speaking.** A reply holds the microphone until it finishes. The new button cuts it short and
+releases the microphone after the usual echo guard.
+
+**Repeated labels are numbered.** Adding a second Process gives "Process", "Process (2)". The first
+shape keeps its plain name. Say "process two" — the brackets are not spoken. Renaming a shape onto
+an existing name numbers it the same way.
+
+**No IDs are spoken.** Describe chart, Inspect and Trace path named every shape by its UUID, which
+is unusable aloud and long enough to hold the microphone shut. They now use labels, which are
+unique. When two shapes are still too close to tell apart, the question is numbered — "Two shapes
+match. Say one for Check payment, or two for Check payments" — and answered by saying **one**,
+**two** or **three**, by the matching numbered button, or by **cancel**.
+
+Owner check with voice on:
+
+1. Say **"Add a process."** twice. Expect **Added Process node.** then **Added Process (2) node.**
+2. Say **"Rename process 2 to Review."** Expect **Renamed node to Review.** and no stall.
+3. Say **"Describe the chart."** Expect labels and types only — no long strings of characters.
+4. During that reply, press **Stop speaking**. Speech should stop and the microphone should resume.
+5. Toggle **Speak replies** off and on; the knob should move and a screen reader should say off/on.
+
+Verification: 679 tests, lint, TypeScript and production build passed.

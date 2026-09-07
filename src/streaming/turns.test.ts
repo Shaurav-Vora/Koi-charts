@@ -131,6 +131,17 @@ describe("speech turn coordination",()=>{
  // dropping a plural leaves a word equally close to two real shapes.
  it("resumes original clarification using a candidate ID rather than a new interpreted edit",async()=>{const h=harness();h.apply(add("Check payment"));h.apply(add("Check payments"));h.apply({kind:"rename",node:{kind:"label",value:"Check paymentz"},newLabel:"Resolved"});await h.turn("n2",true);expect(h.choose).toHaveBeenCalledWith("n2");expect(h.interpret).not.toHaveBeenCalled();expect(h.getState().graph.nodes[1].label).toBe("Resolved");});
  it("keeps unresolvable clarification replies pending",async()=>{const h=harness();h.apply(add("Check payment"));h.apply(add("Check payments"));h.apply({kind:"focus",node:{kind:"label",value:"Check paymentz"}});await h.turn("Check paymentz",true);expect(h.getState().pending?.kind).toBe("clarification");expect(h.presentations.at(-1)?.status).toBe("needs_clarification");});
+ // The reported failure: two default shapes, then a rename that could not be answered, because
+ // both candidates were spoken identically and the reply was read back as a pair of UUIDs.
+ it("renames one of two same-named shapes without stalling",async()=>{const h=harness();
+  await h.turn("Add a process.",true,"1");
+  await h.turn("Now add a process.",true,"2");
+  expect(h.getState().graph.nodes.map(node=>node.label)).toEqual(["Process","Process (2)"]);
+  await h.turn("Rename process 2 to Review.",true,"3");
+  expect(h.getState().graph.nodes.map(node=>node.label)).toEqual(["Process","Review"]);
+  expect(h.getState().pending).toBeNull();
+  expect(h.interpret).not.toHaveBeenCalled();
+ });
  it("answers a clarification by number and never speaks an ID",async()=>{const h=harness();h.apply(add("Check payment"));h.apply(add("Check payments"));h.apply({kind:"rename",node:{kind:"label",value:"Check paymentz"},newLabel:"Resolved"});
   expect(h.getState().pending?.kind).toBe("clarification");
   await h.turn("Two.",true,"1");
