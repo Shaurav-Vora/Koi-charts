@@ -32,7 +32,7 @@ describe("speech turn coordination",()=>{
   await h.turn(`add a ${type} node`,true);
   expect(h.getState().graph.nodes.at(-1)).toMatchObject({type,label:type[0].toUpperCase()+type.slice(1)});expect(h.interpret).not.toHaveBeenCalled();
  });
- it.each(["add a start node before Finish","add a start node and connect it to a new decision","do not add a start node","move Start above Finish"])("leaves richer requests to interpretation: %s",async text=>{
+ it.each(["add three steps for onboarding","add a start node and connect it to a new decision","do not add a start node","move Start somewhere sensible"])("leaves richer requests to interpretation: %s",async text=>{
   const h=harness();await h.turn(text,true);expect(h.interpret).toHaveBeenCalledTimes(1);
  });
  // An author who sees a surprising result needs to know which half of the system produced it.

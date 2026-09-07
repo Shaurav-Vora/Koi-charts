@@ -49,6 +49,18 @@ describe("command templates", () => {
   ])("reads %j as a deletion, which the engine still gates on confirmation", (text, command) => expect(parseTemplate(text)).toEqual(command));
 
   it.each([
+    ["Add a process called Review below Start.", { kind: "add_node", type: "process", label: "Review", placement: { relation: "below", reference: byLabel("Start") } }],
+    ["Add a decision after Review", { kind: "add_node", type: "decision", label: "Decision", placement: { relation: "after", reference: byLabel("Review") } }],
+    // Quoting is how a label that contains grammar words keeps them: "before" here is part of the name.
+    ['Add a process called "Check before payment"', add("process", "Check before payment")],
+    ["Move Start above End.", { kind: "move", node: byLabel("Start"), placement: { relation: "above", reference: byLabel("End") } }],
+    ["Move it to the right of Review", { kind: "move", node: { kind: "focus" }, placement: { relation: "right_of", reference: byLabel("Review") } }],
+    ["Trace the path from Start to End.", { kind: "trace_path", start: byLabel("Start"), end: byLabel("End") }],
+    ["Trace the path from Start.", { kind: "trace_path", start: byLabel("Start"), end: null }],
+    ["Inspect Check payment.", { kind: "inspect", node: byLabel("Check payment") }],
+  ])("reads %j as a placement, route or inspection", (text, command) => expect(parseTemplate(text)).toEqual(command));
+
+  it.each([
     ["Focus on Check payment.", { kind: "focus", node: byLabel("Check payment") }],
     ["Select the last shape", { kind: "focus", node: { kind: "recent" } }],
   ])("reads %j as a focus change", (text, command) => expect(parseTemplate(text)).toEqual(command));
@@ -68,7 +80,6 @@ describe("command templates", () => {
     "Delete all nodes.",
     "Remove every connection.",
     "Add a process called .",
-    "Move Start above End.",
     "Undo the last three things I said.",
   ])("refuses %j and leaves it to the model", text => expect(parseTemplate(text)).toBeNull());
 

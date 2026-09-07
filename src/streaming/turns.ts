@@ -1,8 +1,8 @@
 import type { EngineState, CommandResult } from "../graph/types";
 import { commandSchema, type GraphCommand } from "../commands/schema";
 import { previewCommand } from "../commands/preview";
-import { parseControl, parseFuzzyControl, parseSimpleAddition } from "../commands/fast-path";
-import { parseTemplate } from "../commands/templates";
+import { parseControl } from "../commands/fast-path";
+import { parseLocal } from "../commands/local";
 import type { VoiceStatus } from "../editor/status";
 export type Turn={sessionId:string;turnId:string;text:string;final:boolean};
 // Which path produced the command. Shown to the author so a surprising result can be traced to
@@ -48,9 +48,7 @@ export class TurnCoordinator {
     if(candidates.length!==1) {this.options.present({status:"needs_clarification",preview:null,text:"Choose one matching label or use a candidate button."});return;}
     result=this.options.choose(candidates[0]);
    }else{
-    // Exact rules first, always: approximation only ever sees what nothing else could read.
-    const templates=this.options.preferLocal?.()===false?null:parseSimpleAddition(turn.text) ?? parseTemplate(turn.text) ?? parseFuzzyControl(turn.text);
-    const local=control ?? templates;
+    const local=control ?? (this.options.preferLocal?.()===false?null:parseLocal(turn.text));
     source=local?"local":"model";
     const command=local ?? await this.options.interpret(turn.text,state,controller.signal);
     if(generation!==this.generation || controller.signal.aborted)return;

@@ -1,5 +1,5 @@
 import type { GraphCommand, SpokenRef } from "./schema";
-import type { nodeTypes } from "../graph/types";
+import type { nodeTypes, placementRelations } from "../graph/types";
 import { collapse, stripFillers } from "./phrasing";
 
 /**
@@ -7,9 +7,13 @@ import { collapse, stripFillers } from "./phrasing";
  * command it is certain of: anything it cannot read exactly returns null and reaches the model
  * instead. A missed match costs one interpretation; a confident wrong match writes the wrong
  * thing into the chart, so every rule below is written to refuse rather than to guess.
+ *
+ * The phrases these rules accept are documented in grammar.ts, and a contract test holds the
+ * two together: a form that appears in the guide but no longer parses fails the build.
  */
 
 type NodeType = typeof nodeTypes[number];
+type Relation = typeof placementRelations[number];
 // Authors reach for different words for the same shape; the chart only has four.
 const TYPE_WORDS: Record<string, NodeType> = {
   start: "start", begin: "start", beginning: "start",
@@ -17,8 +21,17 @@ const TYPE_WORDS: Record<string, NodeType> = {
   decision: "decision", choice: "decision", question: "decision",
   end: "end", finish: "end", stop: "end", terminal: "end",
 };
+const RELATION_WORDS: Record<string, Relation> = {
+  before: "before", after: "after",
+  above: "above", over: "above", below: "below", under: "below", underneath: "below",
+  "left of": "left_of", "to the left of": "left_of",
+  "right of": "right_of", "to the right of": "right_of",
+};
 const DEFAULT_LABELS: Record<NodeType, string> = { start: "Start", process: "Process", decision: "Decision", end: "End" };
-const TYPES = Object.keys(TYPE_WORDS).sort((a, b) => b.length - a.length).join("|");
+const alternation = (words: Record<string, unknown>) => Object.keys(words).sort((a, b) => b.length - a.length).join("|");
+const TYPES = alternation(TYPE_WORDS);
+// Longest first, so "to the right of" is never read as the word "right" followed by a shape.
+const RELATIONS = alternation(RELATION_WORDS);
 const VERB = "add|create|insert|make|place|put|new";
 const NAMING = "called|named|labell?ed|titled|that says|saying";
 // "step" is deliberately absent: it names a shape type here, not the word "node".
@@ -68,22 +81,48 @@ function pair(rest: string): [string, string] | null {
   return plain ? [plain[1], plain[2]] : null;
 }
 
+/** A placement is only ever accepted whole: a relation with no shape beside it is not one. */
+function placement(relation: string | undefined, reference: string | undefined) {
+  if (!relation) return { ok: true, value: null } as const;
+  const target = reference === undefined ? null : ref(reference);
+  return target ? { ok: true, value: { relation: RELATION_WORDS[relation.toLowerCase()], reference: target } } as const : { ok: false } as const;
+}
+
+function addNode(type: string, rawLabel: string | undefined, relation?: string, reference?: string): GraphCommand | null {
+  const shape = TYPE_WORDS[type.toLowerCase()];
+  const place = placement(relation, reference);
+  if (!place.ok) return null;
+  // A decision is usually phrased as a question, so its mark is part of the label it names.
+  const label = rawLabel === undefined ? DEFAULT_LABELS[shape] : cleanLabel(rawLabel, shape === "decision");
+  return label ? { kind: "add_node", type: shape, label, placement: place.value } : null;
+}
+
 const patterns: { pattern: RegExp; build: (match: RegExpExecArray) => GraphCommand | null }[] = [
+  { // add, named in quotes: the quotes protect a label that contains command grammar
+    pattern: new RegExp(`^(?:${VERB}) (?:a |an |the )?(${TYPES})(?: (?:${SHAPE}))? (?:${NAMING}) "([^"]+)"(?: (${RELATIONS}) (.+?))?[.!?]*$`, "i"),
+    build: match => addNode(match[1], `"${match[2]}"`, match[3], match[4]),
+  },
   { // add, named
-    pattern: new RegExp(`^(?:please )?(?:${VERB}) (?:a |an |the )?(${TYPES})(?: (?:${SHAPE}))? (?:${NAMING}) (.+)$`, "i"),
-    build: match => {
-      const type = TYPE_WORDS[match[1].toLowerCase()];
-      // A decision is usually phrased as a question, so its mark is part of the label it names.
-      const label = cleanLabel(match[2], type === "decision");
-      return label ? { kind: "add_node", type, label, placement: null } : null;
-    },
+    pattern: new RegExp(`^(?:${VERB}) (?:a |an |the )?(${TYPES})(?: (?:${SHAPE}))? (?:${NAMING}) (.+?)(?: (${RELATIONS}) (.+))?$`, "i"),
+    build: match => addNode(match[1], match[2], match[3], match[4]),
+  },
+  { // add, unnamed, placed beside an existing shape
+    pattern: new RegExp(`^(?:${VERB}) (?:a |an |the )?(${TYPES})(?: (?:${SHAPE}))? (${RELATIONS}) (.+)$`, "i"),
+    build: match => addNode(match[1], undefined, match[2], match[3]),
   },
   { // add, unnamed
-    pattern: new RegExp(`^(?:please )?(?:${VERB}) (?:a |an |the )?(${TYPES})(?: (?:${SHAPE}))?[.!?]*$`, "i"),
-    build: match => { const type = TYPE_WORDS[match[1].toLowerCase()]; return { kind: "add_node", type, label: DEFAULT_LABELS[type], placement: null }; },
+    pattern: new RegExp(`^(?:${VERB}) (?:a |an |the )?(${TYPES})(?: (?:${SHAPE}))?[.!?]*$`, "i"),
+    build: match => addNode(match[1], undefined),
+  },
+  { // move an existing shape beside another
+    pattern: new RegExp(`^(?:move|put|place) (?:the )?(.+?) (${RELATIONS}) (.+)$`, "i"),
+    build: match => {
+      const node = ref(match[1]), place = placement(match[2], match[3]);
+      return node && place.ok && place.value ? { kind: "move", node, placement: place.value } : null;
+    },
   },
   { // rename
-    pattern: /^(?:please )?(?:rename|relabel) (.+)$/i,
+    pattern: /^(?:rename|relabel) (.+)$/i,
     build: match => {
       const parts = pair(match[1]);
       if (!parts) return null;
@@ -92,7 +131,7 @@ const patterns: { pattern: RegExp; build: (match: RegExpExecArray) => GraphComma
     },
   },
   { // delete a connection, named by its two ends
-    pattern: /^(?:please )?(?:delete|remove|erase) (?:the )?(?:connection|arrow|link|edge) (?:from )?(.+)$/i,
+    pattern: /^(?:delete|remove|erase) (?:the )?(?:connection|arrow|link|edge) (?:from )?(.+)$/i,
     build: match => {
       const parts = pair(match[1]);
       if (!parts) return null;
@@ -101,11 +140,11 @@ const patterns: { pattern: RegExp; build: (match: RegExpExecArray) => GraphComma
     },
   },
   { // delete a shape. The engine still refuses to drop a connected shape without confirmation.
-    pattern: new RegExp(`^(?:please )?(?:delete|remove|erase) (?:the )?(?:(?:${SHAPE}) )?(.+)$`, "i"),
+    pattern: new RegExp(`^(?:delete|remove|erase) (?:the )?(?:(?:${SHAPE}) )?(.+)$`, "i"),
     build: match => { const node = ref(match[1]); return node ? { kind: "delete", target: { kind: "node", node } } : null; },
   },
   { // connect
-    pattern: /^(?:please )?(?:(?:connect|link|join)|draw (?:an? )?(?:arrow|line|connection|edge)) (?:from )?(.+)$/i,
+    pattern: /^(?:(?:connect|link|join)|draw (?:an? )?(?:arrow|line|connection|edge)) (?:from )?(.+)$/i,
     build: match => {
       const parts = pair(match[1]);
       if (!parts) return null;
@@ -116,8 +155,23 @@ const patterns: { pattern: RegExp; build: (match: RegExpExecArray) => GraphComma
       return { kind: "connect", source, target, label };
     },
   },
+  { // trace a route between two shapes, or from one shape onward
+    pattern: /^trace (?:the )?(?:path|route) from (.+)$/i,
+    build: match => {
+      const parts = pair(match[1]);
+      const start = ref(parts ? parts[0] : match[1]);
+      if (!start) return null;
+      if (!parts) return { kind: "trace_path", start, end: null };
+      const end = ref(parts[1]);
+      return end ? { kind: "trace_path", start, end } : null;
+    },
+  },
+  { // inspect a named shape. "inspect focus" is a control phrase and never reaches here.
+    pattern: new RegExp(`^inspect (?:the )?(?:(?:${SHAPE}) )?(.+)$`, "i"),
+    build: match => { const node = ref(match[1]); return node ? { kind: "inspect", node } : null; },
+  },
   { // focus
-    pattern: new RegExp(`^(?:please )?(?:focus on|focus|select|highlight) (?:the )?(?:(?:${SHAPE}) )?(.+)$`, "i"),
+    pattern: new RegExp(`^(?:focus on|focus|select|highlight) (?:the )?(?:(?:${SHAPE}) )?(.+)$`, "i"),
     build: match => { const node = ref(match[1]); return node ? { kind: "focus", node } : null; },
   },
 ];

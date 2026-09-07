@@ -294,3 +294,49 @@ The speech toggle now hydrates with the same initial markup on the server and br
 5. Mute replies or stop voice during a reply. Speech should stop; after muting, microphone input should resume after the short echo guard.
 
 Verification: 434 tests, lint, TypeScript and production build passed. A live Gemini request for connecting Start to Process returned a valid connect command. Physical microphone/speaker behavior still needs the owner check above.
+
+## The spoken syntax
+
+Koi charts recognises a fixed command syntax on your own machine, with no model call and the same
+result every time. Anything outside it still works — it is sent to be interpreted — but only these
+forms are guaranteed. The **Fast local commands** toggle turns local recognition off; the
+**Local command** / **Gemini** badge beside the status says which path answered.
+
+Three rules make the syntax dependable:
+
+1. **One command per utterance.** "Add a start and connect it to Review" is read as a single
+   request and goes to the model. Say the two commands separately.
+2. **Quote a label that contains grammar words.** `add a process called "Check before payment"`
+   keeps "before" inside the label instead of reading it as a position.
+3. **Name a shape by its label**, not by describing it. "a new decision" names nothing yet.
+
+| Form | Example |
+| --- | --- |
+| `add a <shape> [called <label>] [<relation> <shape>]` | add a process called Check payment |
+| `connect <shape> to <shape> [labelled <label>]` | connect Approved to Refund labelled No |
+| `rename <shape> to <label>` | rename this to Take payment |
+| `move <shape> <relation> <shape>` | move Refund below Approved |
+| `delete <shape>` / `delete the connection from <shape> to <shape>` | delete Refund |
+| `next` / `back` / `go to start` / `go to end` / `where am I` / `take <branch>` | take No |
+| `focus on <shape>` / `clear selection` | focus on Check payment |
+| `describe the chart` / `describe this` / `inspect <shape>` / `validate the chart` | inspect Check payment |
+| `trace the path from <shape> [to <shape>]` | trace the path from Start to End |
+| `undo` / `redo` / `confirm` / `cancel` | undo |
+
+Shapes are `start`, `process`, `decision` and `end`, each with synonyms (`step`, `choice`,
+`finish`). Positions are `before`, `after`, `above`, `below`, `left of` and `right of`. A leading
+"now", "okay" or "please" is ignored, and dictation's capitalisation and full stops do not matter.
+
+Deliberately left to the model: multi-command sequences, quantities ("add three steps"), bulk
+references ("delete everything"), negation, and labelling an existing arrow by description — that
+last one needs the arrow's identity, so click it or use the labelled `connect` form.
+
+`src/commands/grammar.ts` holds this table as data, and `grammar.test.ts` runs every example
+through the real parser in both plain and dictated form. A documented phrase that stops parsing
+fails the build, so the guide above cannot drift from the code.
+
+Owner check: start voice and say **"Now add a process called Check payment."** Expect the badge to
+read **Local command**. Then say **"Add an end below Check payment."** and **"Connect Check payment
+to End."** Say **"Add three steps for onboarding."** and expect the badge to read **Gemini**.
+
+Verification: 649 tests, lint, TypeScript and production build passed.
