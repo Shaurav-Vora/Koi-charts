@@ -1,3 +1,5 @@
+import { createPreference } from "./preference";
+
 export type Speaker = {
   supported: boolean;
   speak: (text: string) => void;
@@ -7,17 +9,8 @@ export type Speaker = {
   dispose: () => void;
 };
 
-const listeners = new Set<() => void>();
-/**
- * Kept outside React so the server and the browser can disagree without a hydration mismatch:
- * speaking is on unless the author has turned it off, and the server cannot know that yet.
- */
-export const speechPreference = {
-  subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; },
-  read: () => localStorage.getItem("koi-speech") !== "off",
-  readOnServer: () => true,
-  write(on: boolean) { localStorage.setItem("koi-speech", on ? "on" : "off"); listeners.forEach(listener => listener()); },
-};
+/** Speaking is on unless the author has turned it off: nothing else reads a reply aloud. */
+export const speechPreference = createPreference("koi-speech", true);
 
 type UtteranceConstructor = new (text: string) => SpeechSynthesisUtterance;
 

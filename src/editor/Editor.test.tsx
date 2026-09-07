@@ -118,3 +118,27 @@ it("enables fitting once shapes exist and centring once one is selected", () => 
   expect(screen.getByRole("button", { name: "Fit chart" })).toBeEnabled();
   expect(screen.getByRole("button", { name: "Center selection" })).toBeEnabled();
 });
+
+// Provenance is diagnostic: an author who sees the wrong shape appear needs to know whether a
+// template misread them or the model did, without reading logs they cannot see.
+it("labels where a command came from and lets the author send everything to the model", async () => {
+  const { act } = await import("@testing-library/react");
+  const { createEditorCoordinator } = await import("./coordinator");
+  const { localCommandPreference } = await import("./preference");
+  localCommandPreference.write(true);
+  const coordinator = createEditorCoordinator(async () => ({ kind: "add_node", type: "end", label: "Interpreted", placement: null }));
+  render(<Editor coordinator={coordinator} />);
+  act(() => coordinator.turns.start("test"));
+  await act(() => coordinator.turns.accept({ sessionId: "test", turnId: "1", text: "Add a start called Begin.", final: true }));
+  expect(screen.getByRole("region", { name: "Command feedback" })).toHaveTextContent("Local command");
+  expect(screen.getByRole("region", { name: "Chart structure" })).toHaveTextContent("Begin");
+
+  const toggle = screen.getByRole("button", { name: "Fast local commands" });
+  expect(toggle).toHaveAttribute("aria-pressed", "true");
+  fireEvent.click(toggle);
+  expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await act(() => coordinator.turns.accept({ sessionId: "test", turnId: "2", text: "Add a process called Review.", final: true }));
+  expect(screen.getByRole("region", { name: "Command feedback" })).toHaveTextContent("Gemini");
+  expect(screen.getByRole("region", { name: "Chart structure" })).toHaveTextContent("Interpreted");
+  localCommandPreference.write(true);
+});

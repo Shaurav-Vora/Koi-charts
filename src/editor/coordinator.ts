@@ -1,4 +1,5 @@
 import { interpretOnServer } from "./interpret-client";
+import { localCommandPreference } from "./preference";
 import { createEditorState, editorReducer, type EditorAction } from "./reducer";
 import { TurnCoordinator, type Interpret, type Presentation } from "../streaming/turns";
 import type { CommandResult } from "../graph/types";
@@ -8,7 +9,7 @@ export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
  const publish=()=>listeners.forEach(listener=>listener());
  const dispatch=(action:EditorAction)=>{state={...state,editor:editorReducer(state.editor,action),presentation:null};publish();};
  const result=():CommandResult=>({state:state.editor.engine,outcome:state.editor.outcome==="idle"?"error":state.editor.outcome,message:state.editor.message});
- const turns=new TurnCoordinator({getState:()=>state.editor.engine,interpret,
+ const turns=new TurnCoordinator({getState:()=>state.editor.engine,interpret,preferLocal:localCommandPreference.read,
   apply:command=>{dispatch({type:"command",command,idSeed:crypto.randomUUID()});return result();},
   choose:candidateId=>{dispatch({type:"choose",candidateId,idSeed:crypto.randomUUID()});return result();},
   present:presentation=>{state={...state,presentation};publish();},

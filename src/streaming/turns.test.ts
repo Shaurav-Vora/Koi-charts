@@ -6,13 +6,13 @@ import { parseControl } from "../commands/fast-path";
 import type { GraphCommand } from "../commands/schema";
 const add=(label:string):GraphCommand=>({kind:"add_node",type:"process",label,placement:null});
 function deferred<T>() {let resolve!:(value:T)=>void;const promise=new Promise<T>(r=>{resolve=r;});return {promise,resolve};}
-function harness(interpret:Interpret=async text=>add(text)) {
+function harness(interpret:Interpret=async text=>add(text),preferLocal?:()=>boolean) {
  let state=createEngineState(),count=0;
  const presentations:Presentation[]=[];
  const apply=vi.fn((command:GraphCommand)=>{const result=execute(state,command,()=>`n${++count}`);state=result.state;return result;});
  const choose=vi.fn((id:string)=>{const result=resolveClarification(state,id,()=>`n${++count}`);state=result.state;return result;});
  const interpretSpy=vi.fn(interpret);
- const coordinator=new TurnCoordinator({getState:()=>state,apply,choose,interpret:interpretSpy,present:p=>presentations.push(p)});
+ const coordinator=new TurnCoordinator({getState:()=>state,apply,choose,interpret:interpretSpy,present:p=>presentations.push(p),preferLocal});
  coordinator.start("s1");
  return {coordinator,apply,choose,interpret:interpretSpy,getState:()=>state,presentations,turn:(text:string,final=false,turnId="1",sessionId="s1")=>coordinator.accept({text,final,turnId,sessionId})};
 }
@@ -34,6 +34,29 @@ describe("speech turn coordination",()=>{
  });
  it.each(["add a start node before Finish","add a start node and connect it to a new decision","do not add a start node","move Start above Finish"])("leaves richer requests to interpretation: %s",async text=>{
   const h=harness();await h.turn(text,true);expect(h.interpret).toHaveBeenCalledTimes(1);
+ });
+ // An author who sees a surprising result needs to know which half of the system produced it.
+ it("reports whether each command was recognised here or interpreted",async()=>{
+  const h=harness();
+  await h.turn("Add a start called Begin.",true,"1");
+  expect(h.presentations.at(-1)).toMatchObject({status:"committed",source:"local"});
+  await h.turn("Put something roughly near the middle.",true,"2");
+  expect(h.presentations.at(-1)).toMatchObject({source:"model"});
+  await h.turn("Undo.",true,"3");
+  expect(h.presentations.at(-1)).toMatchObject({source:"local"});
+ });
+ // Turning templates off is the escape hatch for a template that reads a phrase wrongly. It must
+ // not disarm the control words: a pending deletion cannot wait on a non-deterministic answer.
+ it("hands phrasing back to the model when local commands are turned off, but never control words",async()=>{
+  const h=harness(async()=>add("Interpreted"),()=>false);
+  await h.turn("Add a process called Review.",true,"1");
+  expect(h.interpret).toHaveBeenCalledTimes(1);
+  expect(h.getState().graph.nodes.map(n=>n.label)).toEqual(["Interpreted"]);
+  expect(h.presentations.at(-1)).toMatchObject({source:"model"});
+  await h.turn("Undo.",true,"2");
+  expect(h.interpret).toHaveBeenCalledTimes(1);
+  expect(h.getState().graph.nodes).toHaveLength(0);
+  expect(h.presentations.at(-1)).toMatchObject({source:"local"});
  });
  // Named shapes, renames and connections are the everyday phrases; sending each to the model
  // costs a round trip, a rate-limit slot and a chance of a different answer to the same words.

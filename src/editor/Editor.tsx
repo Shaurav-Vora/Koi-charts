@@ -2,6 +2,7 @@
 import TactileSimulator from "../tactile/TactileSimulator";
 import { Component, useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createSpeaker, speechPreference } from "./speech";
+import { localCommandPreference } from "./preference";
 import type { GraphCommand } from "../commands/schema";
 import type { FlowGraph } from "../graph/types";
 import { layoutGraph } from "../visual/layout";
@@ -41,6 +42,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const inputPaused = useSyncExternalStore(speaker.subscribe, speaker.getSnapshot, () => false);
   // On by default: an author who cannot see the chart has no other way to receive a reply.
   const wanted = useSyncExternalStore(speechPreference.subscribe, speechPreference.read, speechPreference.readOnServer);
+  const fastLocal = useSyncExternalStore(localCommandPreference.subscribe, localCommandPreference.read, localCommandPreference.readOnServer);
   // A browser with no speech engine must keep its live region, or replies reach nobody at all.
   const speaks = wanted && supported;
   useEffect(() => () => speaker.dispose(), [speaker]);
@@ -64,6 +66,9 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
       </div>
       {voice.active && <span className="mic-level" aria-hidden="true"><span className="mic-level-fill" style={{ width: `${Math.round(Math.min(1, voice.level * 4) * 100)}%` }} /></span>}
       <button className={`voice-button${voice.active ? " is-active" : ""}`} aria-pressed={voice.active} onClick={() => { if (voice.active) { speaker.cancel(); voice.stop(); } else voice.start(); }}>{voice.active ? "Stop voice" : "Start voice"}</button>
+      {/* An escape hatch, not a feature switch: if a template ever reads a phrase wrongly, the
+          author hands everything back to the model without losing voice editing entirely. */}
+      <button className={`local-button${fastLocal ? " is-active" : ""}`} aria-pressed={fastLocal} title="Recognise common phrases on this device instead of sending them to be interpreted." onClick={() => localCommandPreference.write(!fastLocal)}>Fast local commands</button>
       {/* Speaking and the live region below say the same words, so exactly one of them is ever
           active: a screen reader user would otherwise hear every reply twice. */}
       <button className={`speech-button${speaks ? " is-active" : ""}`} aria-pressed={speaks} disabled={!supported} title={supported ? undefined : "This browser has no speech engine."} onClick={toggleSpeech}>{speaks ? "Mute replies" : "Speak replies"}</button>
@@ -78,6 +83,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
     
     <section className={`command-feedback ${hasError ? "has-error" : ""}`} aria-label="Command feedback">
       <span className="feedback-label">{status}</span>
+      {presentation?.source && <span className="feedback-source" data-source={presentation.source}>{presentation.source === "local" ? "Local command" : "Gemini"}</span>}
       <p role={!speaks && hasError ? "alert" : undefined} aria-live={speaks || hasError ? undefined : "polite"}>{message}</p>
       {pending && <div className="pending-actions">
         {pending.kind === "deletion" ? <button className="danger-button" onClick={() => onCommand({ kind: "confirm" })}>Confirm deletion</button> : pending.candidates.slice(0, 3).map(id => <button key={id} onClick={() => dispatch({ type: "choose", candidateId: id, idSeed: crypto.randomUUID() })}>{pending.elementKind === "node" ? graph.nodes.find(node => node.id === id)?.label ?? "New node" : "Connection"} ({id})</button>)}

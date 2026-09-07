@@ -5,9 +5,12 @@ import { parseControl, parseSimpleAddition } from "../commands/fast-path";
 import { parseTemplate } from "../commands/templates";
 import type { VoiceStatus } from "../editor/status";
 export type Turn={sessionId:string;turnId:string;text:string;final:boolean};
-export type Presentation={status:VoiceStatus;preview:GraphCommand|null;text:string;error?:string};
+// Which path produced the command. Shown to the author so a surprising result can be traced to
+// a template misreading their words rather than to the model, or the other way round.
+export type CommandSource="local"|"model";
+export type Presentation={status:VoiceStatus;preview:GraphCommand|null;text:string;error?:string;source?:CommandSource};
 export type Interpret=(text:string,state:EngineState,signal:AbortSignal)=>Promise<GraphCommand>;
-type Options={getState:()=>EngineState;apply:(command:GraphCommand)=>CommandResult;choose:(id:string)=>CommandResult;interpret:Interpret;present:(value:Presentation)=>void};
+type Options={getState:()=>EngineState;apply:(command:GraphCommand)=>CommandResult;choose:(id:string)=>CommandResult;interpret:Interpret;present:(value:Presentation)=>void;preferLocal?:()=>boolean};
 export class TurnCoordinator {
  private session:string|null=null;
  private generation=0;
@@ -32,16 +35,23 @@ export class TurnCoordinator {
   const state=structuredClone(this.options.getState());
   // Focus and pending context matter even when graph version does not change.
   const context=(s:EngineState)=>JSON.stringify([s.version,s.focusedNodeId,s.recentNodeId,s.pending]);
+  // Control words stay local whatever the preference says: "Confirm." must mean confirm every
+  // time, and a pending deletion cannot wait on a model that may answer differently.
+  let source:CommandSource|undefined;
   try {
    const control=parseControl(turn.text);
    let result:CommandResult;
+   if(control)source="local";
    if(state.pending?.kind==="clarification" && !control){
     const reply=turn.text.trim();
     const candidates=state.pending.candidates.filter(id=>id===reply || (state.pending?.kind==="clarification" && state.pending.elementKind==="node" && state.graph.nodes.find(n=>n.id===id)?.label.toLowerCase()===reply.toLowerCase()));
     if(candidates.length!==1) {this.options.present({status:"needs_clarification",preview:null,text:"Choose one matching label or use a candidate button."});return;}
     result=this.options.choose(candidates[0]);
    }else{
-    const command=control ?? parseSimpleAddition(turn.text) ?? parseTemplate(turn.text) ?? await this.options.interpret(turn.text,state,controller.signal);
+    const templates=this.options.preferLocal?.()===false?null:parseSimpleAddition(turn.text) ?? parseTemplate(turn.text);
+    const local=control ?? templates;
+    source=local?"local":"model";
+    const command=local ?? await this.options.interpret(turn.text,state,controller.signal);
     if(generation!==this.generation || controller.signal.aborted)return;
     if(context(state)!==context(this.options.getState()))throw new Error("The chart or selection changed. Please repeat the command.");
     const parsed=commandSchema.safeParse(command);
@@ -49,8 +59,8 @@ export class TurnCoordinator {
     result=this.options.apply(parsed.data);
    }
    if(generation!==this.generation)return;
-   this.options.present({status:result.outcome==="error"?"error":result.outcome==="clarification"?"needs_clarification":result.outcome==="confirmation"?"confirming_delete":"committed",preview:null,text:result.message});
-  }catch(error){if(generation===this.generation)this.options.present({status:"error",preview:null,text:"",error:error instanceof Error?error.message:"Command could not be applied."});}
+   this.options.present({status:result.outcome==="error"?"error":result.outcome==="clarification"?"needs_clarification":result.outcome==="confirmation"?"confirming_delete":"committed",preview:null,text:result.message,source});
+  }catch(error){if(generation===this.generation)this.options.present({status:"error",preview:null,text:"",error:error instanceof Error?error.message:"Command could not be applied.",source});}
   finally{this.controllers.delete(controller);}
  }
 }
