@@ -9,6 +9,7 @@ import { layoutGraph } from "../visual/layout";
 import VisualCanvas from "../visual/VisualCanvas";
 import { ShapePalette, NodeInspector } from "./ShapePalette";
 import CommandForm from "./CommandForm";
+import ToggleSwitch from "./ToggleSwitch";
 import { createEditorCoordinator } from "./coordinator";
 import { useVoice } from "./useVoice";
 import { statusLabels } from "./status";
@@ -54,7 +55,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
     // Depending on the store objects rather than the text repeats an identical reply, which is
     // how pressing Back twice at a dead end confirms twice that there is still nothing behind.
   }, [state, presentation, speaks, speaker, spokenMessage]);
-  const toggleSpeech = () => { speechPreference.write(!speaks); if (speaks) speaker.cancel(); };
+  const toggleSpeech = (next: boolean) => { speechPreference.write(next); if (!next) speaker.cancel(); };
   const indicator = voiceIndicator(voice.connectionStatus, inputPaused, presentation?.status);
   const status = presentation ? statusLabels[presentation.status] : state.outcome === "idle" ? "Idle" : state.outcome === "error" ? "Command not applied" : state.outcome === "confirmation" ? "Confirmation needed" : state.outcome === "clarification" ? "Clarification needed" : state.outcome === "committed" ? "Change applied" : state.outcome === "focused" ? "Focus updated" : state.outcome === "cancelled" ? "Cancelled" : "Chart explored";
   return <>
@@ -66,12 +67,15 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
       </div>
       {voice.active && <span className="mic-level" aria-hidden="true"><span className="mic-level-fill" style={{ width: `${Math.round(Math.min(1, voice.level * 4) * 100)}%` }} /></span>}
       <button className={`voice-button${voice.active ? " is-active" : ""}`} aria-pressed={voice.active} onClick={() => { if (voice.active) { speaker.cancel(); voice.stop(); } else voice.start(); }}>{voice.active ? "Stop voice" : "Start voice"}</button>
+      {/* Interrupting matters more than it sounds: a long reply blocks the microphone until it
+          finishes, so without this the author must wait out a description they no longer want. */}
+      <button className="stop-speech-button" disabled={!inputPaused} onClick={() => speaker.cancel()}>Stop speaking</button>
       {/* An escape hatch, not a feature switch: if a template ever reads a phrase wrongly, the
           author hands everything back to the model without losing voice editing entirely. */}
-      <button className={`local-button${fastLocal ? " is-active" : ""}`} aria-pressed={fastLocal} title="Recognise common phrases on this device instead of sending them to be interpreted." onClick={() => localCommandPreference.write(!fastLocal)}>Fast local commands</button>
+      <ToggleSwitch className="local-switch" label="Fast local commands" checked={fastLocal} title="Recognise common phrases on this device instead of sending them to be interpreted." onChange={next => localCommandPreference.write(next)} />
       {/* Speaking and the live region below say the same words, so exactly one of them is ever
           active: a screen reader user would otherwise hear every reply twice. */}
-      <button className={`speech-button${speaks ? " is-active" : ""}`} aria-pressed={speaks} disabled={!supported} title={supported ? undefined : "This browser has no speech engine."} onClick={toggleSpeech}>{speaks ? "Mute replies" : "Speak replies"}</button>
+      <ToggleSwitch className="speech-switch" label="Speak replies" checked={speaks} disabled={!supported} title={supported ? undefined : "This browser has no speech engine."} onChange={toggleSpeech} />
     </div><div className="history-controls"><button disabled={!history.past.length} onClick={() => onCommand({ kind: "undo" })}>Undo</button><button disabled={!history.future.length} onClick={() => onCommand({ kind: "redo" })}>Redo</button></div><div className="walk-controls" role="group" aria-label="Walk the chart">
       {/* The same cursor the voice commands move, reachable without speaking. Each step
           announces where it landed and every way out, through the feedback live region. */}

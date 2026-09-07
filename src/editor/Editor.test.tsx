@@ -133,10 +133,10 @@ it("labels where a command came from and lets the author send everything to the 
   expect(screen.getByRole("region", { name: "Command feedback" })).toHaveTextContent("Local command");
   expect(screen.getByRole("region", { name: "Chart structure" })).toHaveTextContent("Begin");
 
-  const toggle = screen.getByRole("button", { name: "Fast local commands" });
-  expect(toggle).toHaveAttribute("aria-pressed", "true");
+  const toggle = screen.getByRole("switch", { name: "Fast local commands" });
+  expect(toggle).toHaveAttribute("aria-checked", "true");
   fireEvent.click(toggle);
-  expect(toggle).toHaveAttribute("aria-pressed", "false");
+  expect(toggle).toHaveAttribute("aria-checked", "false");
   await act(() => coordinator.turns.accept({ sessionId: "test", turnId: "2", text: "Add a process called Review.", final: true }));
   expect(screen.getByRole("region", { name: "Command feedback" })).toHaveTextContent("Gemini");
   expect(screen.getByRole("region", { name: "Chart structure" })).toHaveTextContent("Interpreted");

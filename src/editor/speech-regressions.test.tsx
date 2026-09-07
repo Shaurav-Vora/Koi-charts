@@ -16,12 +16,12 @@ afterEach(()=>{cleanup();localStorage.clear();vi.unstubAllGlobals();vi.restoreAl
 it("hydrates the speech toggle without server/client mismatches",async()=>{
  vi.stubGlobal("speechSynthesis",undefined);vi.stubGlobal("SpeechSynthesisUtterance",undefined);
  const container=document.createElement("div");container.innerHTML=renderToString(<Editor/>);document.body.append(container);
- const before=container.querySelector(".speech-button");expect(before?.getAttribute("aria-pressed")).toBe("false");
+ const before=container.querySelector(".speech-switch");expect(before?.getAttribute("aria-checked")).toBe("false");
  browserSpeech();const recoverable=vi.fn(),errors=vi.spyOn(console,"error").mockImplementation(()=>{});let root:Root;
  try {
   await act(async()=>{root=hydrateRoot(container,<Editor/>,{onRecoverableError:recoverable});});
   expect(recoverable).not.toHaveBeenCalled();expect(errors).not.toHaveBeenCalled();
-  expect(container.querySelector(".speech-button")?.getAttribute("aria-pressed")).toBe("true");
+  expect(container.querySelector(".speech-switch")?.getAttribute("aria-checked")).toBe("true");
  } finally {await act(async()=>root?.unmount());container.remove();}
 });
 it("never reads a transcript aloud while interpreting it",()=>{
@@ -46,4 +46,22 @@ it("speaks a short navigation reply but retains visible and requested details",(
  expect(screen.getByRole("region",{name:"Command feedback"})).toHaveTextContent("Focused Process.");
  fireEvent.click(screen.getByRole("button",{name:"Inspect focus"}));
  expect(speech.speak.mock.calls.at(-1)?.[0].text).not.toBe("Process");
+});
+
+it("stops a reply part-way and releases the microphone",()=>{
+ vi.useFakeTimers();
+ try {
+  const speech=browserSpeech(),coordinator=createEditorCoordinator();render(<Editor coordinator={coordinator}/>);
+  act(()=>coordinator.present({status:"committed",preview:null,text:"A long description of the whole chart."}));
+  const stop=screen.getByRole("button",{name:"Stop speaking"});
+  expect(stop).toBeEnabled();
+  speech.cancel.mockClear();speech.speak.mockClear();
+  fireEvent.click(stop);
+  expect(speech.cancel).toHaveBeenCalled();
+  // The reply must not start again: cancelling is the author's decision, not a failed attempt.
+  expect(speech.speak).not.toHaveBeenCalled();
+  // The echo guard still runs, and once it lapses there is nothing left to stop.
+  act(()=>{vi.advanceTimersByTime(500);});
+  expect(screen.getByRole("button",{name:"Stop speaking"})).toBeDisabled();
+ } finally { vi.useRealTimers(); }
 });

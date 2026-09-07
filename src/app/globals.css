@@ -121,7 +121,21 @@ button, input, select { font: inherit; }
   .editor-toolbar .voice-controls button { flex: 1; }
   .editor-toolbar .history-controls, .editor-toolbar .walk-controls { border-right: 0; padding-right: 0; }
 }
-.voice-button.is-active, .speech-button.is-active, .local-button.is-active { border-color: var(--blue); background: #edf2fd; font-weight: 600; }
+.voice-button.is-active { border-color: var(--blue); background: #edf2fd; font-weight: 600; }
+/* A switch shows its state in the knob's position, so the track carries the colour and the
+   label stays constant. The whole control is one button: a 26px knob is not a hit target. */
+.toggle-switch { display: inline-flex; align-items: center; gap: 9px; min-height: 40px; padding: 5px 12px 5px 8px; border: 1px solid var(--line); border-radius: 999px; background: white; color: var(--ink); cursor: pointer; }
+.toggle-switch:hover:not(:disabled) { border-color: var(--blue); background: #f5f8ff; }
+.toggle-switch:disabled { opacity: 0.55; cursor: not-allowed; }
+.toggle-track { display: block; width: 38px; height: 22px; flex: 0 0 38px; padding: 2px; border-radius: 999px; background: #c3cddd; transition: background 140ms ease; }
+.toggle-knob { display: block; width: 18px; height: 18px; border-radius: 50%; background: white; box-shadow: 0 1px 3px #1c2c4940; transition: transform 140ms ease; }
+.toggle-switch.is-on { border-color: var(--blue); background: #edf2fd; font-weight: 600; }
+.toggle-switch.is-on .toggle-track { background: var(--blue); }
+.toggle-switch.is-on .toggle-knob { transform: translateX(16px); }
+.toggle-switch:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .toggle-track, .toggle-knob { transition: none; } }
+/* Windows high contrast replaces backgrounds, which would leave the two states identical. */
+@media (forced-colors: active) { .toggle-knob { background: ButtonText; } .toggle-switch.is-on .toggle-track { background: Highlight; } }
 .mic-level { width: 72px; height: 8px; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
 .mic-level-fill { display: block; height: 100%; background: var(--blue); transition: width 80ms linear; }
 @media (prefers-reduced-motion: reduce) { .mic-level-fill { transition: none; } }
