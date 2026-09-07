@@ -22,6 +22,28 @@ export function replaceReference(command: GraphCommand, path: string, replacemen
   (object as Record<string, unknown>)[last] = replacement;
 }
 
+/**
+ * Two shapes with one label cannot be told apart by voice: "rename Process to Review" has no
+ * answer, and the clarification that follows is unanswerable too, because both choices are
+ * spoken the same. So a repeated label gains a number — "Process", then "Process (2)".
+ *
+ * The first shape keeps its plain label. Renumbering it to "Process (1)" would silently change
+ * a name the author has already learnt and may have written into other commands.
+ *
+ * Matching sees past the brackets: resolveNode normalises punctuation, so "process 2" said
+ * aloud reaches "Process (2)" without the author spelling out the punctuation.
+ */
+export function uniqueLabel(labels: string[], wanted: string): string {
+  const taken = new Set(labels.map(label => label.toLowerCase()));
+  if (!taken.has(wanted.toLowerCase())) return wanted;
+  // Bounded by the number of shapes: one of the first labels.length + 2 suffixes must be free.
+  for (let index = 2; index <= labels.length + 2; index++) {
+    const candidate = `${wanted} (${index})`;
+    if (!taken.has(candidate.toLowerCase())) return candidate;
+  }
+  return wanted;
+}
+
 export interface PreparedTransaction {
   prepared: Snapshot;
   command: GraphCommand;
@@ -74,10 +96,13 @@ export function prepareTransaction(
         }
         const placement = edit.placement ? { relation: edit.placement.relation, referenceNodeId: node(edit.placement.reference, `${prefix}/placement/reference`) } : undefined;
         const id = allocate();
-        working.graph.nodes.push({ id, type: edit.type, label: edit.label, ...(placement ? { placement } : {}) });
+        const label = uniqueLabel(working.graph.nodes.map(item => item.label), edit.label);
+        working.graph.nodes.push({ id, type: edit.type, label, ...(placement ? { placement } : {}) });
+        // The reply names the label the shape actually got, numbering included, so the author
+        // knows what to say next without inspecting the chart to find out.
         affect(id); message = edit.label.toLowerCase() === edit.type
-          ? `Added ${edit.type[0].toUpperCase()}${edit.type.slice(1)} node.`
-          : `Added ${edit.type} ${edit.label}.`; break;
+          ? `Added ${label[0].toUpperCase()}${label.slice(1)} node.`
+          : `Added ${edit.type} ${label}.`; break;
       }
       case "connect": {
         const source = node(edit.source, `${prefix}/source`), target = node(edit.target, `${prefix}/target`);
@@ -94,8 +119,10 @@ export function prepareTransaction(
       }
       case "rename": {
         const id = node(edit.node, `${prefix}/node`);
-        working.graph.nodes.find(item => item.id === id)!.label = edit.newLabel;
-        affect(id); message = `Renamed node to ${edit.newLabel}.`; break;
+        const renamed = working.graph.nodes.find(item => item.id === id)!;
+        const label = uniqueLabel(working.graph.nodes.filter(item => item.id !== id).map(item => item.label), edit.newLabel);
+        renamed.label = label;
+        affect(id); message = `Renamed node to ${label}.`; break;
       }
       case "move_to": {
         const id = node(edit.node, `${prefix}/node`);
