@@ -1,10 +1,11 @@
 import type { GraphCommand } from "./schema";
 import { bestMatch } from "./similarity";
+import { stripFillers } from "./phrasing";
 
 // Match the whole utterance: modifiers, names, negation and compound requests must
 // still go through interpretation. Basic insertion never needs an existing focus.
 export function parseSimpleAddition(text: string): GraphCommand | null {
- const match=/^(?:please )?add (?:a |an )?(start|process|decision|end)(?: (?:node|shape))?[.!]?$/i.exec(text.trim().replace(/\s+/g," "));
+ const match=/^add (?:a |an )?(start|process|decision|end)(?: (?:node|shape))?[.!]?$/i.exec(stripFillers(text));
  if(!match)return null;
  const labels={start:"Start",process:"Process",decision:"Decision",end:"End"} as const;
  const type=match[1].toLowerCase() as keyof typeof labels;
@@ -31,7 +32,7 @@ const controls: { phrase: string; command: GraphCommand; exactOnly?: true }[] = 
 
 // AssemblyAI's formatted finals end in punctuation, so "Confirm." reached no case here and
 // was sent to the provider instead: a pending deletion then hung on a non-deterministic answer.
-const clean=(text:string)=>text.trim().replace(/\s+/g," ").replace(/[.!?]+$/,"");
+const clean=(text:string)=>stripFillers(text).replace(/[.!?]+$/,"");
 
 export function parseControl(text: string): GraphCommand | null {
  const spoken=clean(text).toLowerCase();

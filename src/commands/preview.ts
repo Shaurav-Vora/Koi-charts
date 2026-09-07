@@ -1,9 +1,10 @@
 import { commandSchema, type GraphCommand } from "./schema";
 import { parseSimpleAddition } from "./fast-path";
+import { stripFillers } from "./phrasing";
 // Only complete, simple additions are previewable. No guess about unfinished references.
 export function previewCommand(text:string):GraphCommand|null {
  const simple=parseSimpleAddition(text);if(simple)return simple;
- const match=/^add (?:a |an )?(start|process|decision|end)(?: node)? (?:called|named) (.+)$/i.exec(text.trim());
+ const match=/^add (?:a |an )?(start|process|decision|end)(?: node)? (?:called|named) (.+)$/i.exec(stripFillers(text));
  if(!match || /\b(?:and|then|before|after|above|below|left|right)\b/i.test(match[2])) return null;
  const label=match[2].trim().replace(/^"([^"\n]+)"$/,"$1");
  if(!label || label.includes('"')) return null;

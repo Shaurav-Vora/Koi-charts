@@ -1,5 +1,6 @@
 import type { GraphCommand, SpokenRef } from "./schema";
 import type { nodeTypes } from "../graph/types";
+import { collapse, stripFillers } from "./phrasing";
 
 /**
  * Explicit templates for the phrases an author says most often. A template only ever produces a
@@ -23,7 +24,7 @@ const NAMING = "called|named|labell?ed|titled|that says|saying";
 // "step" is deliberately absent: it names a shape type here, not the word "node".
 const SHAPE = "node|shape|box";
 
-const norm = (text: string) => text.trim().replace(/\s+/g, " ");
+const norm = collapse;
 /**
  * A second command hiding inside a label is the dangerous case: "Review and approve" is a real
  * step, while "Review and connect it to End" is two requests. Neither may be split here, so an
@@ -122,7 +123,7 @@ const patterns: { pattern: RegExp; build: (match: RegExpExecArray) => GraphComma
 ];
 
 export function parseTemplate(text: string): GraphCommand | null {
-  const clean = norm(text);
+  const clean = stripFillers(text);
   for (const { pattern, build } of patterns) {
     const match = pattern.exec(clean);
     if (match) return build(match);
