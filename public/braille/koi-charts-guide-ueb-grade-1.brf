@@ -1,0 +1,239 @@
+,,,koi charts -- what you can say,'
+
+,these phrases run on your own machine1
+  with no model call and the same result
+  every time4 ,anything else is sent to
+  be interpreted1 which takes a moment
+  longer4
+
+,,three ,,rules
+
+#a4 ,one command per utterance4 ,two
+  joined with 8and0 are read as a single
+  request and go to the model4
+#b4 ,quote a label that contains grammar
+  words3 add a process called 8,check
+  before payment,74
+#c4 ,name a shape by its own label ",-
+  or1 when the chart has only one of
+  them1 by its kind3 8the decision,74
+
+,,,build the chart,'
+
+  add a `<shape`>
+  ,adds a shape with a default label4
+  ,also3 add2 create2 insert2 make2
+    place2 put2 new2 shape3 start _/
+    process _/ decision _/ end2 start
+    also3 begin2 process also3 step1
+    action1 task2 decision also3 choice1
+    question2 end also3 finish1 stop1
+    terminal4
+  ,say3 add a start
+  ,say3 create a decision node
+
+  add a `<shape`> called `<label`>
+  ,adds a shape with the label you say4
+  ,also3 called2 named2 labelled2
+    titled2 that says4
+  ,say3 add a process called ,check
+    payment
+  ,say3 add a decision called ,approved8
+  ,say3 add a process called 8,check
+    before payment0
+
+  add a `<shape`> .<called `<label`>.>
+    `<relation`> `<existing shape`>
+  ,adds a shape in a chosen position
+    beside one already in the chart4
+  ,also3 before2 after2 above "<over">2
+    below "<under">2 left of2 right of4
+  ,say3 add an end below ,check payment
+  ,say3 add a process called ,refund to
+    the right of ,check payment
+
+,,connect ,,shapes
+
+  connect `<shape`> to `<shape`>
+  ,draws an arrow from the first shape
+    to the second4
+  ,also3 connect2 link2 join2 draw an
+    arrow from4
+  ,say3 connect ,start to ,check payment
+  ,say3 draw an arrow from ,check
+    payment to ,end
+
+  connect `<shape`> to `<shape`>
+    labelled `<label`>
+  ,draws an arrow and labels it ",- how
+    a decision's branches are named4
+  ,also3 labelled2 called2 named2 with
+    label4
+  ,say3 connect ,approved to ,refund
+    labelled ,no
+
+,,,change what is there,'
+
+  rename `<shape`> to `<label`>
+  ,changes a shape's label4
+  ,also3 rename2 relabel2 change2 to or
+    into2 this _/ it _/ the selected
+    shape refer to the current
+    selection4
+  ,say3 rename ,check payment to ,take
+    payment
+  ,say3 change ,process #c into ,review
+  ,say3 rename this to ,take payment
+
+  move `<shape`> `<relation`> `<shape`>
+  ,repositions a shape beside another
+    one4
+  ,say3 move ,refund below ,approved
+
+  delete `<shape`>
+  ,removes a shape4 ,a shape with arrows
+    asks for confirmation first4
+  ,also3 delete2 remove2 erase4
+  ,say3 delete ,refund
+  ,say3 remove the selected shape
+
+  `<any command`> the `<shape kind`>
+  ,when the chart has only one shape of
+    a kind1 its kind names it ",- useful
+    when the label is a long question4
+    ,with two of them you are asked
+    which4
+  ,also3 the start2 the process "<step1
+    action1 task">2 the decision
+    "<choice1 question">2 the end
+    "<finish1 stop">4
+  ,say3 delete the decision
+  ,say3 focus on the end
+
+  delete the connection from `<shape`>
+    to `<shape`>
+  ,removes one arrow1 leaving both
+    shapes in place4
+  ,also3 connection2 arrow2 link2 edge4
+  ,say3 delete the connection from
+    ,start to ,check payment
+
+,,,move the cursor,'
+
+  next _/ back
+  ,walks one step along the arrows1 and
+    says where you landed4
+  ,also3 next "<go next1 forward">2 back
+    "<go back1 previous">4
+  ,say3 next
+  ,say3 go back
+
+  take `<branch`>
+  ,at a decision1 follows the arrow with
+    that label4
+  ,also3 take2 follow4
+  ,say3 take ,no
+
+  go to start _/ go to end _/ where am
+    ,i
+  ,jumps to either end of the chart1 or
+    repeats your current position4
+  ,say3 go to start
+  ,say3 go to the end
+  ,say3 where am ,i
+
+  focus on `<shape`> _/ clear selection
+  ,selects a shape by name1 or drops the
+    selection entirely4
+  ,also3 focus on2 focus2 select2
+    highlight2 clear selection2
+    deselect4
+  ,say3 focus on ,check payment
+  ,say3 select the last shape
+  ,say3 clear selection
+
+,,,ask about the chart,'
+
+  describe the chart _/ describe this
+  ,reads out the whole chart1 or just
+    the selected shape4
+  ,say3 describe the chart
+  ,say3 describe this
+
+  inspect `<shape`>
+  ,lists what leads into and out of one
+    shape4
+  ,say3 inspect ,check payment
+  ,say3 inspect this
+
+  trace the path from `<shape`> .<to
+    `<shape`>.>
+  ,follows the route between two shapes1
+    or onward from one4
+  ,say3 trace the path from ,start to
+    ,end
+  ,say3 trace the path from ,start
+
+  validate the chart
+  ,reports what is unfinished3 missing
+    start1 dead ends1 unlabelled
+    branches4
+  ,also3 validate the chart2 check the
+    chart4
+  ,say3 validate the chart
+
+,,,take it back,'
+
+  undo _/ redo
+  ,steps back or forward through your
+    edits4 ,walking the chart is not an
+    edit4
+  ,say3 undo
+  ,say3 redo
+
+  confirm _/ cancel
+  ,answers a pending question4
+    ,confirming a deletion is recognised
+    word for word only1 never
+    approximately4
+  ,say3 confirm
+  ,say3 cancel
+
+,,,sent to be interpreted,'
+
+  ,say3 add a start node and connect it
+    to a new decision
+  ,two commands in one breath4 ,say them
+    one at a time1 or let the model
+    expand it4
+
+  ,say3 add three steps for onboarding
+  ,a quantity to expand1 not one named
+    shape4
+
+  ,say3 delete everything
+  ,anything addressed in bulk is a
+    sequence1 and deletion never runs on
+    a guess4
+
+  ,say3 do not add a start node
+  ,negation reverses a phrase the
+    templates would otherwise read
+    literally4
+
+  ,say3 move ,start somewhere sensible
+  ,a placement with no shape beside it
+    is not a placement4
+
+  ,say3 connect the last node to a new
+    decision
+  8,a new decision0 describes a shape
+    that does not exist yet1 so nothing
+    can resolve it4
+
+  ,say3 label the arrow between ,start
+    and ,end ,yes
+  ,labelling an existing arrow needs its
+    identity1 which no spoken phrase
+    carries4 ,click the arrow1 or say
+    the connect form with a label4

@@ -16,6 +16,15 @@ describe("command guide", () => {
     for (const section of grammar) expect(screen.getByRole("heading", { name: section.title })).toBeInTheDocument();
   });
 
+  it("offers the embossable guide, naming the code and grade of braille", () => {
+    render(<CommandGuide />);
+    // "Braille" alone is not a specification: grade 1 and grade 2 are different scripts, and a
+    // file that does not say which is a file a reader has to guess at.
+    expect(screen.getByRole("link", { name: /Grade 2, contracted/ })).toHaveAttribute("href", "/braille/koi-charts-guide-ueb-grade-2.brf");
+    expect(screen.getByRole("link", { name: /Grade 1, uncontracted/ })).toHaveAttribute("href", "/braille/koi-charts-guide-ueb-grade-1.brf");
+    expect(screen.getByText(/Unified English Braille/)).toBeInTheDocument();
+  });
+
   it("stays collapsed until asked for, and opens without a mouse", () => {
     render(<CommandGuide />);
     const summary = screen.getByText("What you can say");

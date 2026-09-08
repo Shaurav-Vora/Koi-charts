@@ -412,3 +412,29 @@ verb. Reference relaxation also now stops at the first reading that matches a re
 "the process 3" is tried as "process 3" before it is cut down to "3".
 
 Verification: 729 tests, lint, TypeScript and production build passed.
+
+## The command guide in braille
+
+**What you can say** offers the guide as two embossable files: **Unified English Braille Grade 2
+(contracted)** and **Grade 1 (uncontracted)**, both Braille ASCII `.brf`, 40 cells by 25 lines.
+The grade is named on the page because contracted and uncontracted braille are different scripts,
+not styles.
+
+They are translated by **liblouis**, the same translator screen readers and embossers use. No dot
+pattern anywhere in this project is hand-made: a decorative approximation of braille is worse than
+none, because it looks right to someone who cannot check it. `npm run braille` regenerates both
+files from `src/commands/grammar.ts`, and a test fails if they fall behind it, the same way the
+contract test fails when a documented phrase stops parsing.
+
+liblouis is GPL and is a development dependency only. It runs as a build-time tool, like a
+compiler; its output is data, so nothing it produces and nothing shipped in the app is a
+derivative work of it.
+
+A refreshable display already renders this page in the reader's own table, so the files exist for
+what a display cannot do: paper, and reading away from the machine.
+
+Owner check: open **What you can say**, download **Grade 2, contracted (.brf)**, and open it in a
+text editor. The first line should read `,,,koi *>ts -- :at y c say,'` — that is "KOI CHARTS --
+WHAT YOU CAN SAY" in Braille ASCII, with the capital-passage indicator around it.
+
+Verification: 737 tests, lint, TypeScript and production build passed.

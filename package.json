@@ -12,7 +12,8 @@
     "start": "next start --hostname 127.0.0.1",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "braille": "node scripts/braille-guide.mjs"
   },
   "dependencies": {
     "@dagrejs/dagre": "3.1.1",
@@ -33,6 +34,7 @@
     "eslint": "9.39.5",
     "eslint-config-next": "16.3.4",
     "jsdom": "30.0.1",
+    "liblouis": "^0.4.0",
     "typescript": "6.0.3",
     "vitest": "5.0.0"
   }

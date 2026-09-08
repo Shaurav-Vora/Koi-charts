@@ -15,6 +15,14 @@ export default function CommandGuide() {
     <div className="guide-body">
       <p className="guide-intro">These phrases run on this machine, with no model call and the same result every time. Anything else is still understood — it is sent to be interpreted, which takes a moment longer.</p>
       <ul className="guide-rules">{rules.map(rule => <li key={rule}>{rule}</li>)}</ul>
+      {/* A refreshable display already renders this page in the reader's own table, so the gap
+          worth filling is paper. Both files are Braille ASCII, translated by liblouis — the
+          translator screen readers use — and the grade is named because contracted and
+          uncontracted braille are not interchangeable for someone still learning. */}
+      <p className="guide-braille">Braille, ready to emboss — Unified English Braille, 40 cells by 25 lines, Braille ASCII:{" "}
+        <a href="/braille/koi-charts-guide-ueb-grade-2.brf" download>Grade 2, contracted (.brf)</a>{" · "}
+        <a href="/braille/koi-charts-guide-ueb-grade-1.brf" download>Grade 1, uncontracted (.brf)</a>
+      </p>
       {grammar.map(section => <section key={section.title} className="guide-section" aria-labelledby={`guide-${slug(section.title)}`}>
         <h4 id={`guide-${slug(section.title)}`}>{section.title}</h4>
         <ul className="guide-forms">{section.entries.map(entry => <li key={entry.form}>

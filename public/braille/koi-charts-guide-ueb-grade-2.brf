@@ -1,0 +1,200 @@
+,,,koi *>ts -- :at y c say,'
+
+,~! phrases run on yr {n ma*9e1 ) no
+  model call & ! same result e "t4
+  ,any?+ else is s5t to 2 9t}pret$1 :
+  takes a mo;t l;g}4
+
+,,?ree ,,rules
+
+#a4 ,"o comm& p} utt}.e4 ,two jo9$ ) 8&0
+  >e r1d z a s+le reque/ & g to ! model4
+#b4 ,quote a label t 3ta9s gramm> ~ws3
+  add a process call$ 8,*eck 2f pay;t04
+#c4 ,"n a %ape by xs {n label ",- or1 :5
+  ! *>t has only "o ( !m1 by xs k9d3 8!
+  deci.n04
+
+,,,build ! *>t,'
+
+  add a `<%ape`>
+  ,adds a %ape ) a default label4
+  ,al3 add2 cr1te2 9s}t2 make2 place2
+    put2 new2 %ape3 />t _/ process _/
+    deci.n _/ 5d2 />t al3 2g92 process
+    al3 /ep1 ac;n1 task2 deci.n al3
+    *oice1 "q2 5d al3 f9i%1 /op1 t}m9al4
+  ,say3 add a />t
+  ,say3 cr1te a deci.n node
+
+  add a `<%ape`> call$ `<label`>
+  ,adds a %ape ) ! label y say4
+  ,al3 call$2 "nd2 labell$2 titl$2 t
+    says4
+  ,say3 add a process call$ ,*eck pay;t
+  ,say3 add a deci.n call$ ,approv$8
+  ,say3 add a process call$ 8,*eck 2f
+    pay;t0
+
+  add a `<%ape`> .<call$ `<label`>.>
+    `<rela;n`> `<exi/+ %ape`>
+  ,adds a %ape 9 a *os5 posi;n 2s "o alr
+    9 ! *>t4
+  ,al3 2f2 af2 abv "<ov}">2 2l "<"u">2
+    left (2 "r (4
+  ,say3 add an 5d 2l ,*eck pay;t
+  ,say3 add a process call$ ,refund to !
+    "r ( ,*eck pay;t
+
+,,3nect ,,%apes
+  3nect `<%ape`> to `<%ape`>
+  ,draws an >r{ f ! f/ %ape to ! second4
+  ,al3 3nect2 l9k2 jo92 draw an >r{ f4
+  ,say3 3nect ,/>t to ,*eck pay;t
+  ,say3 draw an >r{ f ,*eck pay;t to ,5d
+
+  3nect `<%ape`> to `<%ape`> labell$
+    `<label`>
+  ,draws an >r{ & labels x ",- h{ a
+    deci.n's bran*es >e "nd4
+  ,al3 labell$2 call$2 "nd2 ) label4
+  ,say3 3nect ,approv$ to ,refund
+    labell$ ,no
+
+,,,*ange :at is "!,'
+
+  re"n `<%ape`> to `<label`>
+  ,*anges a %ape's label4
+  ,al3 re"n2 relabel2 *ange2 to or 9to2
+    ? _/ x _/ ! select$ %ape ref} to !
+    curr5t selec;n4
+  ,say3 re"n ,*eck pay;t to ,take pay;t
+  ,say3 *ange ,process #c 9to ,review
+  ,say3 re"n ? to ,take pay;t
+  move `<%ape`> `<rela;n`> `<%ape`>
+  ,reposi;ns a %ape 2s ano!r "o4
+  ,say3 move ,refund 2l ,approv$
+
+  delete `<%ape`>
+  ,removes a %ape4 ,a %ape ) >r{s asks =
+    3firma;n f/4
+  ,al3 delete2 remove2 }ase4
+  ,say3 delete ,refund
+  ,say3 remove ! select$ %ape
+
+  `<any comm&`> ! `<%ape k9d`>
+  ,:5 ! *>t has only "o %ape ( a k9d1 xs
+    k9d "ns x ",- use;l :5 ! label is a
+    l;g "q4 ,) two ( !m y >e ask$ :4
+  ,al3 ! />t2 ! process "</ep1 ac;n1
+    task">2 ! deci.n "<*oice1 "q">2 ! 5d
+    "<f9i%1 /op">4
+  ,say3 delete ! deci.n
+  ,say3 focus on ! 5d
+
+  delete ! 3nec;n f `<%ape`> to `<%ape`>
+  ,removes "o >r{1 l1v+ bo? %apes 9
+    place4
+  ,al3 3nec;n2 >r{2 l9k2 $ge4
+  ,say3 delete ! 3nec;n f ,/>t to ,*eck
+    pay;t
+
+,,,move ! cursor,'
+
+  next _/ back
+  ,walks "o /ep al;g ! >r{s1 & says ": y
+    l&$4
+  ,al3 next "<g next1 =w>d">2 back "<g
+    back1 previ|s">4
+  ,say3 next
+  ,say3 g back
+
+  take `<bran*`>
+  ,at a deci.n1 foll{s ! >r{ ) t label4
+  ,al3 take2 foll{4
+  ,say3 take ,no
+
+  g to />t _/ g to 5d _/ ": am ,i
+  ,jumps to ei 5d ( ! *>t1 or rep1ts yr
+    curr5t posi;n4
+  ,say3 g to />t
+  ,say3 g to ! 5d
+  ,say3 ": am ,i
+  focus on `<%ape`> _/ cle> selec;n
+  ,selects a %ape by "n1 or drops !
+    selec;n 5tirely4
+  ,al3 focus on2 focus2 select2 hi<li<t2
+    cle> selec;n2 deselect4
+  ,say3 focus on ,*eck pay;t
+  ,say3 select ! la/ %ape
+  ,say3 cle> selec;n
+
+,,,ask ab ! *>t,'
+
+  describe ! *>t _/ describe ?
+  ,r1ds | ! :ole *>t1 or j ! select$
+    %ape4
+  ,say3 describe ! *>t
+  ,say3 describe ?
+
+  9spect `<%ape`>
+  ,li/s :at l1ds 9to & | ( "o %ape4
+  ,say3 9spect ,*eck pay;t
+  ,say3 9spect ?
+
+  trace ! pa? f `<%ape`> .<to `<%ape`>.>
+  ,foll{s ! r|te 2t two %apes1 or onw>d
+    f "o4
+  ,say3 trace ! pa? f ,/>t to ,5d
+  ,say3 trace ! pa? f ,/>t
+
+  validate ! *>t
+  ,reports :at is unf9i%$3 miss+ />t1
+    d1d 5ds1 unlabell$ bran*es4
+  ,al3 validate ! *>t2 *eck ! *>t4
+  ,say3 validate ! *>t
+
+,,,take x back,'
+
+  undo _/ r$o
+  ,/eps back or =w>d "? yr $its4 ,walk+
+    ! *>t is n an $it4
+  ,say3 undo
+  ,say3 r$o
+
+  3firm _/ c.el
+  ,answ}s a p5d+ "q4 ,3firm+ a dele;n is
+    recognis$ ~w = ~w only1 n"e
+    approximately4
+  ,say3 3firm
+  ,say3 c.el
+
+,,,s5t to 2 9t}pret$,'
+
+  ,say3 add a />t node & 3nect x to a
+    new deci.n
+  ,two comm&s 9 "o br1?4 ,say !m "o at a
+    "t1 or let ! model exp& x4
+
+  ,say3 add ?ree /eps = onbo>d+
+  ,a quant;y to exp&1 n "o "nd %ape4
+
+  ,say3 delete "ey?+
+  ,any?+ address$ 9 bulk is a sequ;e1 &
+    dele;n n"e runs on a guess4
+
+  ,say3 d n add a />t node
+  ,nega;n rev}ses a phrase ! templates
+    wd o!rwise r1d lit}ally4
+
+  ,say3 move ,/>t "s": s5sible
+  ,a place;t ) no %ape 2s x is n a
+    place;t4
+
+  ,say3 3nect ! la/ node to a new deci.n
+  8,a new deci.n0 describes a %ape t
+    does n exi/ yet1 s no?+ c resolve x4
+  ,say3 label ! >r{ 2t ,/>t & ,5d ,yes
+  ,labell+ an exi/+ >r{ ne$s xs id5t;y1
+    : no spok5 phrase c>ries4 ,click !
+    >r{1 or say ! 3nect =m ) a label4
