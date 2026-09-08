@@ -9,6 +9,7 @@ import { layoutGraph } from "../visual/layout";
 import VisualCanvas from "../visual/VisualCanvas";
 import { ShapePalette, NodeInspector } from "./ShapePalette";
 import CommandForm from "./CommandForm";
+import CommandGuide from "./CommandGuide";
 import ToggleSwitch from "./ToggleSwitch";
 import { createEditorCoordinator } from "./coordinator";
 import { useVoice } from "./useVoice";
@@ -87,7 +88,9 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
       <button disabled={!focused} onClick={() => onCommand({ kind: "walk", direction: "next", branch: null })}>Next</button>
       <button disabled={!focused} onClick={() => onCommand({ kind: "walk", direction: "stay", branch: null })}>Where am I</button>
     </div><div className="query-controls"><button disabled={graph.nodes.length > 0 || !!pending} onClick={() => dispatch({type:"example"})}>Load large example</button><button onClick={() => onCommand({ kind: "describe", scope: "chart" })}>Describe chart</button><button disabled={!focused} onClick={() => onCommand({ kind: "inspect", node: null })}>Inspect focus</button><button onClick={() => onCommand({ kind: "validate" })}>Validate chart</button></div></div>
-    
+    {/* Beside the voice button, not buried at the bottom: the phrases are only useful to someone
+        deciding what to say next, and reaching them must not cost a trip through the whole page. */}
+    <CommandGuide />
     <section className={`command-feedback ${hasError ? "has-error" : ""}`} aria-label="Command feedback">
       <span className="feedback-label">{status}</span>
       {presentation?.source && <span className="feedback-source" data-source={presentation.source}>{presentation.source === "local" ? "Local command" : "Gemini"}</span>}

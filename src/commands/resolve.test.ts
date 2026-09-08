@@ -39,6 +39,24 @@ describe("node references", () => {
   it.each(["this", "it", "this node"])("resolves pronoun %s to focus", value => {
     expect(resolveNode(state(), { kind: "label", value })).toEqual({ kind: "resolved", id: "n2" });
   });
+  // Naming a shape by its kind is how anyone refers to the only one of it: on a chart whose
+  // decision reads "is Rukmini less than 18", nobody says that sentence back to delete it.
+  it.each(["the decision", "decision", "the decision node", "choice", "the question shape"])(
+    "resolves a shape named by its kind: %s", value => {
+      expect(resolveNode(state(), { kind: "label", value })).toEqual({ kind: "resolved", id: "n3" });
+    });
+  it("prefers a shape actually labelled with the kind word", () => {
+    const input = state(); input.graph.nodes[1].label = "Decision";
+    expect(resolveNode(input, { kind: "label", value: "decision" })).toEqual({ kind: "resolved", id: "n2" });
+  });
+  it("asks which one when the chart has several of that kind", () => {
+    const input = state(); input.graph.nodes[3].type = "decision";
+    expect(resolveNode(input, { kind: "label", value: "the decision" })).toEqual({ kind: "ambiguous", ids: ["n3", "n4"] });
+  });
+  it("refuses a kind the chart has none of", () => {
+    const input = state(); input.graph.nodes = input.graph.nodes.filter(node => node.type !== "decision");
+    expect(resolveNode(input, { kind: "label", value: "the decision" })).toEqual({ kind: "missing" });
+  });
   it("prefers an exact label over a pronoun", () => {
     const input = state(); input.graph.nodes[0].label = "this";
     expect(resolveNode(input, { kind: "label", value: "this" })).toEqual({ kind: "resolved", id: "n1" });

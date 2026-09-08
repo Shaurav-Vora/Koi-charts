@@ -1,4 +1,5 @@
 import type { Snapshot } from "../graph/types";
+import { TYPE_WORDS } from "../graph/type-words";
 import type { SpokenRef } from "./schema";
 
 export type NodeResolution = { kind: "resolved"; id: string } | { kind: "ambiguous"; ids: string[] } | { kind: "missing" };
@@ -52,6 +53,15 @@ export function resolveNode(state: Snapshot, ref: SpokenRef): NodeResolution {
   if (relaxed !== query) {
     const bare = state.graph.nodes.filter(node => normalize(node.label) === relaxed);
     if (bare.length) return matches(bare.map(node => node.id));
+  }
+  // Naming a shape by its kind: "delete the decision". Only reached once no label matched, so a
+  // shape genuinely labelled "Decision" still wins, and two decisions ask which one rather than
+  // picking. relax() cannot be reused here — it strips type words, so "the decision node" would
+  // come back as "node" with the type thrown away.
+  const type = TYPE_WORDS[query.replace(/^(?:the|a|an) /, "").replace(/ (?:node|shape|box)$/, "")];
+  if (type) {
+    const typed = state.graph.nodes.filter(node => node.type === type);
+    if (typed.length) return matches(typed.map(node => node.id));
   }
   const ranked = state.graph.nodes.map(node => ({ id: node.id, score: similarity(relaxed, normalize(node.label)) }))
     .sort((a, b) => b.score - a.score || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));

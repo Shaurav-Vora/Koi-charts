@@ -149,6 +149,14 @@ describe("speech turn coordination",()=>{
   expect(h.getState().graph.nodes).toHaveLength(0);
   expect(h.interpret).not.toHaveBeenCalled();
  });
+ // The reported failure: a decision labelled with the question it asks, referred to by its kind.
+ // "Node not found: decision" was the local parser resolving nothing and the edit being dropped.
+ it("deletes a shape referred to by its kind",async()=>{const h=harness();
+  await h.turn("Add a decision called is Rukmini less than 18.",true,"1");
+  await h.turn("Delete the decision.",true,"2");
+  expect(h.getState().graph.nodes).toHaveLength(0);
+  expect(h.interpret).not.toHaveBeenCalled();
+ });
  it("renames one of two same-named shapes without stalling",async()=>{const h=harness();
   await h.turn("Add a process.",true,"1");
   await h.turn("Now add a process.",true,"2");

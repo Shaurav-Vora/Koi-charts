@@ -1,5 +1,6 @@
 import type { GraphCommand, SpokenRef } from "./schema";
-import type { nodeTypes, placementRelations } from "../graph/types";
+import type { placementRelations } from "../graph/types";
+import { TYPE_WORDS, type NodeType } from "../graph/type-words";
 import { collapse, stripFillers } from "./phrasing";
 
 /**
@@ -12,15 +13,7 @@ import { collapse, stripFillers } from "./phrasing";
  * two together: a form that appears in the guide but no longer parses fails the build.
  */
 
-type NodeType = typeof nodeTypes[number];
 type Relation = typeof placementRelations[number];
-// Authors reach for different words for the same shape; the chart only has four.
-const TYPE_WORDS: Record<string, NodeType> = {
-  start: "start", begin: "start", beginning: "start",
-  process: "process", step: "process", action: "process", task: "process",
-  decision: "decision", choice: "decision", question: "decision",
-  end: "end", finish: "end", stop: "end", terminal: "end",
-};
 const RELATION_WORDS: Record<string, Relation> = {
   before: "before", after: "after",
   above: "above", over: "above", below: "below", under: "below", underneath: "below",

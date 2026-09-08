@@ -12,8 +12,16 @@ import type { GraphCommand } from "./schema";
  * Three rules make the syntax dependable:
  *   1. One command per utterance. Chains are read as a single request and go to the model.
  *   2. Quote a label that contains grammar words: `add a process called "Check before payment"`.
- *   3. Say the shape's own label, not a description of it. "a new decision" names nothing yet.
+ *   3. Name a shape by its own label, or by its kind when the chart has only one of that kind.
+ *      A description of a shape that does not exist yet — "a new decision" — names nothing.
  */
+
+/** The three rules above, as data, so the guide on the page states them in the author's words. */
+export const rules: string[] = [
+  "One command per utterance. Two joined with \"and\" are read as a single request and go to the model.",
+  "Quote a label that contains grammar words: add a process called \"Check before payment\".",
+  "Name a shape by its own label — or, when the chart has only one of them, by its kind: \"the decision\".",
+];
 
 export type GrammarExample = { say: string; command: GraphCommand };
 export type GrammarEntry = {
@@ -110,6 +118,15 @@ export const grammar: GrammarSection[] = [
         examples: [
           { say: "delete Refund", command: { kind: "delete", target: { kind: "node", node: label("Refund") } } },
           { say: "remove the selected shape", command: { kind: "delete", target: { kind: "node", node: { kind: "focus" } } } },
+        ],
+      },
+      {
+        form: "<any command> the <shape kind>",
+        purpose: "When the chart has only one shape of a kind, its kind names it — useful when the label is a long question. With two of them you are asked which.",
+        alternatives: ["the start", "the process (step, action, task)", "the decision (choice, question)", "the end (finish, stop)"],
+        examples: [
+          { say: "delete the decision", command: { kind: "delete", target: { kind: "node", node: label("decision") } } },
+          { say: "focus on the end", command: { kind: "focus", node: label("end") } },
         ],
       },
       {

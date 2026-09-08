@@ -308,7 +308,9 @@ Three rules make the syntax dependable:
    request and goes to the model. Say the two commands separately.
 2. **Quote a label that contains grammar words.** `add a process called "Check before payment"`
    keeps "before" inside the label instead of reading it as a position.
-3. **Name a shape by its label**, not by describing it. "a new decision" names nothing yet.
+3. **Name a shape by its label**, or by its kind when the chart has only one of that kind
+   ("delete the decision"). A description of a shape that does not exist yet — "a new decision" —
+   names nothing.
 
 | Form | Example |
 | --- | --- |
@@ -381,4 +383,25 @@ cough or a door will not interrupt.
 1 connection? Say confirm or cancel." The old wording counted nodes instead of naming them and ran
 long enough that "confirm", said over it, was swallowed.
 
-Verification: 694 tests, lint, TypeScript and production build passed.
+**Naming a shape by its kind.** A decision labelled "is Rukmini less than 18" is not something
+anyone says back in order to delete it, so "delete the decision" now reaches the only decision on
+the chart — and likewise "the start", "the process", "the end", with their synonyms. The kind is
+read only after every label reading has failed, so a shape genuinely labelled "Decision" still
+wins, and a chart with two decisions asks which one instead of picking.
+
+**The syntax is on the page.** A collapsed **What you can say** panel sits under the toolbar,
+listing every form, its wordings and its examples, plus the phrases that are deliberately sent to
+the model and why. It is rendered from `src/commands/grammar.ts` — the same file the contract test
+runs through the real parser — so the panel cannot describe a phrase the parser has stopped
+recognising.
+
+Owner check:
+
+1. Say **"Add a decision called is Rukmini less than 18."** then **"Delete the decision."** The
+   shape should go, with the badge reading **Local command**.
+2. Add a second decision and say **"Delete the decision."** again. Expect a numbered question
+   rather than a deletion.
+3. Open **What you can say** and confirm the six sections, then Tab through it — the summary is
+   focusable and opens with Enter.
+
+Verification: 712 tests, lint, TypeScript and production build passed.
