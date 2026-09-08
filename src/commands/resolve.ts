@@ -30,11 +30,23 @@ function similarity(a: string, b: string): number {
 const LEADING = new Set(["the", "a", "an", "node", "shape", "box", "called", "named", "labeled", "labelled", "titled",
   "start", "process", "decision", "end", "step", "task", "action", "choice", "question"]);
 const TRAILING = new Set(["node", "shape", "box"]);
-function relax(query: string): string {
+/**
+ * Every progressively shorter reading, in order, rather than only the shortest. "The process 3"
+ * is the third of a numbered repeat, so stripping to the end would take "process" off a name it
+ * belongs to; trying "process 3" before "3" lets the real label claim it first.
+ */
+function relax(query: string): string[] {
+  const readings: string[] = [];
   let words = query.split(" ");
-  while (words.length > 1 && LEADING.has(words[0])) words = words.slice(1);
+  // A trailing "node" is never part of a name that got here: one that really ends in it matched
+  // exactly, above. A leading kind word can be — "Process (3)" — so those come off one at a time.
   while (words.length > 1 && TRAILING.has(words[words.length - 1])) words = words.slice(0, -1);
-  return words.join(" ");
+  if (words.length !== query.split(" ").length) readings.push(words.join(" "));
+  while (words.length > 1 && LEADING.has(words[0])) {
+    words = words.slice(1);
+    readings.push(words.join(" "));
+  }
+  return readings;
 }
 
 export function resolveNode(state: Snapshot, ref: SpokenRef): NodeResolution {
@@ -49,11 +61,12 @@ export function resolveNode(state: Snapshot, ref: SpokenRef): NodeResolution {
   if (!query) return { kind: "missing" };
   const normalized = state.graph.nodes.filter(node => normalize(node.label) === query);
   if (normalized.length) return matches(normalized.map(node => node.id));
-  const relaxed = relax(query);
-  if (relaxed !== query) {
-    const bare = state.graph.nodes.filter(node => normalize(node.label) === relaxed);
+  const readings = relax(query);
+  for (const reading of readings) {
+    const bare = state.graph.nodes.filter(node => normalize(node.label) === reading);
     if (bare.length) return matches(bare.map(node => node.id));
   }
+  const relaxed = readings.at(-1) ?? query;
   // Naming a shape by its kind: "delete the decision". Only reached once no label matched, so a
   // shape genuinely labelled "Decision" still wins, and two decisions ask which one rather than
   // picking. relax() cannot be reused here — it strips type words, so "the decision node" would

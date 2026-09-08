@@ -27,6 +27,13 @@ describe("node references", () => {
     "reads past the words around a name: %s", value => {
       expect(resolveNode(state(), { kind: "label", value })).toEqual({ kind: "resolved", id: "n2" });
     });
+  // A numbered repeat keeps the kind word inside its name, so relaxing must stop at the first
+  // reading that matches: "the process 3" is "Process (3)", not the bare number 3.
+  it.each(["Process 3", "process 3", "the process 3", "the process 3 node"])(
+    "reads a numbered repeat as its own name: %s", value => {
+      const input = state(); input.graph.nodes[1].label = "Process (3)";
+      expect(resolveNode(input, { kind: "label", value })).toEqual({ kind: "resolved", id: "n2" });
+    });
   it("prefers a shape that really is called that, over the relaxed reading", () => {
     const input = state(); input.graph.nodes[3].label = "Validate card node";
     expect(resolveNode(input, { kind: "label", value: "Validate card node" })).toEqual({ kind: "resolved", id: "n4" });

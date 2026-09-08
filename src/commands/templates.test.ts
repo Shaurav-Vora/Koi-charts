@@ -65,6 +65,16 @@ describe("command templates", () => {
     ["Select the last shape", { kind: "focus", node: { kind: "recent" } }],
   ])("reads %j as a focus change", (text, command) => expect(parseTemplate(text)).toEqual(command));
 
+  // A kind word with anything after it is a name, not a description: a repeated label is numbered,
+  // so "Process 3" is what the third one is really called. These all went to the model before.
+  it.each([
+    ["Rename the process 3 to Process 5.", { kind: "rename", node: byLabel("the process 3"), newLabel: "Process 5" }],
+    ["Rename Process 3 into Review.", { kind: "rename", node: byLabel("Process 3"), newLabel: "Review" }],
+    ["Change Process 3 to Review.", { kind: "rename", node: byLabel("Process 3"), newLabel: "Review" }],
+    ["Rename the decision to Approved.", { kind: "rename", node: byLabel("the decision"), newLabel: "Approved" }],
+    ["Delete the process 3.", { kind: "delete", target: { kind: "node", node: byLabel("process 3") } }],
+  ])("reads %j as a named shape rather than a description", (text, command) => expect(parseTemplate(text)).toEqual(command));
+
   // Refusing costs one model call. Matching wrongly writes the wrong thing into the chart.
   it.each([
     // "and" belongs to this label, so splitting on it would truncate a legitimate step.
@@ -77,6 +87,8 @@ describe("command templates", () => {
     "Add a process, then connect it to a new decision.",
     "Connect Start to a new decision.",
     "Connect Start to an end node.",
+    "Rename a new decision to Approved.",
+    "Rename the new process to Review.",
     "Delete all nodes.",
     "Remove every connection.",
     "Add a process called .",

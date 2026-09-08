@@ -149,6 +149,15 @@ describe("speech turn coordination",()=>{
   expect(h.getState().graph.nodes).toHaveLength(0);
   expect(h.interpret).not.toHaveBeenCalled();
  });
+ // The reported failure: renaming a numbered repeat went to the model, because "the process 3"
+ // was read as a description of a shape rather than the name of the third one.
+ it.each(["Rename process 3 to Process 5.","Rename the process 3 to Process 5.","Change process 3 into Process 5."])(
+  "renames a numbered repeat locally: %s",async text=>{const h=harness();
+  for(const seed of ["1","2","3"]) await h.turn("Add a process.",true,seed);
+  await h.turn(text,true,"4");
+  expect(h.getState().graph.nodes.map(node=>node.label)).toEqual(["Process","Process (2)","Process 5"]);
+  expect(h.interpret).not.toHaveBeenCalled();
+ });
  // The reported failure: a decision labelled with the question it asks, referred to by its kind.
  // "Node not found: decision" was the local parser resolving nothing and the edit being dropped.
  it("deletes a shape referred to by its kind",async()=>{const h=harness();

@@ -98,9 +98,10 @@ export const grammar: GrammarSection[] = [
       {
         form: "rename <shape> to <label>",
         purpose: "Changes a shape's label.",
-        alternatives: ["rename", "relabel", "this / it / the selected shape refer to the current selection"],
+        alternatives: ["rename", "relabel", "change", "to or into", "this / it / the selected shape refer to the current selection"],
         examples: [
           { say: "rename Check payment to Take payment", command: { kind: "rename", node: label("Check payment"), newLabel: "Take payment" } },
+          { say: "change Process 3 into Review", command: { kind: "rename", node: label("Process 3"), newLabel: "Review" } },
           { say: "rename this to Take payment", command: { kind: "rename", node: { kind: "focus" }, newLabel: "Take payment" } },
         ],
       },

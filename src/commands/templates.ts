@@ -37,8 +37,20 @@ const norm = collapse;
  * utterance that looks like a chain is handed to the model whole.
  */
 const CHAINED = /\bthen\b|\b(?:and|,)\s+(?:also\s+)?(?:connect|link|join|delete|remove|erase|rename|relabel|add|create|insert|make|focus|select|move|undo|redo|draw)\b/i;
-/** A shape described rather than named does not exist yet, so no local rule can resolve it. */
-const VAGUE = /^(?:a|an|the)\s+(?:new\s+|another\s+)?(?:start|process|decision|end|choice|step|task|action|question|finish|stop|node|shape|box)\b/i;
+/**
+ * A shape described rather than named. "A new decision" does not exist yet, and an indefinite
+ * "a process" picks none of the ones that do — both are the model's to expand.
+ *
+ * Two things are deliberately not vague. A definite "the decision" names the only decision on
+ * the chart, which resolution can find, asking which one when there is more than one. And any
+ * word after the kind makes it a name again: "the process 3" is what a shape numbered by a
+ * repeated label is actually called, so anchoring at the end matters as much as the wording.
+ */
+const VAGUE = new RegExp([
+  `^(?:a|an|the) (?:(?:new|another) )?(?:${SHAPE})$`,
+  `^(?:a|an) (?:(?:new|another) )?(?:${TYPES})(?: (?:${SHAPE}))?$`,
+  `^the (?:new|another) (?:${TYPES})(?: (?:${SHAPE}))?$`,
+].join("|"), "i");
 /** Anything addressed in bulk is a sequence the model must expand, not one named shape. */
 const BULK = /^(?:all|every|each|everything|both)\b/i;
 const PRONOUN = /^(?:this|that|it|(?:the\s+)?(?:selected|focused|current)(?:\s+(?:node|shape|box|one))?|(?:the\s+)?selection)$/i;
@@ -66,11 +78,15 @@ function ref(raw: string): SpokenRef | null {
   return VAGUE.test(value) || BULK.test(value) ? null : { kind: "label", value };
 }
 
-/** Splits on the first " to ", which a quoted name is used to escape: `rename "Go to shop" to X`. */
-function pair(rest: string): [string, string] | null {
-  const quoted = /^"([^"]+)"\s+to\s+(.+)$/i.exec(rest);
+/**
+ * Splits on the first " to ", which a quoted name is used to escape: `rename "Go to shop" to X`.
+ * "into" is accepted alongside it because a rename is as often said that way, and no connection
+ * or path is ever phrased with it, so the two readings cannot collide.
+ */
+function pair(rest: string, joiner = "to"): [string, string] | null {
+  const quoted = new RegExp(`^"([^"]+)" (?:${joiner}) (.+)$`, "i").exec(rest);
   if (quoted) return [`"${quoted[1]}"`, quoted[2]];
-  const plain = /^(.+?)\s+to\s+(.+)$/i.exec(rest);
+  const plain = new RegExp(`^(.+?) (?:${joiner}) (.+)$`, "i").exec(rest);
   return plain ? [plain[1], plain[2]] : null;
 }
 
@@ -114,10 +130,11 @@ const patterns: { pattern: RegExp; build: (match: RegExpExecArray) => GraphComma
       return node && place.ok && place.value ? { kind: "move", node, placement: place.value } : null;
     },
   },
-  { // rename
-    pattern: /^(?:rename|relabel) (.+)$/i,
+  { // rename. "change" is included because it is the everyday word for it; a "change" whose two
+    // halves are not a shape and a label still returns null and reaches the model.
+    pattern: /^(?:rename|relabel|change) (.+)$/i,
     build: match => {
-      const parts = pair(match[1]);
+      const parts = pair(match[1], "to|into");
       if (!parts) return null;
       const node = ref(parts[0]), newLabel = cleanLabel(parts[1]);
       return node && newLabel ? { kind: "rename", node, newLabel } : null;

@@ -404,4 +404,11 @@ Owner check:
 3. Open **What you can say** and confirm the six sections, then Tab through it — the summary is
    focusable and opens with Enter.
 
-Verification: 712 tests, lint, TypeScript and production build passed.
+**Renaming a numbered repeat.** "Rename process 3 to Process 5", "rename **the** process 3 to
+Process 5" and "change process 3 into Process 5" all stay local. Three things were in the way: a
+kind word behind "the" was read as a description of a shape that does not exist rather than as the
+name of one that does; only "to" joined the two halves, not "into"; and "change" was not a rename
+verb. Reference relaxation also now stops at the first reading that matches a real label, so
+"the process 3" is tried as "process 3" before it is cut down to "3".
+
+Verification: 729 tests, lint, TypeScript and production build passed.
