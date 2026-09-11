@@ -482,9 +482,10 @@ Owner check: reload the workspace. Confirm that Voice Controls and Command Feedb
 ## Shape palette and inspector visual refinement
 
 The shape palette and node inspector have been redesigned into a tactile, high-contrast tool panel:
-- **Shape Cards (`.shape-item`)**: Distinct semantic colors and soft tinted fills for each flowchart element (emerald for Start, royal blue for Process/Step, amber for Decision/Branch, and coral for End). Added subtle role labels, hover elevation (`translateY(-2px)` + warm accent glow), and tactile grab cursor affordances.
+- **Single-Column Shape Cards (`.shape-item`)**: Arranged as full-width row cards in a single column to naturally utilize the sidebar's vertical space. Each card features the shape SVG on the left, clear labels and descriptive subtitles in the middle (e.g. `Start / Entry`, `Step / Action`, `Branch / Choice`, `End / Exit`), and a subtle grab handle on the right.
+- **Semantic Colors & Hover Elevation**: Emerald for Start, royal blue for Process, amber for Decision, and coral for End with gentle tinted fills and crisp strokes, elevating with a warm accent glow on hover.
 - **Header and Subtitle**: Clear uppercase category header with shape count pill and concise guidance.
 - **Tip Card (`.palette-tip-card`)**: Streamlined quick-connect guide card with info icon and clear copy explaining connection dots and automatic routing.
 - **Node Inspector (`.node-inspector`)**: Polished selected-shape inspector with type tag badge, clean input focus ring, primary brand action button, and a styled secondary delete button.
 
-Owner check: reload the workspace. Inspect the shape buttons in the left palette: observe the distinct shape tints, crisp strokes, hover animations, and subtitle role badges. Click or drag a shape onto the canvas; click a shape to open the Node Inspector below and confirm the type badge, input focus ring, and action buttons appear cleanly.
+Owner check: reload the workspace. Inspect the shape buttons in the left palette: observe the vertical single-column card list with distinct shape tints, crisp strokes, hover animations, role badges, and drag handles. Click or drag a shape onto the canvas; click a shape to open the Node Inspector below and confirm the type badge, input focus ring, and action buttons appear cleanly.

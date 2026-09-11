@@ -92,7 +92,7 @@
   box-shadow: 0 1px 2px rgba(0,0,0,0.06);
 }
 #workspace .editor-toolbar button:disabled { opacity: 0.45; cursor: not-allowed; }
-#workspace .diagram-workbench { grid-template-columns: 210px minmax(0,1fr); border: 1px solid #c7d3e5; border-radius: 10px; overflow: hidden; background: white; box-shadow: 0 4px 20px #1c2c4906; }
+#workspace .diagram-workbench { grid-template-columns: 216px minmax(0,1fr); border: 1px solid #c7d3e5; border-radius: 10px; overflow: hidden; background: white; box-shadow: 0 4px 20px #1c2c4906; }
 #workspace .palette-column { background: #f8fafd; border-right: 1px solid #dce4f0; padding: 16px 12px; display: flex; flex-direction: column; }
 #workspace .shape-palette { background: transparent; border: 0; padding: 0; }
 #workspace .palette-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
@@ -100,20 +100,23 @@
 #workspace .palette-count { font-size: 10px; font-weight: 700; background: #e3ebf6; color: #3a547a; padding: 1px 6px; border-radius: 999px; }
 #workspace .palette-subtext { font-size: 11px; color: var(--muted); margin: 0 0 12px; }
 
-#workspace .shape-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 0 12px; }
+#workspace .shape-buttons { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 0 0 14px; }
 #workspace .shape-item {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 10px;
   border: 1px solid #d5dfed;
   background: #ffffff;
   border-radius: 8px;
-  padding: 8px 4px 6px;
-  min-height: 80px;
+  padding: 8px 10px;
+  min-height: 52px;
   cursor: grab;
+  text-align: left;
   transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease, background-color 140ms ease;
   box-shadow: 0 1px 3px rgba(28, 44, 73, 0.04);
+  width: 100%;
 }
 #workspace .shape-item:hover {
   transform: translateY(-2px);
@@ -126,8 +129,9 @@
   cursor: grabbing;
 }
 #workspace .shape-icon-wrap {
-  width: 52px;
-  height: 34px;
+  width: 44px;
+  height: 30px;
+  flex: 0 0 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -139,7 +143,7 @@
   transition: transform 140ms ease;
 }
 #workspace .shape-item:hover .shape-svg {
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
 /* Individual semantic shape colors */
@@ -148,20 +152,35 @@
 #workspace .shape-decision .shape-svg { stroke: #c26514; fill: #fef5ee; }
 #workspace .shape-end .shape-svg { stroke: #c0392b; fill: #fdf2f2; }
 
+#workspace .shape-details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
 #workspace .shape-title {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 650;
   color: var(--ink);
-  margin-top: 4px;
   line-height: 1.2;
 }
 #workspace .shape-kind-label {
-  font-size: 9px;
-  font-weight: 600;
-  color: #7b8ba1;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  margin-top: 1px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #6e7f98;
+  margin-top: 2px;
+}
+#workspace .shape-drag-handle {
+  font-size: 13px;
+  color: #b8c7d9;
+  letter-spacing: -2px;
+  opacity: 0.5;
+  margin-left: auto;
+  user-select: none;
+}
+#workspace .shape-item:hover .shape-drag-handle {
+  opacity: 1;
+  color: var(--accent);
 }
 
 /* Tip helper card */
@@ -334,9 +353,11 @@ kbd { font-family: inherit; font-size: .9em; border: 1px solid #c7d3e5; border-b
  #workspace .diagram-workbench { grid-template-columns: 1fr; }
  #workspace .palette-column { border-right: 0; border-bottom: 1px solid #c7d3e5; }
  #workspace .shape-palette { padding: 4px 0; }
- #workspace .shape-buttons { grid-template-columns: repeat(4,minmax(0,1fr)); margin: 8px 0; }
- #workspace .shape-item { min-height: 64px; padding: 6px 2px; }
- #workspace .shape-icon-wrap { height: 28px; width: 44px; }
+ #workspace .shape-buttons { grid-template-columns: repeat(4,minmax(0,1fr)); margin: 8px 0; gap: 6px; }
+ #workspace .shape-item { flex-direction: column; min-height: 62px; padding: 6px 2px; text-align: center; }
+ #workspace .shape-icon-wrap { height: 26px; width: 38px; }
+ #workspace .shape-drag-handle { display: none; }
+ #workspace .shape-kind-label { display: none; }
  #workspace .palette-tip-card { display: none; }
  #workspace .voice-controls { padding: 14px; }
  #workspace .voice-readout { flex-basis: 100%; }

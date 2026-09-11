@@ -37,8 +37,13 @@ export function ShapePalette({ lastNodeId, onCommand }: { lastNodeId?: string; o
                 )}
               </svg>
             </div>
-            <span className="shape-title">{type[0].toUpperCase() + type.slice(1)}</span>
-            <span className="shape-kind-label">{type === "start" ? "Start" : type === "process" ? "Step" : type === "decision" ? "Branch" : "End"}</span>
+            <div className="shape-details">
+              <span className="shape-title">{type[0].toUpperCase() + type.slice(1)}</span>
+              <span className="shape-kind-label">
+                {type === "start" ? "Start / Entry" : type === "process" ? "Step / Action" : type === "decision" ? "Branch / Choice" : "End / Exit"}
+              </span>
+            </div>
+            <span className="shape-drag-handle" aria-hidden="true">⋮⋮</span>
           </button>
         ))}
       </div>
