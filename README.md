@@ -167,7 +167,7 @@ Stable versions resolved from npm on September 5, 2026, pinned exactly in `packa
 | Testing Library React | 16.3.3 |
 | Testing Library jest-dom | 7.0.1 |
 
-Setup follows the official [Next.js installation guide](https://nextjs.org/docs/app/getting-started/installation), checked during bootstrap. The application was manually scaffolded to preserve the existing design and plan. CSS uses a small blue/white token palette and local system fonts, so building does not require downloading fonts. React Flow 12.11.6 and Dagre 3.1.1 provide the canvas and baseline layout. Voice packages remain deferred.
+Setup follows the official [Next.js installation guide](https://nextjs.org/docs/app/getting-started/installation), checked during bootstrap. The application was manually scaffolded to preserve the existing design and plan. CSS uses a blue/white base palette with a warm-orange accent (`--accent`) drawn from the koi brand, and local system fonts, so building does not require downloading fonts. React Flow 12.11.6 and Dagre 3.1.1 provide the canvas and baseline layout. Voice packages remain deferred.
 
 Compatibility exception: the latest TypeScript 7 release was rejected by Next.js's typescript-eslint dependency, and its React/accessibility/import plugins declare ESLint support only through version 9. TypeScript 6.0.3 and ESLint 9.39.5 are pinned to satisfy those boundaries. npm marks ESLint 9 as out of support; revisit the pin when the Next.js plugin stack supports ESLint 10. Do not upgrade either tool independently without rerunning lint. npm also reports a blocked optional `unrs-resolver` postinstall script; the installed native package resolves successfully and lint passes without enabling that script.
 
@@ -454,3 +454,9 @@ text editor. The first line should read `,,,koi *>ts -- :at y c say,'` — that 
 WHAT YOU CAN SAY" in Braille ASCII, with the capital-passage indicator around it.
 
 Verification: 737 tests, lint, TypeScript and production build passed.
+
+## Brand accent color
+
+The koi's orange now carries into the interface. Three new CSS tokens — `--accent`, `--accent-hover`, `--accent-tint` — colour every action the author takes: Start voice, Apply label, form submits, toggle switches, branch shortcuts, shape palette hover, tactile mode selection, export hover, and the active page indicator. Blue remains for links, focus outlines, and node selection, keeping the accessibility contract intact.
+
+Owner check: reload and compare the Start voice button, both toggle switches, the active Workspace tab underline, and a shape palette hover against the koi logo. All should share the same warm orange. Tab to the Start voice button and confirm the focus outline is still blue. Select a node and confirm its canvas highlight is still blue.

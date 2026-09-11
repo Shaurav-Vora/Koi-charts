@@ -22,7 +22,7 @@
 #workspace .shape-palette > p { font-size: 12px; line-height: 1.6; color: #53627a; }
 #workspace .shape-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0; }
 #workspace .shape-buttons button { border: 1px solid #cbd6e6; background: #fff; border-radius: 6px; padding: 10px 4px; min-height: 88px; }
-#workspace .shape-buttons button:hover { background: #f8faff; border-color: #315ac8; box-shadow: 0 2px 6px #315ac815; }
+#workspace .shape-buttons button:hover { background: var(--accent-tint); border-color: var(--accent); box-shadow: 0 2px 6px #c45d1018; }
 #workspace .shape-buttons svg { width: 54px; height: 36px; }
 #workspace .shape-buttons span { font-size: 12px; font-weight: 600; }
 #workspace .node-inspector { padding: 18px 14px; border-top: 1px solid #c7d3e5; background: #f8faff; }
@@ -44,7 +44,7 @@
 #workspace .tactile-display { border-color: #cbd6e6; border-radius: 10px; }
 #workspace .tactile-controls { padding: 14px 20px; background: #f8faff; border-bottom: 1px solid var(--line); }
 #workspace .tactile-controls button { border-radius: 5px; min-height: 40px; font-size: 13px; }
-#workspace .tactile-controls button[aria-pressed="true"] { background: #1c2c49; border-color: #1c2c49; color: #fff; }
+#workspace .tactile-controls button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
 #workspace .information-strip { border-radius: 0 5px 5px 0; }
 #workspace .chart-structure { padding: 22px; margin-top: 24px; border-color: #cbd6e6; border-radius: 10px; }
 #workspace .node-list { display: grid; grid-template-columns: repeat(auto-fill,minmax(170px,1fr)); gap: 10px; padding-top: 10px; }
