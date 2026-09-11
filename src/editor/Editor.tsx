@@ -71,42 +71,48 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const indicator = voiceIndicator(voice.connectionStatus, inputPaused, presentation?.status);
   const status = presentation ? statusLabels[presentation.status] : state.outcome === "idle" ? "Idle" : state.outcome === "error" ? "Command not applied" : state.outcome === "confirmation" ? "Confirmation needed" : state.outcome === "clarification" ? "Clarification needed" : state.outcome === "committed" ? "Change applied" : state.outcome === "focused" ? "Focus updated" : state.outcome === "cancelled" ? "Cancelled" : "Chart explored";
   return <>
-    <div className="workspace-heading"><div><h2>Your workspace</h2><p>Build a flowchart, one clear step at a time.</p></div></div>
-    <div className="editor-toolbar"><div className="voice-controls" data-tone={indicator.tone} role="group" aria-label="Voice workspace">
-      <div className="voice-readout">
-        <div className="status" role="status" aria-live="polite"><span className="status-dot" aria-hidden="true" />{indicator.label}</div>
-        <p className="voice-hint">{indicator.hint}</p>
+    <div className="workspace-heading"><h2>Your workspace</h2><span className="workspace-tagline">Build a flowchart, one clear step at a time.</span></div>
+    <div className="workspace-deck">
+      <div className="voice-controls" data-tone={indicator.tone} role="group" aria-label="Voice workspace">
+        <div className="voice-readout">
+          <div className="status" role="status" aria-live="polite"><span className="status-dot" aria-hidden="true" />{indicator.label}</div>
+          <p className="voice-hint">{indicator.hint}</p>
+        </div>
+        {voice.active && <span className="mic-level" aria-hidden="true"><span className="mic-level-fill" style={{ width: `${Math.round(Math.min(1, voice.level * 4) * 100)}%` }} /></span>}
+        <div className="voice-actions">
+          <button className={`voice-button${voice.active ? " is-active" : ""}`} aria-pressed={voice.active} onClick={() => { if (voice.active) { speaker.cancel(); voice.stop(); } else voice.start(); }}>{voice.active ? "Stop voice" : "Start voice"}</button>
+          <button className="stop-speech-button" disabled={!inputPaused} onClick={() => speaker.interrupt()}>Stop speaking</button>
+          <ToggleSwitch className="local-switch" label="Fast local commands" checked={fastLocal} title="Recognise common phrases on this device instead of sending them to be interpreted." onChange={next => localCommandPreference.write(next)} />
+          <ToggleSwitch className="speech-switch" label="Speak replies" checked={speaks} disabled={!supported} title={supported ? undefined : "This browser has no speech engine."} onChange={toggleSpeech} />
+        </div>
       </div>
-      {voice.active && <span className="mic-level" aria-hidden="true"><span className="mic-level-fill" style={{ width: `${Math.round(Math.min(1, voice.level * 4) * 100)}%` }} /></span>}
-      <button className={`voice-button${voice.active ? " is-active" : ""}`} aria-pressed={voice.active} onClick={() => { if (voice.active) { speaker.cancel(); voice.stop(); } else voice.start(); }}>{voice.active ? "Stop voice" : "Start voice"}</button>
-      {/* Interrupting matters more than it sounds: a long reply blocks the microphone until it
-          finishes, so without this the author must wait out a description they no longer want. */}
-      <button className="stop-speech-button" disabled={!inputPaused} onClick={() => speaker.interrupt()}>Stop speaking</button>
-      {/* An escape hatch, not a feature switch: if a template ever reads a phrase wrongly, the
-          author hands everything back to the model without losing voice editing entirely. */}
-      <ToggleSwitch className="local-switch" label="Fast local commands" checked={fastLocal} title="Recognise common phrases on this device instead of sending them to be interpreted." onChange={next => localCommandPreference.write(next)} />
-      {/* Speaking and the live region below say the same words, so exactly one of them is ever
-          active: a screen reader user would otherwise hear every reply twice. */}
-      <ToggleSwitch className="speech-switch" label="Speak replies" checked={speaks} disabled={!supported} title={supported ? undefined : "This browser has no speech engine."} onChange={toggleSpeech} />
-    </div><div className="history-controls"><button disabled={!history.past.length} onClick={() => onCommand({ kind: "undo" })}>Undo</button><button disabled={!history.future.length} onClick={() => onCommand({ kind: "redo" })}>Redo</button></div><div className="walk-controls" role="group" aria-label="Walk the chart">
-      {/* The same cursor the voice commands move, reachable without speaking. Each step
-          announces where it landed and every way out, through the feedback live region. */}
-      <button disabled={!graph.nodes.length} onClick={() => onCommand({ kind: "walk", direction: "first", branch: null })}>Go to start</button>
-      <button disabled={!focused} onClick={() => onCommand({ kind: "walk", direction: "back", branch: null })}>Back</button>
-      <button disabled={!focused} onClick={() => onCommand({ kind: "walk", direction: "next", branch: null })}>Next</button>
-      <button disabled={!focused} onClick={() => onCommand({ kind: "walk", direction: "stay", branch: null })}>Where am I</button>
-    </div><div className="query-controls"><button disabled={graph.nodes.length > 0 || !!pending} onClick={() => dispatch({type:"example"})}>Load large example</button><button onClick={() => onCommand({ kind: "describe", scope: "chart" })}>Describe chart</button><button disabled={!focused} onClick={() => onCommand({ kind: "inspect", node: null })}>Inspect focus</button><button onClick={() => onCommand({ kind: "validate" })}>Validate chart</button></div></div>
-    {/* Beside the voice button, not buried at the bottom: the phrases are only useful to someone
-        deciding what to say next, and reaching them must not cost a trip through the whole page. */}
-    <section className={`command-feedback ${hasError ? "has-error" : ""}`} aria-label="Command feedback">
-      <span className="feedback-label">{status}</span>
-      {presentation?.source && <span className="feedback-source" data-source={presentation.source}>{presentation.source === "local" ? "Local command" : "Gemini"}</span>}
-      <p role={!speaks && hasError ? "alert" : undefined} aria-live={speaks || hasError ? undefined : "polite"}>{message}</p>
-      {pending && <div className="pending-actions">
-        {pending.kind === "deletion" ? <button className="danger-button" onClick={() => onCommand({ kind: "confirm" })}>Confirm deletion</button> : choiceLabels(graph, pending.candidates, pending.elementKind).map((label, index) => <button key={pending.candidates[index]} onClick={() => dispatch({ type: "choose", candidateId: pending.candidates[index], idSeed: crypto.randomUUID() })}>{`${index + 1}. ${label}`}</button>)}
-        <button onClick={() => onCommand({ kind: "cancel" })}>Cancel</button>
-      </div>}
-    </section>
+      <section className={`command-feedback ${hasError ? "has-error" : ""}`} aria-label="Command feedback">
+        <div className="feedback-meta">
+          <span className="feedback-label">{status}</span>
+          {presentation?.source && <span className="feedback-source" data-source={presentation.source}>{presentation.source === "local" ? "Local command" : "Gemini"}</span>}
+        </div>
+        <p role={!speaks && hasError ? "alert" : undefined} aria-live={speaks || hasError ? undefined : "polite"}>{message}</p>
+        {pending && <div className="pending-actions">
+          {pending.kind === "deletion" ? <button className="danger-button" onClick={() => onCommand({ kind: "confirm" })}>Confirm deletion</button> : choiceLabels(graph, pending.candidates, pending.elementKind).map((label, index) => <button key={pending.candidates[index]} onClick={() => dispatch({ type: "choose", candidateId: pending.candidates[index], idSeed: crypto.randomUUID() })}>{`${index + 1}. ${label}`}</button>)}
+          <button onClick={() => onCommand({ kind: "cancel" })}>Cancel</button>
+        </div>}
+      </section>
+    </div>
+    <div className="editor-toolbar">
+      <div className="history-controls"><button disabled={!history.past.length} onClick={() => onCommand({ kind: "undo" })}>Undo</button><button disabled={!history.future.length} onClick={() => onCommand({ kind: "redo" })}>Redo</button></div>
+      <div className="walk-controls" role="group" aria-label="Walk the chart">
+        <button disabled={!graph.nodes.length} onClick={() => onCommand({ kind: "walk", direction: "first", branch: null })}>Go to start</button>
+        <button disabled={!focused} onClick={() => onCommand({ kind: "walk", direction: "back", branch: null })}>Back</button>
+        <button disabled={!focused} onClick={() => onCommand({ kind: "walk", direction: "next", branch: null })}>Next</button>
+        <button disabled={!focused} onClick={() => onCommand({ kind: "walk", direction: "stay", branch: null })}>Where am I</button>
+      </div>
+      <div className="query-controls">
+        <button disabled={graph.nodes.length > 0 || !!pending} onClick={() => dispatch({type:"example"})}>Load large example</button>
+        <button onClick={() => onCommand({ kind: "describe", scope: "chart" })}>Describe chart</button>
+        <button disabled={!focused} onClick={() => onCommand({ kind: "inspect", node: null })}>Inspect focus</button>
+        <button onClick={() => onCommand({ kind: "validate" })}>Validate chart</button>
+      </div>
+    </div>
     <div className="diagram-workbench"><div className="palette-column"><ShapePalette lastNodeId={graph.nodes.at(-1)?.id} onCommand={onCommand} />{focused && <NodeInspector key={`${focused.id}-${focused.label}`} node={focused} onCommand={onCommand} />}</div>
       <section className="display visual-display" aria-labelledby="visual-title" data-graph-version={version}>
         <div className="display-heading"><h3 id="visual-title">Visual flowchart</h3><span className="count">{graph.nodes.length} nodes · {graph.edges.length} connections</span><ExportMenu graph={graph} layout={layout} /></div>

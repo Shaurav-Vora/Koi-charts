@@ -468,3 +468,13 @@ The empty chart state now provides clear visual branding and onboarding guidance
 The tactile simulator display now displays an authentic hardware lowered-pin bed pattern across all 120 × 80 pin locations, preventing the panel from appearing blank or broken before shapes are added. When empty, the tactile simulator presents a dedicated callout card with instructions, and transitions cleanly once shapes and connections produce raised pins.
 
 Owner check: reload with a fresh or empty chart. Confirm the visual canvas displays the floating koi with starter voice command hints, and that dragging a shape onto the canvas remains responsive. Check the tactile display simulator below: observe the subtle 120 × 80 pin array texture and the "No pins raised" guidance card. Add a shape to confirm pins raise and the empty state clears.
+
+## Space optimization and top deck layout
+
+The top area of the workspace has been restructured into a compact, professional control deck (`.workspace-deck`). Voice controls and Command feedback now sit side-by-side on wide viewports instead of stacking as separate full-width rows with massive dead whitespace:
+- The voice controls group status readout and action buttons tightly without stretching across the monitor.
+- The command feedback card sits alongside voice controls at equal height, giving live command feedback, provider source tags, and pending confirmations a dedicated, well-proportioned card.
+- The workspace header and tagline sit on a single compact line, and the navigation/history/query buttons are organized as sleek, low-profile segmented control groups directly above the workbench.
+- Over 130px of vertical space is reclaimed, pulling the flowchart canvas up into direct view.
+
+Owner check: reload the workspace. Confirm that Voice Controls and Command Feedback now sit side-by-side without wide whitespace voids. Test voice or keyboard actions (e.g. inserting a node or selecting an arrow) to confirm live feedback updates in the card. Check that toolbar buttons (Undo, Navigation, Explore) function as segmented groups, and that the layout stacks cleanly on narrower browser windows.
