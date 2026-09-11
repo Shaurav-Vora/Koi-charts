@@ -135,9 +135,10 @@ button, input, select { font: inherit; }
 .voice-controls .status { width: fit-content; min-height: 28px; padding: 3px 9px; border-radius: 5px; background: var(--voice-tint); color: var(--voice-color); font-weight: 650; }
 .voice-controls .status-dot { flex: 0 0 8px; background: currentColor; border-color: currentColor; }
 .voice-hint { margin-top: 3px; color: var(--muted); font-size: 12px; }
-.voice-button { background: var(--accent); border-color: var(--accent); color: white; font-weight: 600; }
-.voice-button:hover:not(:disabled) { background: var(--accent-hover); color: white; }
-.voice-button.is-active { background: var(--voice-tint); border-color: var(--voice-color); color: var(--voice-color); }
+.voice-button:not(.is-active) { background: var(--accent); border-color: var(--accent); color: white; font-weight: 600; }
+.voice-button:not(.is-active):hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); color: white; }
+.voice-button.is-active { background: #dc2626; border-color: #dc2626; color: white; font-weight: 600; }
+.voice-button.is-active:hover:not(:disabled) { background: #b91c1c; border-color: #b91c1c; color: white; }
 .voice-controls .mic-level { width: 88px; height: 12px; background: var(--voice-tint); border-color: var(--voice-color); }
 .voice-controls .mic-level-fill { background: var(--voice-color); }
 .feedback-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -151,7 +152,6 @@ button, input, select { font: inherit; }
   .editor-toolbar .voice-controls button { flex: 1; }
   .editor-toolbar .history-controls, .editor-toolbar .walk-controls { border-right: 0; padding-right: 0; }
 }
-.voice-button.is-active { border-color: var(--blue); background: #edf2fd; font-weight: 600; }
 /* A switch shows its state in the knob's position, so the track carries the colour and the
    label stays constant. The whole control is one button: a 26px knob is not a hit target. */
 .toggle-switch { display: inline-flex; align-items: center; gap: 9px; min-height: 40px; padding: 5px 12px 5px 8px; border: 1px solid var(--line); border-radius: 999px; background: white; color: var(--ink); cursor: pointer; }
