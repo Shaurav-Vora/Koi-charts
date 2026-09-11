@@ -460,3 +460,11 @@ Verification: 737 tests, lint, TypeScript and production build passed.
 The koi's orange now carries into the interface. Three new CSS tokens — `--accent`, `--accent-hover`, `--accent-tint` — colour every action the author takes: Start voice, Apply label, form submits, toggle switches, branch shortcuts, shape palette hover, tactile mode selection, export hover, and the active page indicator. Blue remains for links, focus outlines, and node selection, keeping the accessibility contract intact.
 
 Owner check: reload and compare the Start voice button, both toggle switches, the active Workspace tab underline, and a shape palette hover against the koi logo. All should share the same warm orange. Tab to the Start voice button and confirm the focus outline is still blue. Select a node and confirm its canvas highlight is still blue.
+
+## Empty states (canvas + tactile)
+
+The empty chart state now provides clear visual branding and onboarding guidance. The visual canvas displays the complete koi brand illustration with a gentle floating animation, an invitation to use voice commands (“Say ‘add a start’ to begin with voice, or drag a shape from the left”), and sample voice prompts.
+
+The tactile simulator display now displays an authentic hardware lowered-pin bed pattern across all 120 × 80 pin locations, preventing the panel from appearing blank or broken before shapes are added. When empty, the tactile simulator presents a dedicated callout card with instructions, and transitions cleanly once shapes and connections produce raised pins.
+
+Owner check: reload with a fresh or empty chart. Confirm the visual canvas displays the floating koi with starter voice command hints, and that dragging a shape onto the canvas remains responsive. Check the tactile display simulator below: observe the subtle 120 × 80 pin array texture and the "No pins raised" guidance card. Add a shape to confirm pins raise and the empty state clears.
