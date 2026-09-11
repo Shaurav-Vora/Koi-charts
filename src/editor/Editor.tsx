@@ -132,11 +132,59 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
         <div className="display-footer"><p>Drag shapes to move them. Use the dots to connect. Double-click a shape to rename it, or click an arrow to label it.</p></div>
       </section>
     </div><details className="keyboard-editor"><summary>Keyboard editing &amp; advanced commands</summary><CommandForm graph={graph} focusedNodeId={focusedNodeId} onCommand={onCommand} /></details><div className="secondary-displays">
-      <TactileSimulator graph={graph} focus={focusedNodeId} version={version} displayIds={state.displayIds} />
+      <TactileSimulator
+        graph={graph}
+        focus={focusedNodeId}
+        version={version}
+        displayIds={state.displayIds}
+        chartOutline={
+          <section className="chart-structure" aria-label="Chart structure">
+            <div className="chart-structure-header">
+              <h3>Chart outline</h3>
+              <span className="outline-count">{graph.nodes.length} nodes · {graph.edges.length} connections</span>
+            </div>
+            <p className="outline-intro">The same chart, available as text. Node buttons change focus.</p>
+            <div className="chart-structure-scroll">
+              <div className="outline-group">
+                <h4>Nodes</h4>
+                {graph.nodes.length ? (
+                  <ul className="node-list">
+                    {graph.nodes.map(node => (
+                      <li key={node.id}>
+                        <button
+                          aria-label={`Focus ${node.label}`}
+                          aria-pressed={node.id === focusedNodeId}
+                          onClick={() => onCommand({ kind: "focus", node: { kind: "id", value: node.id } })}
+                        >
+                          {state.displayIds[node.id] ? <strong>{state.displayIds[node.id]}: </strong> : null}
+                          {node.label}
+                        </button>
+                        <span>{node.type}{node.id === focusedNodeId ? " · Focused" : ""}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No nodes yet.</p>
+                )}
+              </div>
+              <div className="outline-group">
+                <h4>Connections</h4>
+                {graph.edges.length ? (
+                  <ul className="edge-list">
+                    {graph.edges.map(edge => (
+                      <li key={edge.id}>
+                        {graph.nodes.find(node => node.id === edge.source)?.label} → {graph.nodes.find(node => node.id === edge.target)?.label} <span>({edge.label ?? "unlabeled"})</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No connections yet.</p>
+                )}
+              </div>
+            </div>
+          </section>
+        }
+      />
     </div>
-    <section className="chart-structure" aria-label="Chart structure"><h3>Chart outline</h3><p className="outline-intro">The same chart, available as text. Node buttons change focus.</p>
-      {graph.nodes.length ? <ul className="node-list">{graph.nodes.map(node => <li key={node.id}><button aria-label={`Focus ${node.label}`} aria-pressed={node.id === focusedNodeId} onClick={() => onCommand({ kind: "focus", node: { kind: "id", value: node.id } })}>{node.label}</button><span>{node.type}{node.id === focusedNodeId ? " · Focused" : ""}</span></li>)}</ul> : <p>No nodes yet.</p>}
-      <h4>Connections</h4>{graph.edges.length ? <ul className="edge-list">{graph.edges.map(edge => <li key={edge.id}>{graph.nodes.find(node => node.id === edge.source)?.label} → {graph.nodes.find(node => node.id === edge.target)?.label} <span>({edge.label ?? "unlabeled"})</span></li>)}</ul> : <p>No connections yet.</p>}
-    </section>
   </>;
 }

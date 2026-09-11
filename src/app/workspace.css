@@ -552,13 +552,29 @@
 #workspace .keyboard-editor { margin: 14px 0 24px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
 #workspace .keyboard-editor summary { width: 100%; padding: 14px 18px; font-size: 13px; font-weight: 600; }
 #workspace .editing-panel { border: 0; border-top: 1px solid var(--line); border-radius: 0; }
-#workspace .tactile-display { border-color: #cbd6e6; border-radius: 10px; }
-#workspace .tactile-controls { padding: 14px 20px; background: #f8faff; border-bottom: 1px solid var(--line); }
+#workspace .tactile-display { border-color: #cbd6e6; border-radius: 10px; overflow: hidden; }
+#workspace .tactile-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  padding: 12px 20px;
+  background: #f8faff;
+  border-bottom: 1px solid var(--line);
+}
+#workspace .tactile-modes {
+  display: flex;
+  align-items: center;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+}
 #workspace .tactile-controls button {
   border-radius: 5px;
-  min-height: 40px;
-  font-size: 13px;
-  font-weight: 500;
+  min-height: 34px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 550;
   border: 1px solid #c7d3e5;
   background: white;
   color: var(--ink);
@@ -581,42 +597,182 @@
   border-color: var(--accent-hover);
   color: #ffffff;
 }
-#workspace .information-strip { border-radius: 0 5px 5px 0; }
-#workspace .chart-structure { padding: 22px; margin-top: 24px; border-color: #cbd6e6; border-radius: 10px; }
-#workspace .node-list { display: grid; grid-template-columns: repeat(auto-fill,minmax(170px,1fr)); gap: 10px; padding-top: 10px; }
-#workspace .node-list li { gap: 6px; }
-#workspace .node-list button {
-  width: 100%;
-  background: #f8fafd;
-  border: 1px solid #d5deec;
-  border-radius: 6px;
-  min-height: 44px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ink);
-  cursor: pointer;
-  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+#workspace .tactile-mode-desc {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
 }
-#workspace .node-list button:hover:not([aria-pressed="true"]) {
+#workspace .tactile-stats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+#workspace .tactile-pins-stat {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1e3a8a;
+  padding: 3px 9px;
+  background: #edf2fc;
+  border: 1px solid #d0ddf2;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+#workspace .tactile-info-hint {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+#workspace .tactile-surface {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 1fr);
+  align-items: stretch;
+  gap: 20px;
+  padding: 20px;
+}
+
+#workspace .tactile-surface .tactile-pins {
+  width: 100%;
+  max-height: 440px;
+  aspect-ratio: 3 / 2;
+  border: 6px solid #d6deec;
+  border-radius: 8px;
+  background: #edf1f8;
+  box-shadow: inset 0 0 0 1px #ccd6e6;
+}
+
+/* Chart outline placed beside the tactile matrix with small scrollbar */
+#workspace .chart-structure {
+  display: flex;
+  flex-direction: column;
+  max-height: 440px;
+  height: 100%;
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid #cbd6e6;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(28, 44, 73, 0.04);
+  overflow: hidden;
+}
+#workspace .chart-structure-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+#workspace .chart-structure h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+#workspace .chart-structure .outline-count {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 2px 6px;
+  background: #f1f4f9;
+  border-radius: 4px;
+}
+#workspace .chart-structure .outline-intro {
+  color: var(--muted);
+  font-size: 11px;
+  margin: 0 0 10px;
+  line-height: 1.35;
+}
+#workspace .chart-structure-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Small, clean custom scrollbar */
+#workspace .chart-structure-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+#workspace .chart-structure-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+#workspace .chart-structure-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+#workspace .chart-structure-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+#workspace .chart-structure h4 {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #475569;
+  margin: 0 0 6px;
+}
+#workspace .chart-structure .node-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+#workspace .chart-structure .node-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+#workspace .chart-structure .node-list button {
+  flex: 1;
+  min-height: 32px;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 5px;
+  border: 1px solid #d5deec;
+  background: #f8fafd;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+#workspace .chart-structure .node-list button:hover:not([aria-pressed="true"]) {
   background: #edf2fc;
   border-color: #a8bfe2;
   color: var(--blue);
 }
-#workspace .node-list button[aria-pressed="true"] {
+#workspace .chart-structure .node-list button[aria-pressed="true"] {
   border-color: #2563eb;
   background: #eff6ff;
-  box-shadow: inset 3px 0 #2563eb;
   color: #1d4ed8;
   font-weight: 650;
+  box-shadow: inset 3px 0 #2563eb;
 }
-#workspace .node-list button[aria-pressed="true"]:hover {
-  background: #e0edff;
-  border-color: #1d4ed8;
-  color: #1e40af;
+#workspace .chart-structure .node-list span {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
 }
-#workspace .node-list span { padding-left: 4px; font-size: 11px; }
-#workspace .edge-list { columns: 2 260px; column-gap: 32px; }
-#workspace .edge-list li { break-inside: avoid; padding: 4px 0; }
+#workspace .chart-structure .edge-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding-left: 14px;
+  font-size: 12px;
+  color: #475569;
+}
+
+#workspace .information-strip { border-radius: 0 5px 5px 0; }
 .workspace-help { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; margin-top: 30px; padding: 24px 0 0; border-top: 1px solid var(--line); }
 .workspace-help h3 { font-size: 13px; font-weight: 650; margin-bottom: 7px; }
 .workspace-help p { max-width: 65ch; color: var(--muted); font-size: 12px; }
@@ -629,6 +785,7 @@ kbd { font-family: inherit; font-size: .9em; border: 1px solid #c7d3e5; border-b
  #workspace .diagram-workbench { grid-template-columns: 152px minmax(0,1fr); }
  #workspace .display-heading { padding: 12px; }
  #workspace .export-controls { flex-basis: 100%; margin-left: 0; }
+ #workspace .tactile-surface { grid-template-columns: 1fr; }
 }
 @media(max-width: 600px) {
  #workspace { padding: 20px 12px 28px; }

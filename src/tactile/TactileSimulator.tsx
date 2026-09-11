@@ -11,18 +11,63 @@ class TactileBoundary extends Component<{children:ReactNode},{failed:boolean}> {
   static getDerivedStateFromError(){return {failed:true};}
   render(){return this.state.failed ? <section className="display tactile-display" aria-label="Tactile display simulator"><p role="alert">Tactile display unavailable. Your chart and editing history are preserved.</p><button onClick={()=>this.setState({failed:false})}>Retry tactile display</button></section> : this.props.children;}
 }
-type Props={graph:FlowGraph;focus:string|null;version:number;displayIds:Record<string,string>};
-function Simulator({graph,focus,version,displayIds}:Props){
-  const [requested,setRequested]=useState<TactileMode|"auto">("auto");
-  const layout=useMemo(()=>layoutGraph(graph),[graph]);
-  const autoFocus=useMemo(()=>needsFocus(graph,layout),[graph,layout]);
-  const mode=requested==="auto" ? autoFocus?"focus":"overview" : requested;
-  const frame=useMemo(()=>makeTactileFrame(graph,layout,focus,mode,version),[graph,layout,focus,mode,version]);
+type Props = {
+  graph: FlowGraph;
+  focus: string | null;
+  version: number;
+  displayIds: Record<string, string>;
+  chartOutline?: ReactNode;
+};
+function Simulator({ graph, focus, version, displayIds, chartOutline }: Props) {
+  const [requested, setRequested] = useState<TactileMode | "auto">("auto");
+  const layout = useMemo(() => layoutGraph(graph), [graph]);
+  const autoFocus = useMemo(() => needsFocus(graph, layout), [graph, layout]);
+  const mode = requested === "auto" ? (autoFocus ? "focus" : "overview") : requested;
+  const frame = useMemo(() => makeTactileFrame(graph, layout, focus, mode, version), [graph, layout, focus, mode, version]);
   return <section className="display tactile-display" aria-labelledby="tactile-title" data-graph-version={frame.version}>
     <div className="display-heading"><h3 id="tactile-title">Tactile display simulator</h3><span className="simulator-tag">120 × 80 pins</span></div>
-    <div className="tactile-controls" role="group" aria-label="Tactile viewport">{(["auto","overview","focus"] as const).map(choice=><button key={choice} aria-pressed={requested===choice} onClick={()=>setRequested(choice)}>{choice==="auto"?"Auto":choice==="overview"?"Overview":"Focused view"}</button>)}<p>{mode==="focus"?"Focused node and immediate neighbors":"Whole chart"}{requested==="auto"&&autoFocus?" — enlarged automatically":""}</p></div>
-    <div className="tactile-surface"><PinSurface frame={frame} /><div className={`tactile-empty${frame.raisedPins.length ? "" : " is-empty"}`}><h4>{frame.raisedPins.length?`${frame.raisedPins.length} pins raised`:"No pins raised"}</h4>{!frame.raisedPins.length && <p className="tactile-hint">Add shapes to see them as raised pins.</p>}<p>A raised cross marks the focused shape. Arrowheads show connection direction.</p><ul className="tactile-key">{frame.nodeIds.map(id=><li key={id}>{displayIds[id]}: {graph.nodes.find(n=>n.id===id)?.label}{id===frame.focusedNodeId?" — focused":""}</li>)}</ul>{mode==="overview"&&autoFocus&&<p>Shapes are small at this scale. Choose Focused view for more detail.</p>}</div></div>
-    <section className="information-strip" aria-label="Focused node"><h4>Braille information strip</h4><p>{frame.focusedNodeId?`${displayIds[frame.focusedNodeId]}: `:""}{frame.text}</p><p className="braille-cells" aria-hidden="true">{frame.brailleCells}</p>{frame.unsupported.length>0&&<p>Unsupported characters: {frame.unsupported.map(c=>JSON.stringify(c)).join(", ")}. Each is shown as ⠿.</p>}</section>
+    <div className="tactile-controls" role="group" aria-label="Tactile viewport">
+      <div className="tactile-modes">
+        {(["auto", "overview", "focus"] as const).map(choice => (
+          <button key={choice} aria-pressed={requested === choice} onClick={() => setRequested(choice)}>
+            {choice === "auto" ? "Auto" : choice === "overview" ? "Overview" : "Focused view"}
+          </button>
+        ))}
+        <p className="tactile-mode-desc">
+          {mode === "focus" ? "Focused node and immediate neighbors" : "Whole chart"}
+          {requested === "auto" && autoFocus ? " — enlarged automatically" : ""}
+        </p>
+      </div>
+      <div className="tactile-stats">
+        <span className="tactile-pins-stat">{frame.raisedPins.length ? `${frame.raisedPins.length} pins raised` : "No pins raised"}</span>
+        <span className="tactile-info-hint">Raised cross marks focus · Arrows show direction</span>
+      </div>
+    </div>
+    <div className="tactile-surface">
+      <PinSurface frame={frame} />
+      {chartOutline ? chartOutline : (
+        <div className={`tactile-empty${frame.raisedPins.length ? "" : " is-empty"}`}>
+          <h4>{frame.raisedPins.length ? `${frame.raisedPins.length} pins raised` : "No pins raised"}</h4>
+          {!frame.raisedPins.length && <p className="tactile-hint">Add shapes to see them as raised pins.</p>}
+          <p>A raised cross marks the focused shape. Arrowheads show connection direction.</p>
+          <ul className="tactile-key">
+            {frame.nodeIds.map(id => (
+              <li key={id}>
+                {displayIds[id]}: {graph.nodes.find(n => n.id === id)?.label}
+                {id === frame.focusedNodeId ? " — focused" : ""}
+              </li>
+            ))}
+          </ul>
+          {mode === "overview" && autoFocus && <p>Shapes are small at this scale. Choose Focused view for more detail.</p>}
+        </div>
+      )}
+    </div>
+    <section className="information-strip" aria-label="Focused node">
+      <h4>Braille information strip</h4>
+      <p>{frame.focusedNodeId ? `${displayIds[frame.focusedNodeId]}: ` : ""}{frame.text}</p>
+      <p className="braille-cells" aria-hidden="true">{frame.brailleCells}</p>
+      {frame.unsupported.length > 0 && <p>Unsupported characters: {frame.unsupported.map(c => JSON.stringify(c)).join(", ")}. Each is shown as ⠿.</p>}
+    </section>
     <p className="simulation-note">Digital demonstration only; not a physical tactile display or validated Braille output. The Braille preview supports English letters, digits and spaces with capitalization and number markers. Full original text is shown above.</p>
   </section>;
 }
