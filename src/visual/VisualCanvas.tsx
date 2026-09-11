@@ -34,6 +34,8 @@ export interface VisualCanvasProps {
   canRedo?: boolean;
   onUndo?: () => void;
   onRedo?: () => void;
+  canClear?: boolean;
+  onClear?: () => void;
   canWalk?: boolean;
   canStep?: boolean;
   onWalk?: (direction: "first" | "back" | "next" | "stay") => void;
@@ -53,6 +55,8 @@ function Canvas({
   canRedo,
   onUndo,
   onRedo,
+  canClear,
+  onClear,
   canWalk,
   canStep,
   onWalk,
@@ -104,7 +108,8 @@ function Canvas({
   <CanvasControls canFit={layout.nodes.length > 0} canCenter={!!focusedBox}
     onZoomIn={() => void zoomIn({ duration: 160 })} onZoomOut={() => void zoomOut({ duration: 160 })}
     onFit={() => void fitView({ padding: 0.25, maxZoom: 1, duration: 220 })} onCenter={centerOnFocus}
-    canUndo={canUndo} canRedo={canRedo} onUndo={onUndo} onRedo={onRedo} />
+    canUndo={canUndo} canRedo={canRedo} onUndo={onUndo} onRedo={onRedo}
+    canClear={canClear} onClear={onClear} />
   {onWalk && onDescribe && onInspect && onValidate && (
     <div className="canvas-dock nodrag nopan" role="toolbar" aria-label="Chart navigation and inspection">
       <div className="canvas-control-group walk-controls" role="group" aria-label="Walk the chart">

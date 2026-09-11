@@ -301,6 +301,18 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+#workspace .canvas-controls button.clear-chart-button {
+  color: #a82e2e;
+}
+#workspace .canvas-controls button.clear-chart-button:hover:not(:disabled) {
+  background: #fef2f2;
+  color: #dc2626;
+}
+#workspace .canvas-controls button.clear-chart-button:disabled {
+  color: var(--ink);
+  opacity: 0.35;
+}
 #workspace .diagram-workbench { grid-template-columns: 216px minmax(0,1fr); border: 1px solid #c7d3e5; border-radius: 10px; overflow: hidden; background: white; box-shadow: 0 4px 20px #1c2c4906; }
 #workspace .palette-column { background: #f8fafd; border-right: 1px solid #dce4f0; padding: 16px 12px; display: flex; flex-direction: column; }
 #workspace .shape-palette { background: transparent; border: 0; padding: 0; }

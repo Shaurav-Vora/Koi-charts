@@ -120,6 +120,8 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
           canRedo={!!history.future.length}
           onUndo={() => onCommand({ kind: "undo" })}
           onRedo={() => onCommand({ kind: "redo" })}
+          canClear={graph.nodes.length > 0}
+          onClear={() => dispatch({ type: "clear" })}
           canWalk={graph.nodes.length > 0}
           canStep={!!focused}
           onWalk={direction => onCommand({ kind: "walk", direction, branch: null })}

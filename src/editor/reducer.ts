@@ -3,9 +3,26 @@ import { createEngineState, execute, resolveClarification } from "../commands/ex
 import type { GraphCommand } from "../commands/schema";
 import type { CommandResult, EngineState } from "../graph/types";
 export type EditorState = { displayIds: Record<string, string>; engine: EngineState; outcome: CommandResult["outcome"] | "idle"; message: string };
-export type EditorAction = { type: "example" } | { type: "command"; command: GraphCommand; idSeed: string } | { type: "choose"; candidateId: string; idSeed: string };
+export type EditorAction = { type: "example" } | { type: "clear" } | { type: "command"; command: GraphCommand; idSeed: string } | { type: "choose"; candidateId: string; idSeed: string };
 export function createEditorState(): EditorState { return { displayIds: {}, engine: createEngineState(), outcome: "idle", message: "Add a node to begin your chart." }; }
 export function editorReducer(state: EditorState, action: EditorAction): EditorState {
+  if (action.type === "clear") {
+    if (!state.engine.graph.nodes.length) return state;
+    const { graph: previousGraph, focusedNodeId, recentNodeId } = state.engine;
+    return {
+      displayIds: {},
+      engine: {
+        ...createEngineState(),
+        version: state.engine.version + 1,
+        history: {
+          past: [...state.engine.history.past, { graph: previousGraph, focusedNodeId, recentNodeId }],
+          future: []
+        }
+      },
+      outcome: "committed",
+      message: "Chart cleared. Undo restores your nodes."
+    };
+  }
   if (action.type === "example") {
     if (state.engine.graph.nodes.length || state.engine.pending) return state;
     const graph = largeGraph();
