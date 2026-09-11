@@ -2,6 +2,8 @@
 
 ## Documentation and chart exports
 
+The workspace and documentation share a responsive header with an active-page indicator. At narrow widths, navigation appears below the brand. Documentation opens in a new tab from the workspace to preserve the active chart.
+
 **Documentation** is available in the header navigation and opens in a new tab. Press **Delete** to remove the selected node; connected nodes use the existing confirmation dialog. The shortcut does not run while typing in an input or editing text.
 
 With local commands enabled, use **connect Start to a new process node** or **connect Start to a new decision labelled Approved?**. The destination is always created first, then connected to the original source. Here, **labelled** names the destination; it does not label the arrow. **New node** without a type creates a Process. Creation and connection share one Undo step. The documentation and Braille references include these forms.

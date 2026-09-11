@@ -1,19 +1,11 @@
-import Image from "next/image";
+import AppHeader from "./AppHeader";
 import Editor from "../editor/Editor";
 
 export default function Home() {
   return (
     <>
       <a className="skip-link" href="#workspace">Skip to workspace</a>
-      <header className="app-header">
-        <div className="brand">
-          <Image className="brand-mark" src="/koi.svg" width={42} height={42} alt="" />
-          <h1>Koi charts</h1>
-        </div>
-        <p className="brand-description">Flowcharts through sight, touch, and voice.</p>
-        <nav aria-label="Main navigation"><a href="/docs" target="_blank" rel="noopener noreferrer">Documentation</a></nav>
-        <span className="build-label">Early preview</span>
-      </header>
+      <AppHeader page="workspace" />
 
       <main id="workspace" tabIndex={-1}>
         <Editor />

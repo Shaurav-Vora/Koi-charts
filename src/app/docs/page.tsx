@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import AppHeader from "../AppHeader";
 import CommandGuide from "../../editor/CommandGuide";
 import { grammar } from "../../commands/grammar";
 
@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "Documentation | Koi charts", descrip
 export default function Documentation() {
  return <>
   <a className="skip-link" href="#documentation">Skip to documentation</a>
-  <header className="app-header"><Link className="docs-brand" href="/">Koi charts</Link><span className="brand-description">Documentation</span><Link className="docs-workspace-link" href="/">Open workspace</Link></header>
+  <AppHeader page="documentation" />
   <main className="docs-layout" id="documentation">
    <nav className="docs-nav" aria-label="Documentation sections"><p>On this page</p>
     <a href="#overview">Getting started</a>
