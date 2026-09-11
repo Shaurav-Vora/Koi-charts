@@ -25,7 +25,43 @@ function FitChart({ layout }: { layout: LayoutFrame }) {
   useEffect(() => { if (initialized && layout.nodes.length > 0 && !fitted.current) { fitted.current = true; void fitView({ padding: 0.25, maxZoom: 1, duration: 0 }); } }, [fitView, initialized, layout.nodes.length]);
   return null;
 }
-function Canvas({ graph, layout, focusedNodeId, onCommand }: { graph: FlowGraph; layout: LayoutFrame; focusedNodeId: string | null; onCommand: (command: GraphCommand) => void }) {
+export interface VisualCanvasProps {
+  graph: FlowGraph;
+  layout: LayoutFrame;
+  focusedNodeId: string | null;
+  onCommand: (command: GraphCommand) => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
+  onUndo?: () => void;
+  onRedo?: () => void;
+  canWalk?: boolean;
+  canStep?: boolean;
+  onWalk?: (direction: "first" | "back" | "next" | "stay") => void;
+  canExample?: boolean;
+  onExample?: () => void;
+  onDescribe?: () => void;
+  onInspect?: () => void;
+  onValidate?: () => void;
+}
+
+function Canvas({
+  graph,
+  layout,
+  focusedNodeId,
+  onCommand,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
+  canWalk,
+  canStep,
+  onWalk,
+  canExample,
+  onExample,
+  onDescribe,
+  onInspect,
+  onValidate,
+}: VisualCanvasProps) {
   const { screenToFlowPosition, zoomIn, zoomOut, fitView, setCenter, getZoom } = useReactFlow();
   const [drag, setDrag] = useState<{ id: string; x: number; y: number } | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
@@ -64,14 +100,33 @@ function Canvas({ graph, layout, focusedNodeId, onCommand }: { graph: FlowGraph;
     ariaLabelConfig={{ "node.a11yDescription.default": "Select a node to focus it. Use the editing form for keyboard movement and deletion.", "edge.a11yDescription.default": "Connections are available in the chart outline." }}
     fitView fitViewOptions={{ maxZoom: 1, padding: 0.25 }} minZoom={0.1} maxZoom={2}>
     <Background gap={20} color="#d4ddea" /><FitChart layout={layout} />
-  </ReactFlow><CanvasControls canFit={layout.nodes.length > 0} canCenter={!!focusedBox}
+  </ReactFlow>
+  <CanvasControls canFit={layout.nodes.length > 0} canCenter={!!focusedBox}
     onZoomIn={() => void zoomIn({ duration: 160 })} onZoomOut={() => void zoomOut({ duration: 160 })}
-    onFit={() => void fitView({ padding: 0.25, maxZoom: 1, duration: 220 })} onCenter={centerOnFocus} />
+    onFit={() => void fitView({ padding: 0.25, maxZoom: 1, duration: 220 })} onCenter={centerOnFocus}
+    canUndo={canUndo} canRedo={canRedo} onUndo={onUndo} onRedo={onRedo} />
+  {onWalk && onDescribe && onInspect && onValidate && (
+    <div className="canvas-dock nodrag nopan" role="toolbar" aria-label="Chart navigation and inspection">
+      <div className="canvas-control-group walk-controls" role="group" aria-label="Walk the chart">
+        <button type="button" disabled={!canWalk} onClick={() => onWalk("first")} title="Go to start">Go to start</button>
+        <button type="button" disabled={!canStep} onClick={() => onWalk("back")} title="Back to previous node">Back</button>
+        <button type="button" disabled={!canStep} onClick={() => onWalk("next")} title="Next connected node">Next</button>
+        <button type="button" disabled={!canStep} onClick={() => onWalk("stay")} title="Where am I">Where am I</button>
+      </div>
+      <div className="canvas-control-divider" aria-hidden="true" />
+      <div className="canvas-control-group query-controls" role="group" aria-label="Chart actions">
+        {canExample && onExample && <button type="button" onClick={onExample} title="Load large example">Load large example</button>}
+        <button type="button" onClick={onDescribe} title="Describe chart">Describe chart</button>
+        <button type="button" disabled={!canStep} onClick={onInspect} title="Inspect focus">Inspect focus</button>
+        <button type="button" onClick={onValidate} title="Validate chart">Validate chart</button>
+      </div>
+    </div>
+  )}
   {selectedEdge && <ArrowInspector key={`${selectedEdge.id}-${selectedEdge.label ?? ""}`} edge={selectedEdge}
     source={graph.nodes.find(node => node.id === selectedEdge.source)!} target={graph.nodes.find(node => node.id === selectedEdge.target)!}
     onCommand={onCommand} onClose={() => setSelectedEdgeId(null)} />}</div>;
 }
 
-export default function VisualCanvas(props: Parameters<typeof Canvas>[0]) {
+export default function VisualCanvas(props: VisualCanvasProps) {
   return <ReactFlowProvider><Canvas {...props} /></ReactFlowProvider>;
 }
