@@ -478,3 +478,13 @@ The top area of the workspace has been restructured into a compact, professional
 - Over 130px of vertical space is reclaimed, pulling the flowchart canvas up into direct view.
 
 Owner check: reload the workspace. Confirm that Voice Controls and Command Feedback now sit side-by-side without wide whitespace voids. Test voice or keyboard actions (e.g. inserting a node or selecting an arrow) to confirm live feedback updates in the card. Check that toolbar buttons (Undo, Navigation, Explore) function as segmented groups, and that the layout stacks cleanly on narrower browser windows.
+
+## Shape palette and inspector visual refinement
+
+The shape palette and node inspector have been redesigned into a tactile, high-contrast tool panel:
+- **Shape Cards (`.shape-item`)**: Distinct semantic colors and soft tinted fills for each flowchart element (emerald for Start, royal blue for Process/Step, amber for Decision/Branch, and coral for End). Added subtle role labels, hover elevation (`translateY(-2px)` + warm accent glow), and tactile grab cursor affordances.
+- **Header and Subtitle**: Clear uppercase category header with shape count pill and concise guidance.
+- **Tip Card (`.palette-tip-card`)**: Streamlined quick-connect guide card with info icon and clear copy explaining connection dots and automatic routing.
+- **Node Inspector (`.node-inspector`)**: Polished selected-shape inspector with type tag badge, clean input focus ring, primary brand action button, and a styled secondary delete button.
+
+Owner check: reload the workspace. Inspect the shape buttons in the left palette: observe the distinct shape tints, crisp strokes, hover animations, and subtitle role badges. Click or drag a shape onto the canvas; click a shape to open the Node Inspector below and confirm the type badge, input focus ring, and action buttons appear cleanly.
