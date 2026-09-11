@@ -1,5 +1,13 @@
 # Koi charts
 
+## Documentation and chart exports
+
+The command reference is available at **/docs**. The workspace link opens it in a new tab so the active chart remains open. Documentation covers command syntax, examples, Braille downloads, and export formats.
+
+SVG, PNG, JPEG, and PDF exports use the complete chart bounds, including nodes above or left of the canvas origin. All shapes and routed connections are translated together with padding on every side; pan and zoom do not affect the exported area.
+
+To verify: move Begin above and left of the original chart, then export all four formats. Check that Begin, the other shapes, arrow labels, and connections are fully visible. Open Documentation from the workspace, use its section links, and confirm the original chart remains available in its tab.
+
 A voice-first flowchart workspace designed for independent blind authorship. The planned editor uses one semantic graph for a visual flowchart, a digital tactile simulator, and spoken descriptions.
 
 ## Current milestone

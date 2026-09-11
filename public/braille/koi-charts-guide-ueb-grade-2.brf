@@ -1,9 +1,9 @@
-,,,koi *>ts -- :at y c say,'
+,,,koi *>ts -- comm& ref};e,'
 
-,~! phrases run on yr {n ma*9e1 ) no
-  model call & ! same result e "t4
-  ,any?+ else is s5t to 2 9t}pret$1 :
-  takes a mo;t l;g}4
+,) local comm&s 5abl$1 ! support$
+  phrases 2l >e process$ )|t a ,gem9i
+  reque/4 ,o!r phras+ is s5t to ,gem9i =
+  9t}preta;n & may require cl>ifica;n4
 
 ,,?ree ,,rules
 
@@ -173,28 +173,31 @@
 
   ,say3 add a />t node & 3nect x to a
     new deci.n
-  ,two comm&s 9 "o br1?4 ,say !m "o at a
-    "t1 or let ! model exp& x4
+  ,3ta9s multiple op}a;ns4 ,use sep>ate
+    comm&s = local process+4
 
   ,say3 add ?ree /eps = onbo>d+
-  ,a quant;y to exp&1 n "o "nd %ape4
+  ,requires 9t}preta;n ( ! reque/$ numb}
+    & labels ( new nodes4
 
   ,say3 delete "ey?+
-  ,any?+ address$ 9 bulk is a sequ;e1 &
-    dele;n n"e runs on a guess4
+  ,reque/s a bulk op}a;n4 ,de/ructive
+    *anges require 3firma;n4
 
   ,say3 d n add a />t node
-  ,nega;n rev}ses a phrase ! templates
-    wd o!rwise r1d lit}ally4
+  ,3ta9s nega;n & is n tr1t$ z a local
+    add comm&4
 
   ,say3 move ,/>t "s": s5sible
-  ,a place;t ) no %ape 2s x is n a
-    place;t4
+  ,does n specify a de/9a;n or a posi;n
+    relative to ano!r node4
 
   ,say3 3nect ! la/ node to a new deci.n
-  8,a new deci.n0 describes a %ape t
-    does n exi/ yet1 s no?+ c resolve x4
-  ,say3 label ! >r{ 2t ,/>t & ,5d ,yes
-  ,labell+ an exi/+ >r{ ne$s xs id5t;y1
-    : no spok5 phrase c>ries4 ,click !
-    >r{1 or say ! 3nect =m ) a label4
+  ,requires resolv+ ! s|rce & cr1t+ a
+    de/9a;n 2f 3nect+ !m4
+
+  ,say3 label ! >r{ 2t ,/>t & ,5d ,yes
+  ,! local gramm> does n support
+    relabell+ an exi/+ >r{ by xs
+    5dpo9ts4 ,select ! >r{ to $it xs
+    label4

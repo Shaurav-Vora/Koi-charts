@@ -25,11 +25,9 @@ describe("command guide", () => {
     expect(screen.getByText(/Unified English Braille/)).toBeInTheDocument();
   });
 
-  it("stays collapsed until asked for, and opens without a mouse", () => {
-    render(<CommandGuide />);
-    const summary = screen.getByText("What you can say");
-    expect(summary.closest("details")).not.toHaveAttribute("open");
-    // <summary> is focusable and Enter-activated by the browser; no key handler to get wrong.
-    expect(summary.tagName).toBe("SUMMARY");
+  it("presents the reference directly with semantic headings", () => {
+    const { container } = render(<CommandGuide />);
+    expect(container.querySelector("details")).toBeNull();
+    expect(screen.getByRole("heading", {name: "Requests handled by Gemini", level: 2})).toBeInTheDocument();
   });
 });

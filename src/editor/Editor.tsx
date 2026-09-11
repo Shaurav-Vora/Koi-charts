@@ -4,12 +4,11 @@ import { Component, useCallback, useEffect, useMemo, useState, useSyncExternalSt
 import { createSpeaker, speechPreference } from "./speech";
 import { localCommandPreference } from "./preference";
 import type { GraphCommand } from "../commands/schema";
-import type { FlowGraph } from "../graph/types";
 import { layoutGraph } from "../visual/layout";
 import VisualCanvas from "../visual/VisualCanvas";
+import ExportMenu from "../visual/ExportMenu";
 import { ShapePalette, NodeInspector } from "./ShapePalette";
 import CommandForm from "./CommandForm";
-import CommandGuide from "./CommandGuide";
 import ToggleSwitch from "./ToggleSwitch";
 import { createEditorCoordinator } from "./coordinator";
 import { useVoice } from "./useVoice";
@@ -24,10 +23,6 @@ class CanvasBoundary extends Component<{ children: ReactNode }, { failed: boolea
   static getDerivedStateFromError() { return { failed: true }; }
   render() { return this.state.failed ? <div className="canvas-error" role="alert"><p>Visual canvas unavailable. Your chart is preserved in the outline below.</p><button onClick={() => this.setState({ failed: false })}>Retry canvas</button></div> : this.props.children; }
 }
-function LaidOutCanvas(props: { graph: FlowGraph; focusedNodeId: string | null; onCommand: (command: GraphCommand) => void }) {
-  const layout = useMemo(() => layoutGraph(props.graph), [props.graph]);
-  return <VisualCanvas {...props} layout={layout} />;
-}
 export default function Editor({ coordinator: supplied }: { coordinator?: ReturnType<typeof createEditorCoordinator> } = {}) {
   const [local] = useState(() => createEditorCoordinator());
   const coordinator = supplied ?? local;
@@ -39,6 +34,9 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const voice = useVoice(coordinator, speaker.getSnapshot, speaker.interrupt);
   const onCommand = useCallback((command: GraphCommand) => dispatch({ type: "command", command, idSeed: crypto.randomUUID() }), [dispatch]);
   const { graph, focusedNodeId, pending, history, version } = state.engine;
+  // Laid out once, here, because the canvas and the picture that gets exported have to be the
+  // same chart: two independent layouts would drift the moment either one changed.
+  const layout = useMemo(() => layoutGraph(graph), [graph]);
   const hasError = presentation ? presentation.status === "error" : state.outcome === "error";
   const focused = graph.nodes.find(node => node.id === focusedNodeId);
   const message = presentation?.error ?? presentation?.text ?? state.message;
@@ -90,7 +88,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
     </div><div className="query-controls"><button disabled={graph.nodes.length > 0 || !!pending} onClick={() => dispatch({type:"example"})}>Load large example</button><button onClick={() => onCommand({ kind: "describe", scope: "chart" })}>Describe chart</button><button disabled={!focused} onClick={() => onCommand({ kind: "inspect", node: null })}>Inspect focus</button><button onClick={() => onCommand({ kind: "validate" })}>Validate chart</button></div></div>
     {/* Beside the voice button, not buried at the bottom: the phrases are only useful to someone
         deciding what to say next, and reaching them must not cost a trip through the whole page. */}
-    <CommandGuide />
+    <p className="documentation-link"><a href="/docs" target="_blank" rel="noopener noreferrer">Documentation and command reference <span>(opens in a new tab)</span></a></p>
     <section className={`command-feedback ${hasError ? "has-error" : ""}`} aria-label="Command feedback">
       <span className="feedback-label">{status}</span>
       {presentation?.source && <span className="feedback-source" data-source={presentation.source}>{presentation.source === "local" ? "Local command" : "Gemini"}</span>}
@@ -102,8 +100,8 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
     </section>
     <div className="diagram-workbench"><div className="palette-column"><ShapePalette lastNodeId={graph.nodes.at(-1)?.id} onCommand={onCommand} />{focused && <NodeInspector key={`${focused.id}-${focused.label}`} node={focused} onCommand={onCommand} />}</div>
       <section className="display visual-display" aria-labelledby="visual-title" data-graph-version={version}>
-        <div className="display-heading"><h3 id="visual-title">Visual flowchart</h3><span className="count">{graph.nodes.length} nodes · {graph.edges.length} connections</span></div>
-        <div className="canvas-wrap"><CanvasBoundary><LaidOutCanvas graph={graph} focusedNodeId={focusedNodeId} onCommand={onCommand} /></CanvasBoundary><PreviewOverlay command={presentation?.preview ?? null} />{!presentation?.preview && !graph.nodes.length && <div className="canvas-welcome"><h4>Your chart starts here</h4><p>Drag a shape from the left, or click one to begin.</p></div>}</div>
+        <div className="display-heading"><h3 id="visual-title">Visual flowchart</h3><span className="count">{graph.nodes.length} nodes · {graph.edges.length} connections</span><ExportMenu graph={graph} layout={layout} /></div>
+        <div className="canvas-wrap"><CanvasBoundary><VisualCanvas graph={graph} focusedNodeId={focusedNodeId} onCommand={onCommand} layout={layout} /></CanvasBoundary><PreviewOverlay command={presentation?.preview ?? null} />{!presentation?.preview && !graph.nodes.length && <div className="canvas-welcome"><h4>Your chart starts here</h4><p>Drag a shape from the left, or click one to begin.</p></div>}</div>
         <div className="display-footer"><p>Drag shapes to move them. Use the dots to connect. Double-click a shape to rename it, or click an arrow to label it.</p></div>
       </section>
     </div><details className="keyboard-editor"><summary>Keyboard editing &amp; advanced commands</summary><CommandForm graph={graph} focusedNodeId={focusedNodeId} onCommand={onCommand} /></details><div className="secondary-displays">

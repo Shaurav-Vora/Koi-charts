@@ -8,8 +8,8 @@ import { grammar, modelOnly, rules } from "../commands/grammar.ts";
  * two-cell indent, all of which read the same on paper as they do on a refreshable display.
  */
 export function guideLines(): string[] {
-  const lines: string[] = ["KOI CHARTS -- WHAT YOU CAN SAY", ""];
-  lines.push("These phrases run on your own machine, with no model call and the same result every time. Anything else is sent to be interpreted, which takes a moment longer.", "");
+  const lines: string[] = ["KOI CHARTS -- COMMAND REFERENCE", ""];
+  lines.push("With local commands enabled, the supported phrases below are processed without a Gemini request. Other phrasing is sent to Gemini for interpretation and may require clarification.", "");
   lines.push("THREE RULES", "");
   rules.forEach((rule, index) => lines.push(`${index + 1}. ${rule}`));
   lines.push("");

@@ -1,10 +1,11 @@
-,,,koi charts -- what you can say,'
+,,,koi charts -- command reference,'
 
-,these phrases run on your own machine1
-  with no model call and the same result
-  every time4 ,anything else is sent to
-  be interpreted1 which takes a moment
-  longer4
+,with local commands enabled1 the
+  supported phrases below are processed
+  without a ,gemini request4 ,other
+  phrasing is sent to ,gemini for
+  interpretation and may require
+  clarification4
 
 ,,three ,,rules
 
@@ -22,8 +23,8 @@
 
   add a `<shape`>
   ,adds a shape with a default label4
-  ,also3 add2 create2 insert2 make2
-    place2 put2 new2 shape3 start _/
+  ,also3 add2 create2 insert2 make2
+    place2 put2 new2 shape3 start _/
     process _/ decision _/ end2 start
     also3 begin2 process also3 step1
     action1 task2 decision also3 choice1
@@ -47,8 +48,8 @@
   ,adds a shape in a chosen position
     beside one already in the chart4
   ,also3 before2 after2 above "<over">2
-    below "<under">2 left of2 right of4
-  ,say3 add an end below ,check payment
+    below "<under">2 left of2 right of4
+  ,say3 add an end below ,check payment
   ,say3 add a process called ,refund to
     the right of ,check payment
 
@@ -71,9 +72,8 @@
     label4
   ,say3 connect ,approved to ,refund
     labelled ,no
+,,,change what is there,'
 
-,,,change what is there,'
-
   rename `<shape`> to `<label`>
   ,changes a shape's label4
   ,also3 rename2 relabel2 change2 to or
@@ -96,9 +96,8 @@
   ,also3 delete2 remove2 erase4
   ,say3 delete ,refund
   ,say3 remove the selected shape
-
-  `<any command`> the `<shape kind`>
-  ,when the chart has only one shape of
+  `<any command`> the `<shape kind`>
+  ,when the chart has only one shape of
     a kind1 its kind names it ",- useful
     when the label is a long question4
     ,with two of them you are asked
@@ -122,8 +121,8 @@
 
   next _/ back
   ,walks one step along the arrows1 and
-    says where you landed4
-  ,also3 next "<go next1 forward">2 back
+    says where you landed4
+  ,also3 next "<go next1 forward">2 back
     "<go back1 previous">4
   ,say3 next
   ,say3 go back
@@ -147,8 +146,8 @@
     selection entirely4
   ,also3 focus on2 focus2 select2
     highlight2 clear selection2
-    deselect4
-  ,say3 focus on ,check payment
+    deselect4
+  ,say3 focus on ,check payment
   ,say3 select the last shape
   ,say3 clear selection
 
@@ -172,8 +171,8 @@
     or onward from one4
   ,say3 trace the path from ,start to
     ,end
-  ,say3 trace the path from ,start
-
+  ,say3 trace the path from ,start
+
   validate the chart
   ,reports what is unfinished3 missing
     start1 dead ends1 unlabelled
@@ -197,43 +196,43 @@
     word for word only1 never
     approximately4
   ,say3 confirm
-  ,say3 cancel
-
+  ,say3 cancel
+
 ,,,sent to be interpreted,'
 
   ,say3 add a start node and connect it
     to a new decision
-  ,two commands in one breath4 ,say them
-    one at a time1 or let the model
-    expand it4
+  ,contains multiple operations4 ,use
+    separate commands for local
+    processing4
 
   ,say3 add three steps for onboarding
-  ,a quantity to expand1 not one named
-    shape4
+  ,requires interpretation of the
+    requested number and labels of new
+    nodes4
 
   ,say3 delete everything
-  ,anything addressed in bulk is a
-    sequence1 and deletion never runs on
-    a guess4
+  ,requests a bulk operation4
+    ,destructive changes require
+    confirmation4
 
   ,say3 do not add a start node
-  ,negation reverses a phrase the
-    templates would otherwise read
-    literally4
+  ,contains negation and is not treated
+    as a local add command4
 
   ,say3 move ,start somewhere sensible
-  ,a placement with no shape beside it
-    is not a placement4
+  ,does not specify a destination or a
+    position relative to another node4
 
   ,say3 connect the last node to a new
     decision
-  8,a new decision0 describes a shape
-    that does not exist yet1 so nothing
-    can resolve it4
+  ,requires resolving the source and
+    creating a destination before
+    connecting them4
 
   ,say3 label the arrow between ,start
     and ,end ,yes
-  ,labelling an existing arrow needs its
-    identity1 which no spoken phrase
-    carries4 ,click the arrow1 or say
-    the connect form with a label4
+  ,the local grammar does not support
+    relabelling an existing arrow by its
+    endpoints4 ,select the arrow to edit
+    its label4

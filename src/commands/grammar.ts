@@ -245,13 +245,13 @@ export const grammar: GrammarSection[] = [
  * boundary honest: an author who learns the syntax also learns where it stops.
  */
 export const modelOnly: { say: string; why: string }[] = [
-  { say: "add a start node and connect it to a new decision", why: "Two commands in one breath. Say them one at a time, or let the model expand it." },
-  { say: "add three steps for onboarding", why: "A quantity to expand, not one named shape." },
-  { say: "delete everything", why: "Anything addressed in bulk is a sequence, and deletion never runs on a guess." },
-  { say: "do not add a start node", why: "Negation reverses a phrase the templates would otherwise read literally." },
-  { say: "move Start somewhere sensible", why: "A placement with no shape beside it is not a placement." },
-  { say: "connect the last node to a new decision", why: "\"A new decision\" describes a shape that does not exist yet, so nothing can resolve it." },
-  { say: "label the arrow between Start and End Yes", why: "Labelling an existing arrow needs its identity, which no spoken phrase carries. Click the arrow, or say the connect form with a label." },
+  { say: "add a start node and connect it to a new decision", why: "Contains multiple operations. Use separate commands for local processing." },
+  { say: "add three steps for onboarding", why: "Requires interpretation of the requested number and labels of new nodes." },
+  { say: "delete everything", why: "Requests a bulk operation. Destructive changes require confirmation." },
+  { say: "do not add a start node", why: "Contains negation and is not treated as a local add command." },
+  { say: "move Start somewhere sensible", why: "Does not specify a destination or a position relative to another node." },
+  { say: "connect the last node to a new decision", why: "Requires resolving the source and creating a destination before connecting them." },
+  { say: "label the arrow between Start and End Yes", why: "The local grammar does not support relabelling an existing arrow by its endpoints. Select the arrow to edit its label." },
 ];
 
 export const grammarEntries = grammar.flatMap(section => section.entries);
