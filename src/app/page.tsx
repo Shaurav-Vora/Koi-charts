@@ -1,4 +1,5 @@
 import AppHeader from "./AppHeader";
+import "./workspace.css";
 import Editor from "../editor/Editor";
 
 export default function Home() {
@@ -10,29 +11,14 @@ export default function Home() {
       <main id="workspace" tabIndex={-1}>
         <Editor />
 
-        <section className="voice-panel" aria-labelledby="voice-title">
-          <svg className="voice-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="9" y="3" width="6" height="12" rx="3" />
-            <path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8" />
-          </svg>
-          <div>
-            <h3 id="voice-title">Voice workspace</h3>
-            <p>Voice is not connected yet.</p>
-          </div>
-          <p className="microphone-note">Your microphone is off.</p>
-        </section>
-
-        <details className="milestone-help">
-          <summary>What can I check in this preview?</summary>
-          <div>
-            <p>Click or drag shapes from the palette. Connect their dots and select a shape to rename or delete it. Keyboard editing and advanced commands are available below the canvas. Undo and redo let you revisit changes. Refreshing the page clears this local workspace.</p>
-            <p>Every editing action is available using the keyboard. Use the chart outline to focus nodes, and Describe chart or Inspect focus to explore them. The tactile simulator follows your chart and focus. Voice input is coming next.</p>
-          </div>
-        </details>
+        <aside className="workspace-help" aria-label="Workspace shortcuts">
+          <div><h3>Editing shortcuts</h3><p>Double-click a shape to rename it. Click an arrow to edit its label. Press <kbd>Delete</kbd> to remove a selected shape.</p></div>
+          <div><h3>Keep your work</h3><p>Export your chart before closing the workspace. Reloading clears the current chart; exported images cannot be reopened as editable charts.</p></div>
+        </aside>
       </main>
 
       <footer className="app-footer">
-        <p>Designed for independent flowchart authorship.</p>
+        <p>Koi charts · Flowchart workspace</p>
         <span>Local workspace · Not saved</span>
       </footer>
     </>

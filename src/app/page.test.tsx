@@ -20,7 +20,8 @@ describe("application shell", () => {
     const workspace = screen.getByRole("main");
     expect(screen.getByRole("link", { name: "Skip to workspace" })).toHaveAttribute("href", `#${workspace.id}`);
     expect(workspace).toHaveAttribute("tabindex", "-1");
-    expect(screen.getByText("Voice is not connected yet.")).toBeVisible();
+    expect(screen.queryByText("Voice is not connected yet.")).not.toBeInTheDocument();
+    expect(screen.getByRole("complementary",{name:"Workspace shortcuts"})).toBeVisible();
     expect(screen.queryByRole("button", { name: /start listening/i })).not.toBeInTheDocument();
   });
 });

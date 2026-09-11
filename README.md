@@ -2,6 +2,8 @@
 
 ## Documentation and chart exports
 
+The workspace uses a canvas-first layout with grouped editing controls, a shape palette, separate command feedback, and matching tactile and chart-outline panels. On small screens the palette moves above the canvas. The former static voice placeholder has been removed; microphone state is shown only by the live voice controls.
+
 The workspace and documentation share a responsive header with an active-page indicator. At narrow widths, navigation appears below the brand. Documentation opens in a new tab from the workspace to preserve the active chart.
 
 **Documentation** is available in the header navigation and opens in a new tab. Press **Delete** to remove the selected node; connected nodes use the existing confirmation dialog. The shortcut does not run while typing in an input or editing text.
