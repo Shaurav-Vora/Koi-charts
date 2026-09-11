@@ -74,6 +74,16 @@ export const grammar: GrammarSection[] = [
     title: "Connect shapes",
     entries: [
       {
+        form: "connect <source> to a new <shape> [labelled <label>]",
+        purpose: "Creates the destination, then connects the source to it. Labelled names the new node, not the arrow. A new node without a shape type defaults to Process. Undo removes both changes.",
+        alternatives: ["called", "named", "labeled", "labelled"],
+        examples: [
+          {say:"connect Start to a new process",command:{kind:"connect_new",source:label("Start"),type:"process",label:"Process"}},
+          {say:"connect it to a new decision labelled Approved?",command:{kind:"connect_new",source:{kind:"focus"},type:"decision",label:"Approved?"}},
+          {say:"connect Start to a new node labelled Review",command:{kind:"connect_new",source:label("Start"),type:"process",label:"Review"}},
+        ],
+      },
+      {
         form: "connect <shape> to <shape>",
         purpose: "Draws an arrow from the first shape to the second.",
         alternatives: ["connect", "link", "join", "draw an arrow from"],
@@ -250,7 +260,6 @@ export const modelOnly: { say: string; why: string }[] = [
   { say: "delete everything", why: "Requests a bulk operation. Destructive changes require confirmation." },
   { say: "do not add a start node", why: "Contains negation and is not treated as a local add command." },
   { say: "move Start somewhere sensible", why: "Does not specify a destination or a position relative to another node." },
-  { say: "connect the last node to a new decision", why: "Requires resolving the source and creating a destination before connecting them." },
   { say: "label the arrow between Start and End Yes", why: "The local grammar does not support relabelling an existing arrow by its endpoints. Select the arrow to edit its label." },
 ];
 

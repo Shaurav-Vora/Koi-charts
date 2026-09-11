@@ -19,6 +19,7 @@ export default function Documentation() {
      <p>Select <strong>Start voice</strong> and allow microphone access. Wait for <strong>Listening</strong>, then speak a command. The command result appears below the voice controls.</p>
      <p>Use node labels to identify shapes. Words in angle brackets, such as <code>&lt;label&gt;</code>, are placeholders; replace them with a label from your chart. Square brackets indicate optional wording.</p>
      <p>Select <strong>Mute replies</strong> to turn off spoken feedback. The chart outline and command feedback remain available as text.</p>
+     <p>To delete a selected shape, press <kbd>Delete</kbd>. Connected shapes require confirmation. The shortcut is disabled while editing text. Use Undo to restore a deleted shape.</p>
     </section>
     <CommandGuide />
     <section id="exports"><h2>Exporting charts</h2>

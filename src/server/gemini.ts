@@ -88,7 +88,7 @@ export class GeminiProvider {
   if (simple) return simple;
   const response = await this.http.request(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(this.model)}:generateContent`, {
    method: "POST", body: JSON.stringify({
-    systemInstruction: { parts: [{ text: instructions }] },
+    systemInstruction: { parts: [{ text: instructions }, { text: "Use connect_new when a request explicitly connects an existing source to a new destination. Its type and label describe the new node, not the arrow. It resolves the source before creation and creates the node and arrow together." }] },
     contents: [{ role: "user", parts: [{ text: JSON.stringify(providerContext(input)) }] }],
     generationConfig: { candidateCount: 1, maxOutputTokens: 1024, responseMimeType: "application/json", responseJsonSchema: geminiCommandSchema,
      ...(this.model === DEFAULT_GEMINI_MODEL ? { thinkingConfig: { thinkingLevel: "MINIMAL" } } : {}),

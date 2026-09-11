@@ -39,6 +39,16 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const layout = useMemo(() => layoutGraph(graph), [graph]);
   const hasError = presentation ? presentation.status === "error" : state.outcome === "error";
   const focused = graph.nodes.find(node => node.id === focusedNodeId);
+  useEffect(() => {
+    const removeSelected = (event: KeyboardEvent) => {
+      if (event.key !== "Delete" || event.repeat || event.defaultPrevented || event.isComposing || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || !focusedNodeId || pending) return;
+      if (event.target instanceof Element && event.target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]')) return;
+      event.preventDefault();
+      onCommand({kind:"delete",target:{kind:"node",node:{kind:"id",value:focusedNodeId}}});
+    };
+    document.addEventListener("keydown", removeSelected);
+    return () => document.removeEventListener("keydown", removeSelected);
+  }, [focusedNodeId, pending, onCommand]);
   const message = presentation?.error ?? presentation?.text ?? state.message;
   const spokenMessage = briefReply(state, message);
   const supported = useSyncExternalStore(speaker.subscribe, () => speaker.supported, () => false);
@@ -88,7 +98,6 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
     </div><div className="query-controls"><button disabled={graph.nodes.length > 0 || !!pending} onClick={() => dispatch({type:"example"})}>Load large example</button><button onClick={() => onCommand({ kind: "describe", scope: "chart" })}>Describe chart</button><button disabled={!focused} onClick={() => onCommand({ kind: "inspect", node: null })}>Inspect focus</button><button onClick={() => onCommand({ kind: "validate" })}>Validate chart</button></div></div>
     {/* Beside the voice button, not buried at the bottom: the phrases are only useful to someone
         deciding what to say next, and reaching them must not cost a trip through the whole page. */}
-    <p className="documentation-link"><a href="/docs" target="_blank" rel="noopener noreferrer">Documentation and command reference <span>(opens in a new tab)</span></a></p>
     <section className={`command-feedback ${hasError ? "has-error" : ""}`} aria-label="Command feedback">
       <span className="feedback-label">{status}</span>
       {presentation?.source && <span className="feedback-source" data-source={presentation.source}>{presentation.source === "local" ? "Local command" : "Gemini"}</span>}

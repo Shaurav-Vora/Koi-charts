@@ -7,6 +7,8 @@ describe("application shell", () => {
     render(<Home />);
 
     expect(screen.getByRole("heading", { name: "Koi charts", level: 1 })).toBeVisible();
+    expect(screen.getByRole("navigation", {name:"Main navigation"})).toContainElement(screen.getByRole("link",{name:"Documentation"}));
+    expect(screen.getByRole("link",{name:"Documentation"})).toHaveAttribute("href","/docs");
     expect(screen.getByRole("region", { name: "Visual flowchart" })).toHaveTextContent("Your chart starts here");
     expect(screen.getByRole("region", { name: "Tactile display simulator" })).toHaveTextContent("No pins raised");
     expect(screen.getByRole("status")).toHaveTextContent("Microphone off");

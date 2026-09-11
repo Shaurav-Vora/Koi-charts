@@ -159,6 +159,13 @@ const patterns: { pattern: RegExp; build: (match: RegExpExecArray) => GraphComma
       const parts = pair(match[1]);
       if (!parts) return null;
       const named = new RegExp(`^(.+?) (?:${NAMING}|with label) (.+)$`, "i").exec(parts[1]);
+      const created = new RegExp(`^(?:a |an )?new (?:(${TYPES})(?: (?:${SHAPE}))?|(?:${SHAPE}))(?: (?:${NAMING}) (.+))?[.!?]*$`, "i").exec(parts[1]);
+      if (created) {
+        const source = ref(parts[0]);
+        const type = created[1] ? TYPE_WORDS[created[1].toLowerCase()] : "process";
+        const label = created[2] ? cleanLabel(created[2], type === "decision") : DEFAULT_LABELS[type];
+        return source && label ? {kind:"connect_new",source,type,label} : null;
+      }
       const source = ref(parts[0]), target = ref(named ? named[1] : parts[1]);
       const label = named ? cleanLabel(named[2]) : null;
       if (!source || !target || (named && !label)) return null;

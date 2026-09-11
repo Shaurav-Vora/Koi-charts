@@ -11,6 +11,7 @@ export default function Home() {
           <h1>Koi charts</h1>
         </div>
         <p className="brand-description">Flowcharts through sight, touch, and voice.</p>
+        <nav aria-label="Main navigation"><a href="/docs" target="_blank" rel="noopener noreferrer">Documentation</a></nav>
         <span className="build-label">Early preview</span>
       </header>
 

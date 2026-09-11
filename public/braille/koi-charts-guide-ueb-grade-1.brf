@@ -55,9 +55,25 @@
 
 ,,connect ,,shapes
 
+  connect `<source`> to a new `<shape`>
+    .<labelled `<label`>.>
+  ,creates the destination1 then
+    connects the source to it4 ,labelled
+    names the new node1 not the arrow4
+    ,a new node without a shape type
+    defaults to ,process4 ,undo removes
+    both changes4
+  ,also3 called2 named2 labeled2
+    labelled4
+  ,say3 connect ,start to a new process
+  ,say3 connect it to a new decision
+    labelled ,approved8
+  ,say3 connect ,start to a new node
+    labelled ,review
+
   connect `<shape`> to `<shape`>
   ,draws an arrow from the first shape
-    to the second4
+    to the second4
   ,also3 connect2 link2 join2 draw an
     arrow from4
   ,say3 connect ,start to ,check payment
@@ -72,7 +88,8 @@
     label4
   ,say3 connect ,approved to ,refund
     labelled ,no
-,,,change what is there,'
+
+,,,change what is there,'
 
   rename `<shape`> to `<label`>
   ,changes a shape's label4
@@ -81,7 +98,7 @@
     shape refer to the current
     selection4
   ,say3 rename ,check payment to ,take
-    payment
+    payment
   ,say3 change ,process #c into ,review
   ,say3 rename this to ,take payment
 
@@ -96,7 +113,8 @@
   ,also3 delete2 remove2 erase4
   ,say3 delete ,refund
   ,say3 remove the selected shape
-  `<any command`> the `<shape kind`>
+
+  `<any command`> the `<shape kind`>
   ,when the chart has only one shape of
     a kind1 its kind names it ",- useful
     when the label is a long question4
@@ -105,7 +123,7 @@
   ,also3 the start2 the process "<step1
     action1 task">2 the decision
     "<choice1 question">2 the end
-    "<finish1 stop">4
+    "<finish1 stop">4
   ,say3 delete the decision
   ,say3 focus on the end
 
@@ -121,7 +139,7 @@
 
   next _/ back
   ,walks one step along the arrows1 and
-    says where you landed4
+    says where you landed4
   ,also3 next "<go next1 forward">2 back
     "<go back1 previous">4
   ,say3 next
@@ -130,7 +148,7 @@
   take `<branch`>
   ,at a decision1 follows the arrow with
     that label4
-  ,also3 take2 follow4
+  ,also3 take2 follow4
   ,say3 take ,no
 
   go to start _/ go to end _/ where am
@@ -146,7 +164,7 @@
     selection entirely4
   ,also3 focus on2 focus2 select2
     highlight2 clear selection2
-    deselect4
+    deselect4
   ,say3 focus on ,check payment
   ,say3 select the last shape
   ,say3 clear selection
@@ -155,7 +173,7 @@
 
   describe the chart _/ describe this
   ,reads out the whole chart1 or just
-    the selected shape4
+    the selected shape4
   ,say3 describe the chart
   ,say3 describe this
 
@@ -171,7 +189,7 @@
     or onward from one4
   ,say3 trace the path from ,start to
     ,end
-  ,say3 trace the path from ,start
+  ,say3 trace the path from ,start
 
   validate the chart
   ,reports what is unfinished3 missing
@@ -180,7 +198,7 @@
   ,also3 validate the chart2 check the
     chart4
   ,say3 validate the chart
-
+
 ,,,take it back,'
 
   undo _/ redo
@@ -196,7 +214,7 @@
     word for word only1 never
     approximately4
   ,say3 confirm
-  ,say3 cancel
+  ,say3 cancel
 
 ,,,sent to be interpreted,'
 
@@ -205,7 +223,7 @@
   ,contains multiple operations4 ,use
     separate commands for local
     processing4
-
+
   ,say3 add three steps for onboarding
   ,requires interpretation of the
     requested number and labels of new
@@ -221,14 +239,8 @@
     as a local add command4
 
   ,say3 move ,start somewhere sensible
-  ,does not specify a destination or a
+  ,does not specify a destination or a
     position relative to another node4
-
-  ,say3 connect the last node to a new
-    decision
-  ,requires resolving the source and
-    creating a destination before
-    connecting them4
 
   ,say3 label the arrow between ,start
     and ,end ,yes
@@ -236,3 +248,4 @@
     relabelling an existing arrow by its
     endpoints4 ,select the arrow to edit
     its label4
+

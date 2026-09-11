@@ -85,7 +85,6 @@ describe("command templates", () => {
     "Add a process called Review and connect it to End.",
     "Add a process called Review then delete Start.",
     "Add a process, then connect it to a new decision.",
-    "Connect Start to a new decision.",
     "Connect Start to an end node.",
     "Rename a new decision to Approved.",
     "Rename the new process to Review.",

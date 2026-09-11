@@ -22,6 +22,8 @@ a { color: var(--blue); }
 .skip-link:focus { transform: translateY(0); }
 .app-header { min-height: 88px; padding: 20px 4%; display: flex; align-items: center; gap: 30px; border-bottom: 1px solid var(--line); background: var(--surface); }
 .brand { display: flex; align-items: center; gap: 12px; }
+.app-header nav a { display: inline-flex; min-height: 44px; align-items: center; font-size: 14px; font-weight: 600; text-decoration: none; }
+.app-header nav a:hover { text-decoration: underline; }
 .brand h1 { font-size: 25px; font-weight: 700; letter-spacing: -1px; }
 .brand-description { font-size: 14px; color: var(--muted); }
 .build-label { margin-left: auto; color: var(--muted); font-size: 13px; border: 1px solid var(--line); padding: 5px 11px; border-radius: 5px; white-space: nowrap; }

@@ -82,6 +82,14 @@ export function prepareTransaction(
   const affect = (id: string) => { working.focusedNodeId = id; working.recentNodeId = id; };
   const apply = (edit: EditCommand, prefix: string) => {
     switch (edit.kind) {
+      case "connect_new": {
+        const source = node(edit.source, `${prefix}/source`);
+        apply({kind:"add_node",type:edit.type,label:edit.label,placement:null}, prefix);
+        const target = working.recentNodeId!;
+        working.graph.edges.push({id:allocate(),source,target});
+        message = `Added and connected ${working.graph.nodes.find(item=>item.id===target)!.label}.`;
+        break;
+      }
       case "add_node": {
         // Adding a shape must not rearrange existing shapes, including auto-laid-out ones.
         const existing = layoutGraph(working.graph);

@@ -2,6 +2,10 @@
 
 ## Documentation and chart exports
 
+**Documentation** is available in the header navigation and opens in a new tab. Press **Delete** to remove the selected node; connected nodes use the existing confirmation dialog. The shortcut does not run while typing in an input or editing text.
+
+With local commands enabled, use **connect Start to a new process node** or **connect Start to a new decision labelled Approved?**. The destination is always created first, then connected to the original source. Here, **labelled** names the destination; it does not label the arrow. **New node** without a type creates a Process. Creation and connection share one Undo step. The documentation and Braille references include these forms.
+
 The command reference is available at **/docs**. The workspace link opens it in a new tab so the active chart remains open. Documentation covers command syntax, examples, Braille downloads, and export formats.
 
 SVG, PNG, JPEG, and PDF exports use the complete chart bounds, including nodes above or left of the canvas origin. All shapes and routed connections are translated together with padding on every side; pan and zoom do not affect the exported area.
