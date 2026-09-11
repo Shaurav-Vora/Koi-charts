@@ -70,6 +70,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const toggleSpeech = (next: boolean) => { speechPreference.write(next); if (!next) speaker.cancel(); };
   const indicator = voiceIndicator(voice.connectionStatus, inputPaused, presentation?.status);
   const status = presentation ? statusLabels[presentation.status] : state.outcome === "idle" ? "Idle" : state.outcome === "error" ? "Command not applied" : state.outcome === "confirmation" ? "Confirmation needed" : state.outcome === "clarification" ? "Clarification needed" : state.outcome === "committed" ? "Change applied" : state.outcome === "focused" ? "Focus updated" : state.outcome === "cancelled" ? "Cancelled" : "Chart explored";
+  const outcomeTone = hasError ? "error" : state.outcome === "committed" ? "success" : state.outcome === "confirmation" || state.outcome === "clarification" ? "warning" : state.outcome === "focused" || state.outcome === "explored" ? "info" : "idle";
   return <>
     <div className="workspace-heading"><h2>Your workspace</h2><span className="workspace-tagline">Build a flowchart, one clear step at a time.</span></div>
     <div className="workspace-deck">
@@ -86,12 +87,15 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
           <ToggleSwitch className="speech-switch" label="Speak replies" checked={speaks} disabled={!supported} title={supported ? undefined : "This browser has no speech engine."} onChange={toggleSpeech} />
         </div>
       </div>
-      <section className={`command-feedback ${hasError ? "has-error" : ""}`} aria-label="Command feedback">
-        <div className="feedback-meta">
-          <span className="feedback-label">{status}</span>
-          {presentation?.source && <span className="feedback-source" data-source={presentation.source}>{presentation.source === "local" ? "Local command" : "Gemini"}</span>}
+      <section className={`command-feedback ${hasError ? "has-error" : ""}`} data-tone={outcomeTone} aria-label="Command feedback">
+        <div key={`${status}-${message}`} className="feedback-body">
+          <div className="feedback-meta">
+            <span className="feedback-status-dot" aria-hidden="true" />
+            <span className="feedback-label">{status}</span>
+            {presentation?.source && <span className="feedback-source" data-source={presentation.source}>{presentation.source === "local" ? "Local command" : "Gemini"}</span>}
+          </div>
+          <p role={!speaks && hasError ? "alert" : undefined} aria-live={speaks || hasError ? undefined : "polite"}>{message}</p>
         </div>
-        <p role={!speaks && hasError ? "alert" : undefined} aria-live={speaks || hasError ? undefined : "polite"}>{message}</p>
         {pending && <div className="pending-actions">
           {pending.kind === "deletion" ? <button className="danger-button" onClick={() => onCommand({ kind: "confirm" })}>Confirm deletion</button> : choiceLabels(graph, pending.candidates, pending.elementKind).map((label, index) => <button key={pending.candidates[index]} onClick={() => dispatch({ type: "choose", candidateId: pending.candidates[index], idSeed: crypto.randomUUID() })}>{`${index + 1}. ${label}`}</button>)}
           <button onClick={() => onCommand({ kind: "cancel" })}>Cancel</button>
