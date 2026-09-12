@@ -26,21 +26,12 @@ export default function PlaybackPanel({ graph, graphVersion, state, onAction, an
   const canBack = currentGraph && state.route.length > 1;
   const dispatch = (action: PlaybackAction) => onAction(action);
 
-  return <section className="playback-panel" data-status={state.status} role="region" aria-label="Test chart">
-    <div className="playback-heading">
-      <div>
-        <span className="playback-eyebrow">Guided playback</span>
+  return <section className={`playback-panel${active ? "" : " is-compact"}`} data-status={state.status} role="region" aria-label="Test chart">
+    {!active ? <button className="playback-launch" type="button" onClick={() => dispatch({ type: "start", graphVersion })}>Test chart</button> : <>
+      <div className="playback-heading">
         <h3>Test chart</h3>
+        <span className="playback-status"><span aria-hidden="true" />{statusLabels[state.status]}</span>
       </div>
-      <span className="playback-status"><span aria-hidden="true" />{statusLabels[state.status]}</span>
-    </div>
-
-    {!active ? <>
-      <p className="playback-intro">Follow the chart one node at a time and choose every branch yourself.</p>
-      <div className="playback-actions">
-        <button className="playback-primary" type="button" onClick={() => dispatch({ type: "start", graphVersion })}>Test chart</button>
-      </div>
-    </> : <>
       <p className="playback-message" role="status" aria-live={announce ? "polite" : "off"}>{state.message}</p>
       {current && <p className="playback-progress"><strong>Step {state.route.length} · {current.label}</strong><span>{current.type}</span></p>}
       {routeLabels.length > 1 && <p className="playback-route"><span>Route</span>{routeLabels.join(" → ")}</p>}

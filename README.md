@@ -224,7 +224,7 @@ npm run braille
 
 ## Guided Chart Testing
 
-The **Test chart** panel follows a flowchart one node at a time without changing the chart or its undo history. Starting a test focuses the Start node across the visual canvas, tactile display, and chart outline. **Next step** follows a single outgoing connection, while charts with multiple outgoing connections require an explicit branch choice.
+The compact **Test chart** control sits inside the visual canvas instead of taking a permanent workspace row. It expands into an in-canvas panel only while testing, then returns to one button when stopped. Playback follows a flowchart one node at a time without changing the chart or its undo history. Starting a test focuses the Start node across the visual canvas, tactile display, and chart outline. **Next step** follows a single outgoing connection, while charts with multiple outgoing connections require an explicit branch choice.
 
 - **Back one step** returns through the route actually taken.
 - **Repeat step** repeats the current node guidance.

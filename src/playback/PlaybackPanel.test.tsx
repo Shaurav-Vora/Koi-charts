@@ -24,7 +24,10 @@ describe("PlaybackPanel", () => {
     const onAction = vi.fn();
     render(<PlaybackPanel graph={graph} graphVersion={3} state={createPlaybackState()} onAction={onAction} />);
 
-    expect(screen.getByRole("region", { name: "Test chart" })).toBeVisible();
+    const panel = screen.getByRole("region", { name: "Test chart" });
+    expect(panel).toBeVisible();
+    expect(panel).toHaveClass("is-compact");
+    expect(screen.queryByText("Follow the chart one node at a time and choose every branch yourself.")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Test chart" }));
 
     expect(onAction).toHaveBeenCalledWith({ type: "start", graphVersion: 3 });

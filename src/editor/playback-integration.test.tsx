@@ -1,7 +1,19 @@
-import { describe, expect, it } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import Editor from "./Editor";
 import { createEditorCoordinator } from "./coordinator";
 
+vi.mock("../visual/VisualCanvas", () => ({ default: () => <div data-testid="visual-canvas" /> }));
+
 describe("editor playback integration", () => {
+  it("keeps the guided test control inside the canvas instead of a workspace row", () => {
+    render(<Editor />);
+
+    const panel = screen.getByRole("region", { name: "Test chart" });
+    expect(panel).toHaveClass("is-compact");
+    expect(panel.parentElement).toHaveClass("canvas-wrap");
+  });
+
   it("starts at the Start node, synchronizes focus, and preserves graph history", () => {
     const coordinator = createEditorCoordinator();
     coordinator.dispatch({
