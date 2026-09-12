@@ -10,3 +10,13 @@ test-results/
 *.tsbuildinfo
 npm-debug.log*
 graphify-out/
+
+# Local coding-agent and browser automation state
+.claude/
+.codex/
+.playwright-mcp/
+.serena/
+
+# Generated export-preview artifacts
+/public/preview-tmp.*
+/src/tmp-preview/
