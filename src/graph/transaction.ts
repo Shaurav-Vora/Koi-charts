@@ -187,7 +187,16 @@ export function prepareTransaction(
   if (command.kind === "focus") {
     working.focusedNodeId = node(command.node, "/node"); message = `Focused ${working.graph.nodes.find(item => item.id === working.focusedNodeId)!.label}.`;
   } else if (command.kind === "compound") {
-    command.commands.forEach((edit, index) => apply(edit, `/commands/${index}`)); message = `Applied ${command.commands.length} edits.`;
+    const positionsNewNode = command.commands.length === 2
+      && command.commands[0].kind === "add_node"
+      && command.commands[1].kind === "move_to"
+      && command.commands[1].node.kind === "recent";
+    let additionMessage = "";
+    command.commands.forEach((edit, index) => {
+      apply(edit, `/commands/${index}`);
+      if (index === 0) additionMessage = message;
+    });
+    message = positionsNewNode ? additionMessage : `Applied ${command.commands.length} edits.`;
   } else if (editKinds.includes(command.kind)) apply(command as EditCommand, "");
   else throw new Error("This command does not edit or focus the graph.");
   assertSnapshot(working);
