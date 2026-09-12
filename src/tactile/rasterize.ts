@@ -24,7 +24,12 @@ export function makeTactileFrame(graph: FlowGraph, layout: LayoutFrame, focus: s
     if(node.id===view.focusedNodeId) {line(x+w/2-2,y+h/2,x+w/2+2,y+h/2);line(x+w/2,y+h/2-2,x+w/2,y+h/2+2);}
   }
   const focused=graph.nodes.find(n=>n.id===view.focusedNodeId);
-  const text=focused ? `${focused.label} ${focused.type}` : "No node selected";
+  const visibleEdgeIds=new Set(view.edges.map(edge=>edge.id));
+  const nodeLabels=new Map(graph.nodes.map(node=>[node.id,node.label]));
+  const incoming=focused ? graph.edges.filter(edge=>visibleEdgeIds.has(edge.id)&&edge.target===focused.id) : [];
+  const outgoing=focused ? graph.edges.filter(edge=>visibleEdgeIds.has(edge.id)&&edge.source===focused.id) : [];
+  const describeEdges=(edges:typeof graph.edges,direction:"from"|"to")=>edges.map(edge=>`${edge.label ? `${edge.label} ` : ""}${direction} ${nodeLabels.get(direction==="from" ? edge.source : edge.target)}`).join(" and ");
+  const text=focused ? [`${focused.label} ${focused.type}`,incoming.length ? `Incoming ${describeEdges(incoming,"from")}` : "",outgoing.length ? `Outgoing ${describeEdges(outgoing,"to")}` : ""].filter(Boolean).join(" ") : "No node selected";
   const braille=toBraille(focused ? text : "");
   return {version,width:120,height:80,raisedPins:[...pins].sort((a,b)=>a-b).map(p=>({x:p%120,y:Math.floor(p/120)})),brailleCells:braille.cells,text,focusedNodeId:view.focusedNodeId,mode,unsupported:braille.unsupported,nodeIds:view.nodes.map(n=>n.id),edgeIds:view.edges.map(e=>e.id)};
 }

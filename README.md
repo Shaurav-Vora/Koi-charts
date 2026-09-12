@@ -24,7 +24,7 @@ A voice-first flowchart workspace designed for independent blind authorship. The
 
 **Task 8 remains available: server authentication and command interpretation.** Server-only endpoints mint temporary AssemblyAI tokens and interpret final transcripts through a validated command schema. Task 7 preview, deduplication and stale-context protections remain in place.
 
-**Task 6 remains available: tactile simulator.** The committed graph now produces a deterministic 120 × 80 raised-pin simulation, with shape outlines, directional arrowheads and a focused-node cross. Auto mode switches dense charts to a neighborhood view; Overview and Focused view remain available. The full focused label, stable session ID and limited Braille demonstration appear below the pins.
+**Task 6 remains available: tactile simulator.** The committed graph now produces a deterministic 120 × 80 raised-pin simulation, with shape outlines, directional arrowheads and a focused-node cross. Auto mode switches dense charts to a neighborhood view; Overview and Focused view remain available. The information strip below the pins gives the focused node followed by its visible incoming and outgoing connections. Arrow labels appear before the connected node name in both the text and Braille cells.
 
 The visual palette, keyboard commands and undo/redo remain available, including while voice is unavailable. Charts clear on refresh. The simulator is a digital demonstration, not physical hardware or validated Braille.
 
