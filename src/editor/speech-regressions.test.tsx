@@ -4,7 +4,12 @@ import { hydrateRoot, type Root } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
 import Editor from "./Editor";
 import { createEditorCoordinator } from "./coordinator";
-vi.mock("../visual/VisualCanvas",()=>({default:()=>null}));
+vi.mock("../visual/VisualCanvas",()=>({
+ default:({onWalk,onInspect}:{onWalk?:(direction:"stay")=>void;onInspect?:()=>void})=><>
+  <button type="button" onClick={()=>onWalk?.("stay")}>Where am I</button>
+  <button type="button" onClick={onInspect}>Inspect focus</button>
+ </>
+}));
 class Utterance { constructor(public text:string){} }
 function browserSpeech(){
  const speak=vi.fn(),cancel=vi.fn();

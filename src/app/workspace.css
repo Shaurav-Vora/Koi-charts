@@ -249,6 +249,49 @@
 #workspace .command-feedback .pending-actions { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
 #workspace .command-feedback .pending-actions button { padding: 4px 10px; min-height: 28px; font-size: 12px; border-radius: 4px; }
 
+#workspace .playback-panel {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px;
+  margin: 0 0 10px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 2px 6px #1c2c4905;
+}
+#workspace .playback-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#workspace .playback-heading h3 { margin: 0; font-size: 15px; font-weight: 700; color: var(--ink); }
+#workspace .playback-eyebrow { display: block; margin-bottom: 1px; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+#workspace .playback-status { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border: 1px solid #d7e0ed; border-radius: 999px; background: #f7f9fc; color: #3b4e6d; font-size: 11px; font-weight: 650; }
+#workspace .playback-status span { width: 7px; height: 7px; border-radius: 50%; background: #6b7c98; }
+#workspace .playback-panel[data-status="paused"] .playback-status span,
+#workspace .playback-panel[data-status="choosing_start"] .playback-status span,
+#workspace .playback-panel[data-status="choosing_branch"] .playback-status span { background: #315ac8; }
+#workspace .playback-panel[data-status="complete"] .playback-status span { background: #16834b; }
+#workspace .playback-panel[data-status="blocked"] .playback-status span { background: #c26514; }
+#workspace .playback-intro,
+#workspace .playback-message,
+#workspace .playback-progress,
+#workspace .playback-route { margin: 0; font-size: 13px; line-height: 1.45; }
+#workspace .playback-intro,
+#workspace .playback-route { color: var(--muted); }
+#workspace .playback-progress { display: flex; align-items: baseline; gap: 8px; }
+#workspace .playback-progress span { color: var(--muted); font-size: 11px; text-transform: capitalize; }
+#workspace .playback-route span { margin-right: 8px; color: #3b4e6d; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+#workspace .playback-warnings { padding: 9px 11px; border: 1px solid #fed7aa; border-radius: 6px; background: #fffbeb; color: #7c3d0a; font-size: 12px; }
+#workspace .playback-warnings > strong { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+#workspace .playback-warnings ul { margin: 4px 0 0; padding-left: 18px; }
+#workspace .playback-actions,
+#workspace .playback-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+#workspace .playback-actions button,
+#workspace .playback-choices button { min-height: 34px; padding: 6px 12px; border: 1px solid #cbd6e6; border-radius: 6px; background: #ffffff; color: var(--ink); font-size: 12px; font-weight: 600; cursor: pointer; }
+#workspace .playback-actions button:hover:not(:disabled),
+#workspace .playback-choices button:hover:not(:disabled) { border-color: #7893c7; background: #f2f6fc; color: #244ea9; }
+#workspace .playback-actions button:disabled { opacity: .45; cursor: not-allowed; }
+#workspace .playback-actions .playback-primary { border-color: var(--accent); background: var(--accent); color: #ffffff; }
+#workspace .playback-actions .playback-primary:hover:not(:disabled) { border-color: var(--accent-hover); background: var(--accent-hover); color: #ffffff; }
+
 /* In-Chart Canvas Floating Controls & Navigation Dock */
 #workspace .canvas-controls,
 #workspace .canvas-dock {

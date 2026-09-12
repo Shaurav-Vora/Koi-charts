@@ -221,6 +221,20 @@ npm run braille
 
 ---
 
+## Guided Chart Testing
+
+The **Test chart** panel follows a flowchart one node at a time without changing the chart or its undo history. Starting a test focuses the Start node across the visual canvas, tactile display, and chart outline. **Next step** follows a single outgoing connection, while charts with multiple outgoing connections require an explicit branch choice.
+
+- **Back one step** returns through the route actually taken.
+- **Repeat step** repeats the current node guidance.
+- **Restart test** begins again after completion, a dead end, or a chart change.
+- **Stop test** closes the active route and returns the panel to its ready state.
+- Editing the graph during a test pauses playback and asks for a restart, preventing stale connections from being followed.
+
+Manual check: create **Start → Process → End**, select **Test chart**, and verify that **Next step** pauses at Process, **Back one step** returns to Start, and the following two steps reach End. Every control should be reachable with <kbd>Tab</kbd> and usable with <kbd>Enter</kbd> or <kbd>Space</kbd>.
+
+---
+
 ## Keyboard Shortcuts
 
 | Shortcut | Context | Action |
@@ -297,7 +311,7 @@ To verify the guided playback engine milestone independently:
 npm test -- src/playback/engine.test.ts
 ```
 
-The playback engine is currently headless. Its workspace controls and spoken guidance will be added in the next milestone.
+The workspace exposes this engine through the Test chart panel and keeps playback focus synchronized across its chart representations.
 
 ---
 

@@ -17,6 +17,7 @@ import { voiceIndicator } from "./voice-status";
 import { briefReply } from "./brief-reply";
 import { choiceLabels } from "../feedback/choices";
 import PreviewOverlay from "../visual/PreviewOverlay";
+import PlaybackPanel from "../playback/PlaybackPanel";
 
 const editableTarget = (target: EventTarget | null) =>
   target instanceof Element && !!target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]');
@@ -29,7 +30,7 @@ class CanvasBoundary extends Component<{ children: ReactNode }, { failed: boolea
 export default function Editor({ coordinator: supplied }: { coordinator?: ReturnType<typeof createEditorCoordinator> } = {}) {
   const [local] = useState(() => createEditorCoordinator());
   const coordinator = supplied ?? local;
-  const { editor: state, presentation } = useSyncExternalStore(coordinator.subscribe, coordinator.getSnapshot, coordinator.getSnapshot);
+  const { editor: state, presentation, playback } = useSyncExternalStore(coordinator.subscribe, coordinator.getSnapshot, coordinator.getSnapshot);
   const dispatch = coordinator.dispatch;
   const speaker = useMemo(() => createSpeaker(), []);
   // Talking over a reply stops it: the microphone is muted while one plays, so without this
@@ -54,7 +55,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
     return () => document.removeEventListener("keydown", removeSelected);
   }, [focusedNodeId, pending, onCommand]);
   const message = presentation?.error ?? presentation?.text ?? state.message;
-  const spokenMessage = briefReply(state, message);
+  const spokenMessage = playback.status === "idle" ? briefReply(state, message) : playback.message;
   const supported = useSyncExternalStore(speaker.subscribe, () => speaker.supported, () => false);
   const inputPaused = useSyncExternalStore(speaker.subscribe, speaker.getSnapshot, () => false);
   const toggleVoice = useCallback(() => {
@@ -90,7 +91,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
     speaker.speak(spokenMessage);
     // Depending on the store objects rather than the text repeats an identical reply, which is
     // how pressing Back twice at a dead end confirms twice that there is still nothing behind.
-  }, [state, presentation, speaks, speaker, spokenMessage]);
+  }, [state, presentation, playback, speaks, speaker, spokenMessage]);
   const toggleSpeech = (next: boolean) => { speechPreference.write(next); if (!next) speaker.cancel(); };
   const indicator = voiceIndicator(voiceConnectionStatus, inputPaused, presentation?.status);
   const status = presentation ? statusLabels[presentation.status] : state.outcome === "idle" ? "Idle" : state.outcome === "error" ? "Command not applied" : state.outcome === "confirmation" ? "Confirmation needed" : state.outcome === "clarification" ? "Clarification needed" : state.outcome === "committed" ? "Change applied" : state.outcome === "focused" ? "Focus updated" : state.outcome === "cancelled" ? "Cancelled" : "Chart explored";
@@ -132,6 +133,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
         </div>}
       </section>
     </div>
+    <PlaybackPanel graph={graph} graphVersion={version} state={playback} onAction={coordinator.playbackDispatch} announce={!speaks} />
     <div className="diagram-workbench"><div className="palette-column"><ShapePalette lastNodeId={graph.nodes.at(-1)?.id} onCommand={onCommand} />{focused && <NodeInspector key={`${focused.id}-${focused.label}`} node={focused} onCommand={onCommand} />}</div>
       <section className="display visual-display" aria-labelledby="visual-title" data-graph-version={version}>
         <div className="display-heading"><h3 id="visual-title">Visual flowchart</h3><span className="count">{graph.nodes.length} nodes · {graph.edges.length} connections</span><ExportMenu graph={graph} layout={layout} /></div>

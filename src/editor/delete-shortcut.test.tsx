@@ -2,7 +2,9 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import Editor from "./Editor";
 import { createEditorCoordinator } from "./coordinator";
-vi.mock("../visual/VisualCanvas",()=>({default:()=>null}));
+vi.mock("../visual/VisualCanvas",()=>({
+ default:({onUndo}:{onUndo?:()=>void})=><button type="button" onClick={onUndo}>Undo</button>
+}));
 it("deletes the selected unconnected node, with undo",()=>{
  const coordinator=createEditorCoordinator();
  render(<Editor coordinator={coordinator}/>);
