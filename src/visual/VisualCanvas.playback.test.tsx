@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
 import VisualCanvas from "./VisualCanvas";
@@ -25,10 +25,11 @@ vi.mock("@xyflow/react", async () => {
       zoomIn: vi.fn(),
       zoomOut: vi.fn(),
     }),
-    ReactFlow: ({ nodes, edges, children }: {
+    ReactFlow: ({ nodes, edges, children, onEdgeClick }: {
       nodes: Array<{ id: string; data: { playbackState?: string } }>;
       edges: Array<{ id: string; ariaLabel?: string; data: { playbackState?: string } }>;
       children: ReactNode;
+      onEdgeClick?: (event: unknown, edge: unknown) => void;
     }) => React.createElement(
       "div",
       null,
@@ -43,6 +44,7 @@ vi.mock("@xyflow/react", async () => {
         "aria-label": edge.ariaLabel,
         "data-testid": "edge-" + edge.id,
         "data-playback-state": edge.data.playbackState,
+        onClick: event => onEdgeClick?.(event, edge),
       })),
       children,
     ),
@@ -90,5 +92,20 @@ describe("VisualCanvas playback route", () => {
     render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId={null} onCommand={vi.fn()} />);
 
     expect(screen.getByRole("img", { name: "Edit arrow from Begin to Review labelled next" })).toBeInTheDocument();
+  });
+
+  it("deletes the selected connection with Delete while leaving label typing safe", () => {
+    const onCommand = vi.fn();
+    render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId={null} onCommand={onCommand} />);
+
+    fireEvent.click(screen.getByRole("img", { name: "Edit arrow from Begin to Review labelled next" }));
+    const labelInput = screen.getByLabelText("Arrow label");
+    expect(labelInput).not.toHaveFocus();
+    fireEvent.keyDown(labelInput, { key: "Delete" });
+    expect(onCommand).toHaveBeenCalledTimes(1);
+    fireEvent.keyDown(document, { key: "Delete" });
+
+    expect(onCommand).toHaveBeenLastCalledWith({ kind: "delete", target: { kind: "edge_id", id: "start-review" } });
+    expect(onCommand).toHaveBeenCalledTimes(2);
   });
 });

@@ -80,6 +80,18 @@ function Canvas({
   const [drag, setDrag] = useState<{ id: string; x: number; y: number } | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const selectedEdge = graph.edges.find(edge => edge.id === selectedEdgeId);
+  useEffect(() => {
+    if (!selectedEdgeId) return;
+    const removeSelectedEdge = (event: KeyboardEvent) => {
+      const editable = event.target instanceof Element && !!event.target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]');
+      if (event.key !== "Delete" || event.repeat || event.defaultPrevented || event.isComposing || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || editable) return;
+      event.preventDefault();
+      onCommand({ kind: "delete", target: { kind: "edge_id", id: selectedEdgeId } });
+      setSelectedEdgeId(null);
+    };
+    document.addEventListener("keydown", removeSelectedEdge);
+    return () => document.removeEventListener("keydown", removeSelectedEdge);
+  }, [onCommand, selectedEdgeId]);
   const focusedBox = layout.nodes.find(box => box.id === focusedNodeId);
   // Never zoom out to centre: an author who has zoomed in to read a label keeps that reading size.
   const centerOnFocus = () => { if (focusedBox) void setCenter(focusedBox.x + focusedBox.width / 2, focusedBox.y + focusedBox.height / 2, { zoom: Math.max(getZoom(), 1), duration: 220 }); };

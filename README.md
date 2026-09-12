@@ -248,7 +248,7 @@ Manual check: create a Start leading to a Decision with labelled **Yes** and **N
 | :--- | :--- | :--- |
 | <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>V</kbd> | Global | Start or stop live voice streaming |
 | <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>S</kbd> | Global | Stop currently playing speech reply and release mic |
-| <kbd>Delete</kbd> / <kbd>Backspace</kbd> | Canvas | Delete currently selected node (with confirmation guard) |
+| <kbd>Delete</kbd> | Canvas | Delete the selected node or connection. Connected-node deletion keeps its confirmation guard. |
 | <kbd>Escape</kbd> | Canvas / Forms | Clear active selection or cancel inline editing |
 | <kbd>Enter</kbd> | Inline Rename | Save updated label |
 | <kbd>Tab</kbd> / <kbd>Shift</kbd> + <kbd>Tab</kbd> | Global | Navigate accessible elements & toolbar controls |

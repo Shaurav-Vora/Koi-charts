@@ -12,7 +12,7 @@ export default function ArrowInspector({ edge, source, target, onCommand, onClos
    onKeyDown={event => { event.stopPropagation(); if (event.key === "Escape") onClose(); }}>
   <div className="arrow-inspector-heading"><h3>Selected arrow</h3><button type="button" aria-label="Close arrow editor" onClick={onClose}>×</button></div>
   <p className="arrow-endpoints">{source.label} → {target.label}</p>
-  <label>Arrow label<input autoFocus maxLength={200} value={label} onChange={event => setLabel(event.target.value)} placeholder="Add a label" /></label>
+  <label>Arrow label<input maxLength={200} value={label} onChange={event => setLabel(event.target.value)} placeholder="Add a label" /></label>
   {source.type === "decision" && <div className="branch-shortcuts" role="group" aria-label="Decision branch label">
    {["Yes", "No"].map(value => <button key={value} type="button" aria-pressed={edge.label === value} onClick={() => apply(value)}>{value}</button>)}
   </div>}
