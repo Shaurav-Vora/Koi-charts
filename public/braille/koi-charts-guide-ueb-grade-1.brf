@@ -135,6 +135,31 @@
   ,say3 delete the connection from
     ,start to ,check payment
 
+,,,test the chart,'
+
+  test chart _/ start test
+  ,starts guided playback at a ,start
+    shape without changing the chart4
+  ,say3 test chart
+  ,say3 start test
+
+  repeat _/ restart test _/ stop test
+  ,repeats the current step1 starts the
+    route again1 or closes guided
+    playback4
+  ,also3 repeat step4
+  ,say3 repeat
+  ,say3 restart test
+  ,say3 stop test
+
+  next _/ back _/ take `<branch`>
+  ,while testing1 moves through the
+    recorded route or takes only the
+    branch you name4
+  ,say3 next
+  ,say3 back
+  ,say3 take ,yes
+
 ,,,move the cursor,'
 
   next _/ back

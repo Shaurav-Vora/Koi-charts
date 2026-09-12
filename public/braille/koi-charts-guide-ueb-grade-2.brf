@@ -113,6 +113,28 @@
   ,say3 delete ! 3nec;n f ,/>t to ,*eck
     pay;t
 
+,,,te/ ! *>t,'
+
+  te/ *>t _/ />t te/
+  ,/>ts guid$ playback at a ,/>t %ape
+    )|t *ang+ ! *>t4
+  ,say3 te/ *>t
+  ,say3 />t te/
+  rep1t _/ re/>t te/ _/ /op te/
+  ,rep1ts ! curr5t /ep1 />ts ! r|te ag1
+    or closes guid$ playback4
+  ,al3 rep1t /ep4
+  ,say3 rep1t
+  ,say3 re/>t te/
+  ,say3 /op te/
+
+  next _/ back _/ take `<bran*`>
+  ,:ile te/+1 moves "? ! record$ r|te or
+    takes only ! bran* y "n4
+  ,say3 next
+  ,say3 back
+  ,say3 take ,yes
+
 ,,,move ! cursor,'
 
   next _/ back
@@ -121,9 +143,8 @@
   ,al3 next "<g next1 =w>d">2 back "<g
     back1 previ|s">4
   ,say3 next
-  ,say3 g back
-
-  take `<bran*`>
+  ,say3 g back
+  take `<bran*`>
   ,at a deci.n1 foll{s ! >r{ ) t label4
   ,al3 take2 foll{4
   ,say3 take ,no
@@ -145,9 +166,10 @@
   ,say3 cle> selec;n
 
 ,,,ask ab ! *>t,'
-  describe ! *>t _/ describe ?
+
+  describe ! *>t _/ describe ?
   ,r1ds | ! :ole *>t1 or j ! select$
-    %ape4
+    %ape4
   ,say3 describe ! *>t
   ,say3 describe ?
 
@@ -169,9 +191,10 @@
   ,say3 validate ! *>t
 
 ,,,take x back,'
-  undo _/ r$o
+
+  undo _/ r$o
   ,/eps back or =w>d "? yr $its4 ,walk+
-    ! *>t is n an $it4
+    ! *>t is n an $it4
   ,say3 undo
   ,say3 r$o
 
@@ -194,9 +217,9 @@
     & labels ( new nodes4
 
   ,say3 delete "ey?+
-  ,reque/s a bulk op}a;n4 ,de/ructive
+  ,reque/s a bulk op}a;n4 ,de/ructive
     *anges require 3firma;n4
-
+
   ,say3 d n add a />t node
   ,3ta9s nega;n & is n tr1t$ z a local
     add comm&4

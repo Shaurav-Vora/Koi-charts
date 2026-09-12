@@ -33,6 +33,8 @@ export const validCommands: { name: string; command: Record<string, unknown> }[]
   ...["chart", "focus"].map(scope => ({ name: `describe ${scope}`, command: { kind: "describe", scope } })),
   ...["next", "back", "first", "last", "stay"].map(direction => ({ name: `walk ${direction}`, command: { kind: "walk", direction, branch: null } })),
   { name: "walk a named branch", command: { kind: "walk", direction: "next", branch: "yes" } },
+  ...["start", "stop", "restart", "repeat"].map(action => ({ name: `playback ${action}`, command: { kind: "playback", action, choice: null } })),
+  { name: "playback choice", command: { kind: "playback", action: "choose", choice: "yes" } },
   { name: "inspect focused", command: { kind: "inspect", node: null } },
   { name: "inspect named", command: { kind: "inspect", node: { kind: "label", value: "Begin" } } },
   { name: "trace to target", command: { kind: "trace_path", start: { kind: "label", value: "Begin" }, end: { kind: "id", value: "n4" } } },

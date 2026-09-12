@@ -195,6 +195,7 @@ Koi Charts features an on-device deterministic grammar parser (`src/commands/gra
 | **Delete Arrow** | `delete the connection from <shape> to <shape>` | *"Delete the connection from Start to Verify"* |
 | **Navigation** | `next` / `back` / `go to start` / `go to end` | *"Next"* or *"Go to start"* |
 | **Branch Choice** | `take <branch>` | *"Take Yes"* |
+| **Test Chart** | `test chart` / `start test` / `repeat` / `restart test` / `stop test` | *"Test chart"* or *"Stop test"* |
 | **Inspect / Query** | `where am I` / `inspect <shape>` / `describe the chart` | *"Describe the chart"* |
 | **Trace Path** | `trace the path from <shape> [to <shape>]` | *"Trace the path from Start to End"* |
 | **History & Guard** | `undo` / `redo` / `confirm` / `cancel` | *"Undo"* or *"Confirm"* |
@@ -231,6 +232,8 @@ The compact **Test chart** control sits inside the visual canvas instead of taki
 - **Restart test** begins again after completion, a dead end, or a chart change.
 - **Stop test** closes the active route and returns the panel to its ready state.
 - Editing the graph during a test pauses playback and asks for a restart, preventing stale connections from being followed.
+
+Voice control uses exact local commands: **test chart** or **start test**, **next**, **back**, **repeat**, **take _branch label or destination_**, **restart test**, and **stop test**. These commands run locally without calling Gemini. Branch choices must match an arrow label or destination node; Koi Charts does not guess an unspoken choice.
 
 Manual check: create **Start → Process → End**, select **Test chart**, and verify that **Next step** pauses at Process, **Back one step** returns to Start, and the following two steps reach End. Every control should be reachable with <kbd>Tab</kbd> and usable with <kbd>Enter</kbd> or <kbd>Space</kbd>.
 

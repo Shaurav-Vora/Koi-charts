@@ -151,6 +151,38 @@ export const grammar: GrammarSection[] = [
     ],
   },
   {
+    title: "Test the chart",
+    entries: [
+      {
+        form: "test chart / start test",
+        purpose: "Starts guided playback at a Start shape without changing the chart.",
+        examples: [
+          { say: "test chart", command: { kind: "playback", action: "start", choice: null } },
+          { say: "start test", command: { kind: "playback", action: "start", choice: null } },
+        ],
+      },
+      {
+        form: "repeat / restart test / stop test",
+        purpose: "Repeats the current step, starts the route again, or closes guided playback.",
+        alternatives: ["repeat step"],
+        examples: [
+          { say: "repeat", command: { kind: "playback", action: "repeat", choice: null } },
+          { say: "restart test", command: { kind: "playback", action: "restart", choice: null } },
+          { say: "stop test", command: { kind: "playback", action: "stop", choice: null } },
+        ],
+      },
+      {
+        form: "next / back / take <branch>",
+        purpose: "While testing, moves through the recorded route or takes only the branch you name.",
+        examples: [
+          { say: "next", command: { kind: "walk", direction: "next", branch: null } },
+          { say: "back", command: { kind: "walk", direction: "back", branch: null } },
+          { say: "take Yes", command: { kind: "walk", direction: "next", branch: "Yes" } },
+        ],
+      },
+    ],
+  },
+  {
     title: "Move the cursor",
     entries: [
       {

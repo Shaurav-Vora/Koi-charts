@@ -40,6 +40,7 @@ export const commandSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("focus"), node: spokenRefSchema }),
   z.strictObject({ kind: z.literal("clear_focus") }),
   z.strictObject({ kind: z.literal("walk"), direction: z.enum(walkDirections), branch: text.nullable() }),
+  z.strictObject({ kind: z.literal("playback"), action: z.enum(["start", "stop", "restart", "repeat", "choose"]), choice: text.nullable() }),
   z.strictObject({ kind: z.literal("undo") }),
   z.strictObject({ kind: z.literal("redo") }),
   z.strictObject({ kind: z.literal("validate") }),

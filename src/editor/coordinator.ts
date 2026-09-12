@@ -2,6 +2,7 @@ import { interpretOnServer } from "./interpret-client";
 import { localCommandPreference } from "./preference";
 import { createEditorState, editorReducer, type EditorAction } from "./reducer";
 import { TurnCoordinator, type Interpret, type Presentation } from "../streaming/turns";
+import type { GraphCommand } from "../commands/schema";
 import type { CommandResult } from "../graph/types";
 import { createPlaybackState, playbackTransition } from "../playback/engine";
 import type { PlaybackAction } from "../playback/types";
@@ -17,17 +18,66 @@ export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
    :state.playback;
   state={...state,editor,presentation:null,playback};publish();
  };
- const playbackDispatch=(action:PlaybackAction)=>{
+ const result=():CommandResult=>({state:state.editor.engine,outcome:state.editor.outcome==="idle"?"error":state.editor.outcome,message:state.editor.message});
+ const playbackResult=(action:PlaybackAction):CommandResult=>({
+  state:state.editor.engine,
+  outcome:state.playback.status==="blocked"||(state.playback.status==="idle"&&action.type!=="stop")?"error"
+   :state.playback.status==="choosing_start"||state.playback.status==="choosing_branch"?"clarification":"explored",
+  message:state.playback.message,
+ });
+ const playbackDispatch=(action:PlaybackAction):CommandResult=>{
   const playback=playbackTransition(state.editor.engine.graph,state.playback,action);
   let editor=state.editor;
   if(playback.currentNodeId&&playback.currentNodeId!==editor.engine.focusedNodeId){
    editor=editorReducer(editor,{type:"command",idSeed:crypto.randomUUID(),command:{kind:"focus",node:{kind:"id",value:playback.currentNodeId}}});
   }
   state={...state,editor,presentation:null,playback};publish();
+  return playbackResult(action);
  };
- const result=():CommandResult=>({state:state.editor.engine,outcome:state.editor.outcome==="idle"?"error":state.editor.outcome,message:state.editor.message});
+ const normalize=(value:string)=>value.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu," ").trim();
+ const playbackFeedback=(message:string,outcome:"error"|"clarification"):CommandResult=>{
+  state={...state,playback:{...state.playback,message},presentation:null};publish();
+  return {state:state.editor.engine,outcome,message};
+ };
+ const choosePlayback=(spoken:string|null):CommandResult=>{
+  if(state.playback.status==="paused"){
+   const outgoing=state.editor.engine.graph.edges.filter(edge=>edge.source===state.playback.currentNodeId);
+   if(outgoing.length>1)playbackDispatch({type:"next",graphVersion:state.editor.engine.version});
+  }
+  if(!spoken)return state.playback.status==="choosing_start"||state.playback.status==="choosing_branch"
+   ?playbackResult({type:"repeat",graphVersion:state.editor.engine.version})
+   :playbackFeedback("There is no choice to take here.","error");
+  const wanted=normalize(spoken);
+  if(state.playback.status==="choosing_start"){
+   const matches=state.playback.choices.filter(choice=>normalize(choice.label)===wanted||normalize(choice.destinationLabel)===wanted);
+   if(matches.length===1)return playbackDispatch({type:"choose_start",nodeId:matches[0].id,graphVersion:state.editor.engine.version});
+   if(!matches.length)return playbackFeedback(`No Start node here is called ${spoken}.`,"error");
+   return playbackFeedback(`Several Start nodes match ${spoken}. Say the full label.`,"clarification");
+  }
+  if(state.playback.status!=="choosing_branch")return playbackFeedback(`No branch here is called ${spoken}.`,"error");
+  const choices=state.playback.choices;
+  const edgeLabel=(id:string)=>state.editor.engine.graph.edges.find(edge=>edge.id===id)?.label??"";
+  let matches=choices.filter(choice=>normalize(edgeLabel(choice.id))===wanted);
+  if(!matches.length)matches=choices.filter(choice=>normalize(choice.destinationLabel)===wanted);
+  if(!matches.length)matches=choices.filter(choice=>normalize(choice.label)===wanted);
+  if(matches.length===1)return playbackDispatch({type:"choose_branch",edgeId:matches[0].id,graphVersion:state.editor.engine.version});
+  if(!matches.length)return playbackFeedback(`No branch here is called ${spoken}.`,"error");
+  return playbackFeedback(`Several branches match ${spoken}: ${matches.map(choice=>choice.label).join("; ")}. Say the destination.`,"clarification");
+ };
+ const applyCommand=(command:GraphCommand):CommandResult=>{
+  if(command.kind==="playback"){
+   if(command.action==="choose")return choosePlayback(command.choice);
+   return playbackDispatch({type:command.action,graphVersion:state.editor.engine.version});
+  }
+  if(state.playback.status!=="idle"&&command.kind==="walk"){
+   if(command.branch)return choosePlayback(command.branch);
+   const action=command.direction==="next"?"next":command.direction==="back"?"back":command.direction==="stay"?"repeat":null;
+   if(action)return playbackDispatch({type:action,graphVersion:state.editor.engine.version});
+  }
+  dispatch({type:"command",command,idSeed:crypto.randomUUID()});return result();
+ };
  const turns=new TurnCoordinator({getState:()=>state.editor.engine,interpret,preferLocal:localCommandPreference.read,
-  apply:command=>{dispatch({type:"command",command,idSeed:crypto.randomUUID()});return result();},
+  apply:applyCommand,
   choose:candidateId=>{dispatch({type:"choose",candidateId,idSeed:crypto.randomUUID()});return result();},
   present:presentation=>{state={...state,presentation};publish();},
  });

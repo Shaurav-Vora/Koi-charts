@@ -82,6 +82,17 @@ it("calls Google directly with only the Google key and the configured model",asy
  expect(body.generationConfig.responseMimeType).toBe("application/json");expect(body.generationConfig.responseJsonSchema).toHaveProperty("properties.command.anyOf");
  expect(body.contents[0].parts[0].text).toContain("Add a start called Begin");expect(transport).toHaveBeenCalledTimes(1);
 });
+it.each([
+ ["choose a branch","Yes",null],
+ ["take Yes","Yes","Yes"],
+ ["choose another","No",null],
+] as const)("keeps only a spoken playback choice for: %s",async(transcript,proposedChoice,choice)=>{
+ const proposed={kind:"playback",action:"choose",choice:proposedChoice};
+ const transport=vi.fn().mockResolvedValue(Response.json({candidates:[{finishReason:"STOP",content:{parts:[{text:JSON.stringify({command:proposed})}]}}]}));
+ const response=await createRoutes({transport,env:()=>({GEMINI_API_KEY:"test"})}).interpret(new Request("http://localhost/api/commands/interpret",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({transcript,graph:{schemaVersion:1,nodes:[],edges:[]},focusedNodeId:null,recentNodeId:null,pending:null})}));
+ expect(response.status).toBe(200);
+ expect(await response.json()).toEqual({command:{...proposed,choice}});
+});
 it("requires a Google key even if an AssemblyAI key is present",async()=>{
  vi.spyOn(console,"warn").mockImplementation(()=>{});const transport=vi.fn();
  const response=await createRoutes({transport,env:()=>({ASSEMBLYAI_API_KEY:"assembly-secret"})}).interpret(request());
