@@ -262,6 +262,7 @@ Koi-charts/
 │   ├── editor/             # Canvas editor coordinator, status management, UI components
 │   ├── feedback/           # Natural language chart descriptions and query generators
 │   ├── graph/              # Core FlowGraph types, invariants, and graph algorithms
+│   ├── playback/           # Guided chart playback state machine and route history
 │   ├── server/             # Secure API routes (AssemblyAI token minting, Gemini API gateway)
 │   ├── streaming/          # WebSocket session coordinator, audio filters, turn manager
 │   ├── tactile/            # 120 × 80 pin matrix rasterizer and Braille conversion utilities
@@ -279,6 +280,7 @@ Koi-charts/
 Koi Charts maintains comprehensive automated test coverage across all subsystems:
 
 - **Graph Invariants**: Guarantees structural integrity, cycle safety, and immutable updates.
+- **Guided Playback Engine**: Covers Start selection, branch choices, exact route history, loops, dead ends, and graph-change invalidation.
 - **Command Engine**: Tests rollback on errors, multi-step history preservation, and fuzzy reference resolution.
 - **Grammar & Lexer**: Exercises all recognized spoken forms against plain and dictated inputs.
 - **Streaming & Provider Resilience**: Tests simulated token expiry, connection loss, 30-minute session timeouts, and rate limit backoffs.
@@ -288,6 +290,14 @@ Run the test suite:
 ```bash
 npm test
 ```
+
+To verify the guided playback engine milestone independently:
+
+```bash
+npm test -- src/playback/engine.test.ts
+```
+
+The playback engine is currently headless. Its workspace controls and spoken guidance will be added in the next milestone.
 
 ---
 
