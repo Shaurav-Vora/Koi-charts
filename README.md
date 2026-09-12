@@ -15,7 +15,7 @@
   <a href="https://www.assemblyai.com"><img src="https://img.shields.io/badge/AssemblyAI-Streaming%20v3-0000FF?style=flat-square" alt="AssemblyAI" /></a>
   <a href="https://ai.google.dev"><img src="https://img.shields.io/badge/Google%20Gemini-3.1%20Flash%20Lite-orange?style=flat-square&logo=google" alt="Google Gemini" /></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-22%20%7C%2024%20%7C%2026-green?style=flat-square&logo=node.js" alt="Node Engines" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square" alt="License: MIT" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square" alt="License: GPLv3" /></a>
 </p>
 
 <p align="center">
@@ -309,4 +309,4 @@ We welcome contributions from engineers, accessibility advocates, and designers!
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [GNU General Public License v3.0](LICENSE).
