@@ -368,6 +368,11 @@ change with the state, so "Speak replies" always names the setting, never the ac
 **Stop speaking.** A reply holds the microphone until it finishes. The new button cuts it short and
 releases the microphone after the usual echo guard.
 
+**Voice keyboard shortcuts.** Press **Ctrl+Alt+V** to start or stop voice capture, and
+**Ctrl+Alt+S** to interrupt a spoken reply. The controls show these shortcuts and expose them
+through `aria-keyshortcuts`. They are ignored while focus is in a text field or other editable
+control so entering a label cannot open the microphone or stop feedback.
+
 **Repeated labels are numbered.** Adding a second Process gives "Process", "Process (2)". The first
 shape keeps its plain name. Say "process two" — the brackets are not spoken. Renaming a shape onto
 an existing name numbers it the same way.

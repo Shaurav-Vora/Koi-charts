@@ -18,6 +18,9 @@ import { briefReply } from "./brief-reply";
 import { choiceLabels } from "../feedback/choices";
 import PreviewOverlay from "../visual/PreviewOverlay";
 
+const editableTarget = (target: EventTarget | null) =>
+  target instanceof Element && !!target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]');
+
 class CanvasBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
@@ -32,6 +35,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   // Talking over a reply stops it: the microphone is muted while one plays, so without this
   // the author's next command is discarded and they are left repeating themselves.
   const voice = useVoice(coordinator, speaker.getSnapshot, speaker.interrupt);
+  const { active: voiceActive, level: voiceLevel, connectionStatus: voiceConnectionStatus, start: startVoice, stop: stopVoice } = voice;
   const onCommand = useCallback((command: GraphCommand) => dispatch({ type: "command", command, idSeed: crypto.randomUUID() }), [dispatch]);
   const { graph, focusedNodeId, pending, history, version } = state.engine;
   // Laid out once, here, because the canvas and the picture that gets exported have to be the
@@ -42,7 +46,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   useEffect(() => {
     const removeSelected = (event: KeyboardEvent) => {
       if (event.key !== "Delete" || event.repeat || event.defaultPrevented || event.isComposing || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || !focusedNodeId || pending) return;
-      if (event.target instanceof Element && event.target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]')) return;
+      if (editableTarget(event.target)) return;
       event.preventDefault();
       onCommand({kind:"delete",target:{kind:"node",node:{kind:"id",value:focusedNodeId}}});
     };
@@ -53,6 +57,26 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const spokenMessage = briefReply(state, message);
   const supported = useSyncExternalStore(speaker.subscribe, () => speaker.supported, () => false);
   const inputPaused = useSyncExternalStore(speaker.subscribe, speaker.getSnapshot, () => false);
+  const toggleVoice = useCallback(() => {
+    if (voiceActive) { speaker.cancel(); stopVoice(); }
+    else startVoice();
+  }, [speaker, startVoice, stopVoice, voiceActive]);
+  const stopSpeaking = useCallback(() => speaker.interrupt(), [speaker]);
+  useEffect(() => {
+    const handleVoiceShortcut = (event: KeyboardEvent) => {
+      if (event.repeat || event.defaultPrevented || event.isComposing || event.metaKey || event.shiftKey || !event.ctrlKey || !event.altKey || editableTarget(event.target)) return;
+      const key = event.key.toLowerCase();
+      if (key === "v") {
+        event.preventDefault();
+        toggleVoice();
+      } else if (key === "s" && inputPaused) {
+        event.preventDefault();
+        stopSpeaking();
+      }
+    };
+    document.addEventListener("keydown", handleVoiceShortcut);
+    return () => document.removeEventListener("keydown", handleVoiceShortcut);
+  }, [inputPaused, stopSpeaking, toggleVoice]);
   // On by default: an author who cannot see the chart has no other way to receive a reply.
   const wanted = useSyncExternalStore(speechPreference.subscribe, speechPreference.read, speechPreference.readOnServer);
   const fastLocal = useSyncExternalStore(localCommandPreference.subscribe, localCommandPreference.read, localCommandPreference.readOnServer);
@@ -68,7 +92,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
     // how pressing Back twice at a dead end confirms twice that there is still nothing behind.
   }, [state, presentation, speaks, speaker, spokenMessage]);
   const toggleSpeech = (next: boolean) => { speechPreference.write(next); if (!next) speaker.cancel(); };
-  const indicator = voiceIndicator(voice.connectionStatus, inputPaused, presentation?.status);
+  const indicator = voiceIndicator(voiceConnectionStatus, inputPaused, presentation?.status);
   const status = presentation ? statusLabels[presentation.status] : state.outcome === "idle" ? "Idle" : state.outcome === "error" ? "Command not applied" : state.outcome === "confirmation" ? "Confirmation needed" : state.outcome === "clarification" ? "Clarification needed" : state.outcome === "committed" ? "Change applied" : state.outcome === "focused" ? "Focus updated" : state.outcome === "cancelled" ? "Cancelled" : "Chart explored";
   const outcomeTone = hasError ? "error" : state.outcome === "committed" ? "success" : state.outcome === "confirmation" || state.outcome === "clarification" ? "warning" : state.outcome === "focused" || state.outcome === "explored" ? "info" : "idle";
   const isIdle = state.outcome === "idle" && !presentation;
@@ -80,10 +104,10 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
           <div className="status" role="status" aria-live="polite"><span className="status-dot" aria-hidden="true" />{indicator.label}</div>
           <p className="voice-hint">{indicator.hint}</p>
         </div>
-        {voice.active && <span className="mic-level" aria-hidden="true"><span className="mic-level-fill" style={{ width: `${Math.round(Math.min(1, voice.level * 4) * 100)}%` }} /></span>}
+        {voiceActive && <span className="mic-level" aria-hidden="true"><span className="mic-level-fill" style={{ width: `${Math.round(Math.min(1, voiceLevel * 4) * 100)}%` }} /></span>}
         <div className="voice-actions">
-          <button className={`voice-button${voice.active ? " is-active" : ""}`} aria-pressed={voice.active} onClick={() => { if (voice.active) { speaker.cancel(); voice.stop(); } else voice.start(); }}>{voice.active ? "Stop voice" : "Start voice"}</button>
-          <button className="stop-speech-button" disabled={!inputPaused} onClick={() => speaker.interrupt()}>Stop speaking</button>
+          <button className={`voice-button${voiceActive ? " is-active" : ""}`} aria-pressed={voiceActive} aria-keyshortcuts="Control+Alt+V" title="Keyboard shortcut: Ctrl+Alt+V" onClick={toggleVoice}><span>{voiceActive ? "Stop voice" : "Start voice"}</span><kbd className="shortcut-key" aria-hidden="true">Ctrl Alt V</kbd></button>
+          <button className="stop-speech-button" disabled={!inputPaused} aria-keyshortcuts="Control+Alt+S" title="Keyboard shortcut: Ctrl+Alt+S" onClick={stopSpeaking}><span>Stop speaking</span><kbd className="shortcut-key" aria-hidden="true">Ctrl Alt S</kbd></button>
           <ToggleSwitch className="local-switch" label="Fast local commands" checked={fastLocal} title="Recognise common phrases on this device instead of sending them to be interpreted." onChange={next => localCommandPreference.write(next)} />
           <ToggleSwitch className="speech-switch" label="Speak replies" checked={speaks} disabled={!supported} title={supported ? undefined : "This browser has no speech engine."} onChange={toggleSpeech} />
         </div>

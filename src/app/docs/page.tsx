@@ -45,7 +45,7 @@ export default function Documentation() {
                 <div className="step-content">
                   <h3>Add your first shape</h3>
                   <p>
-                    <strong>Voice:</strong> Select <strong>Start voice</strong> in the top workspace bar and grant microphone permission. When the status indicator turns green (<strong>Listening</strong>), say <code>&ldquo;add a start&rdquo;</code> or <code>&ldquo;add a start called Begin&rdquo;</code>.
+                    <strong>Voice:</strong> Select <strong>Start voice</strong>, or press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>V</kbd>, and grant microphone permission. The same shortcut stops voice capture. When the status indicator turns green (<strong>Listening</strong>), say <code>&ldquo;add a start&rdquo;</code> or <code>&ldquo;add a start called Begin&rdquo;</code>. Press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>S</kbd> to interrupt a spoken reply.
                   </p>
                   <p>
                     <strong>Mouse:</strong> Drag a shape (Start, Process, Decision, or End) from the left <strong>Shape Palette</strong> directly onto the canvas, or click any shape button to append it.
