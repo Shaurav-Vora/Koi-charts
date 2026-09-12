@@ -2,12 +2,12 @@
 import { useCallback, useState } from "react";
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
 import type { NodeType } from "../graph/types";
-export type CanvasNode = Node<{ label: string; nodeType: NodeType; focused: boolean; onFocus: () => void; onRename: (label: string) => void }, "flowNode">;
+export type CanvasNode = Node<{ label: string; nodeType: NodeType; focused: boolean; playbackState?: "visited" | "current"; onFocus: () => void; onRename: (label: string) => void }, "flowNode">;
 export default function FlowNode({ data }: NodeProps<CanvasNode>) {
   const focusInput = useCallback((input: HTMLInputElement | null) => { if (input) { input.focus(); input.select(); } }, []);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
-  return <div className={`flow-node ${data.nodeType} ${data.focused ? "is-focused" : ""}`}>
+  return <div className={`flow-node ${data.nodeType} ${data.focused ? "is-focused" : ""}`} data-playback-state={data.playbackState}>
     <Handle id="top" type="source" position={Position.Top} title="Drag to a dot on another shape to connect" />
     <Handle id="left" type="source" position={Position.Left} title="Drag to a dot on another shape to connect" />
     <Handle id="right" type="source" position={Position.Right} title="Drag to a dot on another shape to connect" />

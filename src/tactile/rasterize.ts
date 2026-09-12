@@ -2,8 +2,8 @@ import type { FlowGraph } from "../graph/types";
 import type { LayoutFrame } from "../visual/layout";
 import { toBraille } from "./braille";
 import { selectViewport, fitViewport } from "./viewport";
-import type { TactileFrame, TactileMode } from "./types";
-export function makeTactileFrame(graph: FlowGraph, layout: LayoutFrame, focus: string | null, mode: TactileMode, version: number): TactileFrame {
+import type { PlaybackTactileContext, TactileFrame, TactileMode } from "./types";
+export function makeTactileFrame(graph: FlowGraph, layout: LayoutFrame, focus: string | null, mode: TactileMode, version: number, playback?: PlaybackTactileContext): TactileFrame {
   const view = selectViewport(graph,layout,focus,mode), fit = fitViewport(view), pins = new Set<number>();
   const pin = (x:number,y:number) => { x=Math.round(x); y=Math.round(y); if (x>=0 && x<120 && y>=0 && y<80) pins.add(y*120+x); };
   const line = (x1:number,y1:number,x2:number,y2:number) => { const steps=Math.max(1,Math.ceil(Math.max(Math.abs(x2-x1),Math.abs(y2-y1)))); for(let i=0;i<=steps;i++) pin(x1+(x2-x1)*i/steps,y1+(y2-y1)*i/steps); };
@@ -29,7 +29,10 @@ export function makeTactileFrame(graph: FlowGraph, layout: LayoutFrame, focus: s
   const incoming=focused ? graph.edges.filter(edge=>visibleEdgeIds.has(edge.id)&&edge.target===focused.id) : [];
   const outgoing=focused ? graph.edges.filter(edge=>visibleEdgeIds.has(edge.id)&&edge.source===focused.id) : [];
   const describeEdges=(edges:typeof graph.edges,direction:"from"|"to")=>edges.map(edge=>`${edge.label ? `${edge.label} ` : ""}${direction} ${nodeLabels.get(direction==="from" ? edge.source : edge.target)}`).join(" and ");
-  const text=focused ? [`${focused.label} ${focused.type}`,incoming.length ? `Incoming ${describeEdges(incoming,"from")}` : "",outgoing.length ? `Outgoing ${describeEdges(outgoing,"to")}` : ""].filter(Boolean).join(" ") : "No node selected";
+  const enteredBy=focused&&playback?.active&&playback.enteredByEdgeId ? graph.edges.find(edge=>edge.id===playback.enteredByEdgeId&&edge.target===focused.id) : undefined;
+  const playbackPrefix=focused&&playback?.active ? [`Testing step ${playback.routePosition}`,`${focused.label} ${focused.type}`,enteredBy ? `Entered by ${enteredBy.label ? `${enteredBy.label} ` : ""}from ${nodeLabels.get(enteredBy.source)}` : ""].filter(Boolean) : [];
+  const remainingIncoming=enteredBy ? incoming.filter(edge=>edge.id!==enteredBy.id) : incoming;
+  const text=focused ? [...playbackPrefix.length ? playbackPrefix : [`${focused.label} ${focused.type}`],remainingIncoming.length ? `Incoming ${describeEdges(remainingIncoming,"from")}` : "",outgoing.length ? `Outgoing ${describeEdges(outgoing,"to")}` : ""].filter(Boolean).join(" ") : "No node selected";
   const braille=toBraille(focused ? text : "");
   return {version,width:120,height:80,raisedPins:[...pins].sort((a,b)=>a-b).map(p=>({x:p%120,y:Math.floor(p/120)})),brailleCells:braille.cells,text,focusedNodeId:view.focusedNodeId,mode,unsupported:braille.unsupported,nodeIds:view.nodes.map(n=>n.id),edgeIds:view.edges.map(e=>e.id)};
 }

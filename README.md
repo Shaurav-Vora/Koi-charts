@@ -232,10 +232,13 @@ The compact **Test chart** control sits inside the visual canvas instead of taki
 - **Restart test** begins again after completion, a dead end, or a chart change.
 - **Stop test** closes the active route and returns the panel to its ready state.
 - Editing the graph during a test pauses playback and asks for a restart, preventing stale connections from being followed.
+- The visual canvas marks earlier route connections with a wider solid line and the current connection with a wider dashed line. Route nodes use matching visited and current outlines.
+- The Braille information strip begins with the playback step and, after the first node, names the arrow and source node used to enter the current shape.
+- The chart outline contains a compact numbered **Test route** list while playback has recorded steps. Its current item is marked as the active step.
 
 Voice control uses exact local commands: **test chart** or **start test**, **next**, **back**, **repeat**, **take _branch label or destination_**, **restart test**, and **stop test**. These commands run locally without calling Gemini. Branch choices must match an arrow label or destination node; Koi Charts does not guess an unspoken choice.
 
-Manual check: create **Start → Process → End**, select **Test chart**, and verify that **Next step** pauses at Process, **Back one step** returns to Start, and the following two steps reach End. Every control should be reachable with <kbd>Tab</kbd> and usable with <kbd>Enter</kbd> or <kbd>Space</kbd>.
+Manual check: create a Start leading to a Decision with labelled **Yes** and **No** branches. Select **Test chart**, advance to the Decision, and take one branch. Verify that earlier connections are solid, the incoming current connection is dashed, the Braille strip names the chosen arrow and its source, and **Test route** marks the current node. Choose **Back one step** and confirm the final route item and highlight are removed. Every control should be reachable with <kbd>Tab</kbd> and usable with <kbd>Enter</kbd> or <kbd>Space</kbd>.
 
 ---
 

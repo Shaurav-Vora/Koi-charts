@@ -5,7 +5,7 @@ import { layoutGraph } from "../visual/layout";
 import { makeTactileFrame } from "./rasterize";
 import { needsFocus } from "./viewport";
 import { createSimulatorAdapter } from "./adapter";
-import type { TactileFrame, TactileMode } from "./types";
+import type { PlaybackTactileContext, TactileFrame, TactileMode } from "./types";
 class TactileBoundary extends Component<{children:ReactNode},{failed:boolean}> {
   state={failed:false};
   static getDerivedStateFromError(){return {failed:true};}
@@ -17,13 +17,14 @@ type Props = {
   version: number;
   displayIds: Record<string, string>;
   chartOutline?: ReactNode;
+  playbackContext?: PlaybackTactileContext;
 };
-function Simulator({ graph, focus, version, displayIds, chartOutline }: Props) {
+function Simulator({ graph, focus, version, displayIds, chartOutline, playbackContext }: Props) {
   const [requested, setRequested] = useState<TactileMode | "auto">("auto");
   const layout = useMemo(() => layoutGraph(graph), [graph]);
   const autoFocus = useMemo(() => needsFocus(graph, layout), [graph, layout]);
   const mode = requested === "auto" ? (autoFocus ? "focus" : "overview") : requested;
-  const frame = useMemo(() => makeTactileFrame(graph, layout, focus, mode, version), [graph, layout, focus, mode, version]);
+  const frame = useMemo(() => makeTactileFrame(graph, layout, focus, mode, version, playbackContext), [graph, layout, focus, mode, version, playbackContext]);
   return <section className="display tactile-display" aria-labelledby="tactile-title" data-graph-version={frame.version}>
     <div className="display-heading"><h3 id="tactile-title">Tactile display simulator</h3><span className="simulator-tag">120 × 80 pins</span></div>
     <div className="tactile-controls" role="group" aria-label="Tactile viewport">

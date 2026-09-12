@@ -9,14 +9,22 @@ import FlowNode, { type CanvasNode } from "./FlowNode";
 import ArrowInspector from "./ArrowInspector";
 import CanvasControls from "./CanvasControls";
 import type { LayoutFrame } from "./layout";
+import type { PlaybackRouteStep } from "../playback/types";
 import "@xyflow/react/dist/style.css";
 
-type RoutedEdge = Edge<{ points: { x: number; y: number }[] }, "routed">;
+type PlaybackMark = "visited" | "current";
+type RoutedEdge = Edge<{ points: { x: number; y: number }[]; playbackState?: PlaybackMark; accessibleName: string }, "routed">;
 function FlowEdge({ id, data, label, markerEnd, selected }: EdgeProps<RoutedEdge>) {
   if (!data) return null;
   const path = data.points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
   const a = data.points[Math.floor((data.points.length - 1) / 2)], b = data.points[Math.ceil((data.points.length - 1) / 2)];
-  return <><BaseEdge id={id} path={path} markerEnd={markerEnd} interactionWidth={24} style={{ stroke: selected ? "#315ac8" : "#536b99", strokeWidth: selected ? 3 : 1.7 }} />{label && <EdgeText x={(a.x + b.x) / 2} y={(a.y + b.y) / 2} label={label} labelStyle={{ fill: selected ? "#244ea9" : "#1c2c49", fontSize: 12, fontWeight: selected ? 700 : 500 }} labelShowBg labelBgStyle={{ fill: selected ? "#e9efff" : "white" }} labelBgPadding={[7, 4]} />}</>;
+  const stroke = selected ? "#244ea9" : data.playbackState === "current" ? "#c25f0a" : data.playbackState === "visited" ? "#315ac8" : "#536b99";
+  const strokeWidth = selected ? 4 : data.playbackState === "current" ? 3.2 : data.playbackState === "visited" ? 2.6 : 1.7;
+  return <><BaseEdge id={id} path={path} markerEnd={markerEnd} interactionWidth={24}
+    className={`playback-edge${data.playbackState ? ` is-${data.playbackState}` : ""}`}
+    data-playback-state={data.playbackState} aria-label={data.accessibleName}
+    style={{ stroke, strokeWidth, strokeDasharray: !selected && data.playbackState === "current" ? "8 5" : undefined }} />
+    {label && <EdgeText x={(a.x + b.x) / 2} y={(a.y + b.y) / 2} label={label} labelStyle={{ fill: selected ? "#244ea9" : "#1c2c49", fontSize: 12, fontWeight: selected ? 700 : 500 }} labelShowBg labelBgStyle={{ fill: selected ? "#e9efff" : "white" }} labelBgPadding={[7, 4]} />}</>;
 }
 const nodeTypes = { flowNode: FlowNode }, edgeTypes = { routed: FlowEdge };
 function FitChart({ layout }: { layout: LayoutFrame }) {
@@ -44,6 +52,7 @@ export interface VisualCanvasProps {
   onDescribe?: () => void;
   onInspect?: () => void;
   onValidate?: () => void;
+  playbackRoute?: PlaybackRouteStep[];
 }
 
 function Canvas({
@@ -65,6 +74,7 @@ function Canvas({
   onDescribe,
   onInspect,
   onValidate,
+  playbackRoute = [],
 }: VisualCanvasProps) {
   const { screenToFlowPosition, zoomIn, zoomOut, fitView, setCenter, getZoom } = useReactFlow();
   const [drag, setDrag] = useState<{ id: string; x: number; y: number } | null>(null);
@@ -73,15 +83,27 @@ function Canvas({
   const focusedBox = layout.nodes.find(box => box.id === focusedNodeId);
   // Never zoom out to centre: an author who has zoomed in to read a label keeps that reading size.
   const centerOnFocus = () => { if (focusedBox) void setCenter(focusedBox.x + focusedBox.width / 2, focusedBox.y + focusedBox.height / 2, { zoom: Math.max(getZoom(), 1), duration: 220 }); };
+  const currentRouteStep = playbackRoute.at(-1);
+  const visitedNodeIds = useMemo(() => new Set(playbackRoute.slice(0, -1).map(step => step.nodeId)), [playbackRoute]);
+  const visitedEdgeIds = useMemo(() => new Set(playbackRoute.slice(0, -1).flatMap(step => step.viaEdgeId ? [step.viaEdgeId] : [])), [playbackRoute]);
   const nodes: CanvasNode[] = useMemo(() => graph.nodes.map(node => {
     const box = layout.nodes.find(item => item.id === node.id)!;
+    const playbackState: PlaybackMark | undefined = node.id === currentRouteStep?.nodeId ? "current" : visitedNodeIds.has(node.id) ? "visited" : undefined;
     return { id: node.id, type: "flowNode", selectable: false, position: { x: box.x, y: box.y }, width: box.width, height: box.height, measured: { width: box.width, height: box.height },
       style: { width: box.width, height: box.height }, data: { label: node.label, nodeType: node.type, focused: node.id === focusedNodeId,
+        playbackState,
         onRename: (newLabel: string) => onCommand({ kind: "rename", node: { kind: "id", value: node.id }, newLabel }),
         onFocus: () => { setSelectedEdgeId(null); onCommand({ kind: "focus", node: { kind: "id", value: node.id } }); } } };
-  }), [graph, layout, focusedNodeId, onCommand]);
+  }), [graph, layout, focusedNodeId, onCommand, currentRouteStep?.nodeId, visitedNodeIds]);
   const liveLayout = useMemo(() => drag ? routeEdges(graph, layout.nodes.map(node => node.id === drag.id ? { ...node, x: drag.x, y: drag.y } : node)) : layout.edges, [drag, graph, layout]);
-  const edges: RoutedEdge[] = useMemo(() => graph.edges.map(edge => ({ ...edge, type: "routed", selected: edge.id === selectedEdgeId, ariaLabel: `Edit arrow from ${graph.nodes.find(node => node.id === edge.source)?.label} to ${graph.nodes.find(node => node.id === edge.target)?.label}`, data: { points: liveLayout.find(item => item.id === edge.id)!.points }, markerEnd: { type: MarkerType.ArrowClosed, color: edge.id === selectedEdgeId ? "#315ac8" : "#536b99" } })), [graph, liveLayout, selectedEdgeId]);
+  const edges: RoutedEdge[] = useMemo(() => graph.edges.map(edge => {
+    const playbackState: PlaybackMark | undefined = edge.id === currentRouteStep?.viaEdgeId ? "current" : visitedEdgeIds.has(edge.id) ? "visited" : undefined;
+    const source = graph.nodes.find(node => node.id === edge.source)?.label;
+    const target = graph.nodes.find(node => node.id === edge.target)?.label;
+    const accessibleName = `Edit arrow from ${source} to ${target}${edge.label ? ` labelled ${edge.label}` : " unlabelled"}`;
+    const markerColor = edge.id === selectedEdgeId ? "#244ea9" : playbackState === "current" ? "#c25f0a" : playbackState === "visited" ? "#315ac8" : "#536b99";
+    return { ...edge, type: "routed", selected: edge.id === selectedEdgeId, ariaLabel: accessibleName, className: playbackState ? `playback-edge is-${playbackState}` : undefined, data: { points: liveLayout.find(item => item.id === edge.id)!.points, playbackState, accessibleName }, markerEnd: { type: MarkerType.ArrowClosed, color: markerColor } };
+  }), [graph, liveLayout, selectedEdgeId, currentRouteStep?.viaEdgeId, visitedEdgeIds]);
   return <div className="canvas-area" onDragOver={event => { event.preventDefault(); event.dataTransfer.dropEffect = "copy"; }} onDrop={event => {
     event.preventDefault();
     const type = event.dataTransfer.getData("application/koi-node");

@@ -300,6 +300,13 @@
 #workspace .playback-actions button:disabled { opacity: .45; cursor: not-allowed; }
 #workspace .playback-actions .playback-primary { border-color: var(--accent); background: var(--accent); color: #ffffff; }
 #workspace .playback-actions .playback-primary:hover:not(:disabled) { border-color: var(--accent-hover); background: var(--accent-hover); color: #ffffff; }
+#workspace .flow-node[data-playback-state="visited"] .node-shape { stroke: #315ac8; stroke-width: 2.6; }
+#workspace .flow-node[data-playback-state="current"] .node-shape { stroke: #c25f0a; stroke-width: 3.2; stroke-dasharray: 8 4; }
+#workspace .playback-outline { padding: 9px 10px; border: 1px solid #d7e0ed; border-radius: 6px; background: #f8faff; }
+#workspace .playback-outline-route { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; counter-reset: playback-step; }
+#workspace .playback-outline-route li { counter-increment: playback-step; padding: 4px 7px; border: 1px solid #cbd6e6; border-radius: 4px; background: #fff; color: #3b4e6d; font-size: 11px; }
+#workspace .playback-outline-route li::before { content: counter(playback-step) ". "; font-weight: 700; }
+#workspace .playback-outline-route li[aria-current="step"] { border-color: #c25f0a; border-style: dashed; color: #7c3d0a; font-weight: 700; }
 
 /* In-Chart Canvas Floating Controls & Navigation Dock */
 #workspace .canvas-controls,

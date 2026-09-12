@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import Editor from "./Editor";
 import { createEditorCoordinator } from "./coordinator";
@@ -76,5 +76,29 @@ describe("editor playback integration", () => {
       status: "blocked",
       message: "The chart changed. Restart the test to use the updated structure.",
     });
+  });
+
+  it("shows the recorded route inside the chart outline and marks the current step", () => {
+    const coordinator = createEditorCoordinator();
+    coordinator.dispatch({
+      type: "command",
+      idSeed: "a",
+      command: { kind: "add_node", type: "start", label: "Begin", placement: null },
+    });
+    coordinator.dispatch({
+      type: "command",
+      idSeed: "b",
+      command: { kind: "connect_new", source: { kind: "focus" }, type: "process", label: "Review" },
+    });
+    const version = coordinator.getSnapshot().editor.engine.version;
+    coordinator.playbackDispatch({ type: "start", graphVersion: version });
+    coordinator.playbackDispatch({ type: "next", graphVersion: version });
+
+    render(<Editor coordinator={coordinator} />);
+
+    const route = screen.getByRole("list", { name: "Playback route" });
+    expect(within(route).getAllByRole("listitem")).toHaveLength(2);
+    expect(within(route).getByText("Begin")).not.toHaveAttribute("aria-current");
+    expect(within(route).getByText("Review")).toHaveAttribute("aria-current", "step");
   });
 });

@@ -1,0 +1,94 @@
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import type { ReactNode } from "react";
+import VisualCanvas from "./VisualCanvas";
+import { layoutGraph } from "./layout";
+import type { FlowGraph } from "../graph/types";
+
+vi.mock("@xyflow/react", async () => {
+  const React = await import("react");
+  return {
+    Background: () => null,
+    BaseEdge: () => null,
+    EdgeText: () => null,
+    Handle: () => null,
+    ConnectionMode: { Loose: "loose" },
+    MarkerType: { ArrowClosed: "arrow-closed" },
+    Position: { Top: "top", Right: "right", Bottom: "bottom", Left: "left" },
+    ReactFlowProvider: ({ children }: { children: ReactNode }) => children,
+    useNodesInitialized: () => false,
+    useReactFlow: () => ({
+      fitView: vi.fn(),
+      getZoom: () => 1,
+      screenToFlowPosition: ({ x, y }: { x: number; y: number }) => ({ x, y }),
+      setCenter: vi.fn(),
+      zoomIn: vi.fn(),
+      zoomOut: vi.fn(),
+    }),
+    ReactFlow: ({ nodes, edges, children }: {
+      nodes: Array<{ id: string; data: { playbackState?: string } }>;
+      edges: Array<{ id: string; ariaLabel?: string; data: { playbackState?: string } }>;
+      children: ReactNode;
+    }) => React.createElement(
+      "div",
+      null,
+      ...nodes.map(node => React.createElement("div", {
+        key: node.id,
+        "data-testid": "node-" + node.id,
+        "data-playback-state": node.data.playbackState,
+      })),
+      ...edges.map(edge => React.createElement("div", {
+        key: edge.id,
+        role: "img",
+        "aria-label": edge.ariaLabel,
+        "data-testid": "edge-" + edge.id,
+        "data-playback-state": edge.data.playbackState,
+      })),
+      children,
+    ),
+  };
+});
+
+const graph: FlowGraph = {
+  schemaVersion: 1,
+  nodes: [
+    { id: "start", type: "start", label: "Begin" },
+    { id: "review", type: "process", label: "Review" },
+    { id: "approve", type: "end", label: "Approved" },
+    { id: "other", type: "end", label: "Other" },
+  ],
+  edges: [
+    { id: "start-review", source: "start", target: "review", label: "next" },
+    { id: "review-approve", source: "review", target: "approve", label: "yes" },
+    { id: "review-other", source: "review", target: "other", label: "no" },
+  ],
+};
+
+describe("VisualCanvas playback route", () => {
+  it("marks visited, current, and unrelated route elements without relying on color", () => {
+    render(<VisualCanvas
+      graph={graph}
+      layout={layoutGraph(graph)}
+      focusedNodeId="approve"
+      onCommand={vi.fn()}
+      playbackRoute={[
+        { nodeId: "start", viaEdgeId: null },
+        { nodeId: "review", viaEdgeId: "start-review" },
+        { nodeId: "approve", viaEdgeId: "review-approve" },
+      ]}
+    />);
+
+    expect(screen.getByTestId("edge-start-review")).toHaveAttribute("data-playback-state", "visited");
+    expect(screen.getByTestId("edge-review-approve")).toHaveAttribute("data-playback-state", "current");
+    expect(screen.getByTestId("edge-review-other")).not.toHaveAttribute("data-playback-state");
+    expect(screen.getByTestId("node-start")).toHaveAttribute("data-playback-state", "visited");
+    expect(screen.getByTestId("node-approve")).toHaveAttribute("data-playback-state", "current");
+    expect(screen.getByTestId("node-other")).not.toHaveAttribute("data-playback-state");
+  });
+
+  it("keeps the connection label in its accessible name", () => {
+    render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId={null} onCommand={vi.fn()} />);
+
+    expect(screen.getByRole("img", { name: "Edit arrow from Begin to Review labelled next" })).toBeInTheDocument();
+  });
+});
