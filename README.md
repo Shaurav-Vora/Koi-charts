@@ -68,7 +68,8 @@ Every action—whether initiated via speech, keyboard hotkeys, visual drag-and-d
 - **Smart Connection Routing**: Interactive connection ports that automatically determine optimal orthogonal routing based on relative node positioning.
 - **Free Positioning & Auto-Layout**: Drag shapes freely across the canvas or use structured relative placements (`move Process below Start`).
 - **Consistent Add Feedback**: Clicking or dropping a shape reports the same added-node confirmation while drag-and-drop positioning remains one undoable edit.
-- **Inline Editing**: Double-click any shape to rename in-place with instant validation and canvas canvas fit-to-view controls.
+- **Inline Editing**: Double-click any shape to rename in place with instant validation and canvas fit-to-view controls.
+- **Consistent Selection Cards**: Clicking a shape or connection opens the same lower-right canvas overlay. Both can be edited, closed, or deleted by mouse; connection deletion is immediate and undoable.
 
 ### 📋 Accessible Structure & Braille Reference
 - **Chart Outline**: A dedicated, keyboard-navigable list reflecting nodes, types, and directional edges in reading order.

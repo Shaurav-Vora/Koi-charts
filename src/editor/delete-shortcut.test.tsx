@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import Editor from "./Editor";
 import { createEditorCoordinator } from "./coordinator";
@@ -32,4 +32,16 @@ it("requires confirmation for connected nodes and ignores Delete without a selec
  act(()=>coordinator.dispatch({type:"command",idSeed:"c",command:{kind:"clear_focus"}}));
  fireEvent.keyDown(document,{key:"Delete"});
  expect(coordinator.getSnapshot().editor.engine.graph.nodes).toHaveLength(2);
+});
+it("opens selected shape controls as a closable canvas overlay",()=>{
+ const coordinator=createEditorCoordinator();
+ render(<Editor coordinator={coordinator}/>);
+ fireEvent.click(screen.getByRole("button",{name:"Insert process"}));
+ const inspector=screen.getByRole("form",{name:"Selected shape"});
+ expect(inspector).toHaveClass("canvas-inspector");
+ expect(inspector.parentElement).toHaveClass("canvas-wrap");
+ expect(within(screen.getByRole("complementary",{name:"Shapes"})).queryByRole("form",{name:"Selected shape"})).not.toBeInTheDocument();
+ fireEvent.click(screen.getByRole("button",{name:"Close shape editor"}));
+ expect(screen.queryByRole("form",{name:"Selected shape"})).not.toBeInTheDocument();
+ expect(coordinator.getSnapshot().editor.engine.focusedNodeId).toBeNull();
 });

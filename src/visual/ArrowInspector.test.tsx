@@ -33,3 +33,14 @@ it("reserves branch shortcuts for decisions and supports closing with Escape", (
  fireEvent.keyDown(screen.getByLabelText("Arrow label"), {key:"Escape"});
  expect(close).toHaveBeenCalledOnce();
 });
+it("deletes the selected connection by mouse and closes the overlay", () => {
+ const close = vi.fn();
+ let state: EngineState = { ...createEngineState(), graph: {schemaVersion: 1, nodes: [source, target], edges: [edge]} };
+ const onCommand = (command: GraphCommand) => { state = execute(state, command, () => "unused").state; };
+ render(<ArrowInspector edge={edge} source={source} target={target} onCommand={onCommand} onClose={close} />);
+
+ fireEvent.click(screen.getByRole("button", {name: "Delete connection"}));
+
+ expect(state.graph.edges).toHaveLength(0);
+ expect(close).toHaveBeenCalledOnce();
+});

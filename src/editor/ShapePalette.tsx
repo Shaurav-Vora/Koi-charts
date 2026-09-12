@@ -61,20 +61,24 @@ export function ShapePalette({ lastNodeId, onCommand }: { lastNodeId?: string; o
   );
 }
 
-export function NodeInspector({ node, onCommand }: { node: FlowNode; onCommand: (command: GraphCommand) => void }) {
+export function NodeInspector({ node, onCommand, onClose }: { node: FlowNode; onCommand: (command: GraphCommand) => void; onClose: () => void }) {
   const [label, setLabel] = useState(node.label);
   return (
     <form
-      className="node-inspector"
+      className="node-inspector canvas-inspector nodrag nopan"
       aria-label="Selected shape"
       onSubmit={event => {
         event.preventDefault();
         onCommand({ kind: "rename", node: { kind: "id", value: node.id }, newLabel: label });
       }}
+      onKeyDown={event => { event.stopPropagation(); if (event.key === "Escape") onClose(); }}
     >
       <div className="inspector-header">
         <h3>Selected shape</h3>
-        <span className={`inspector-tag tag-${node.type}`}>{node.type}</span>
+        <div className="inspector-heading-actions">
+          <span className={`inspector-tag tag-${node.type}`}>{node.type}</span>
+          <button type="button" className="inspector-close" aria-label="Close shape editor" onClick={onClose}>×</button>
+        </div>
       </div>
       <label>
         Shape label
@@ -87,7 +91,7 @@ export function NodeInspector({ node, onCommand }: { node: FlowNode; onCommand: 
           className="inspector-delete"
           onClick={() => onCommand({ kind: "delete", target: { kind: "node", node: { kind: "id", value: node.id } } })}
         >
-          Delete selected
+          Delete shape
         </button>
       </div>
     </form>
