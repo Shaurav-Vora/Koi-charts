@@ -1,34 +1,10 @@
 import { assertGraph } from "./invariants";
 import type { FlowGraph } from "./types";
+import { auditGraph } from "../audit/engine";
 
 /** Authoring warnings are separate from graph-integrity errors. */
 export function validateGraph(graph: FlowGraph): string[] {
-  assertGraph(graph);
-  const nodes = [...graph.nodes].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
-  const starts = nodes.filter(node => node.type === "start");
-  const warnings: string[] = [];
-  if (!starts.length) warnings.push("No start node.");
-  if (!nodes.some(node => node.type === "end")) warnings.push("No end node.");
-  if (starts.length) {
-    const reachable = new Set(starts.map(node => node.id));
-    const queue = [...reachable];
-    for (let i = 0; i < queue.length; i++) {
-      for (const edge of graph.edges.filter(edge => edge.source === queue[i])) {
-        if (!reachable.has(edge.target)) { reachable.add(edge.target); queue.push(edge.target); }
-      }
-    }
-    for (const node of nodes) {
-      if (!reachable.has(node.id)) warnings.push(`Unreachable from any start node: "${node.label}" (${node.id}).`);
-    }
-  }
-  for (const node of nodes.filter(node => node.type === "decision")) {
-    const outgoing = graph.edges.filter(edge => edge.source === node.id).sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
-    if (outgoing.length < 2) warnings.push(`Decision "${node.label}" (${node.id}) has fewer than two outgoing branches.`);
-    for (const edge of outgoing) {
-      if (!edge.label) warnings.push(`Decision "${node.label}" (${node.id}) has an unlabeled outgoing connection (${edge.id}).`);
-    }
-  }
-  return warnings;
+  return auditGraph(graph).map(issue => issue.message);
 }
 
 /** With a target, find one shortest directed route. Without one, never choose a branch. */

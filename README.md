@@ -75,6 +75,7 @@ Every action—whether initiated via speech, keyboard hotkeys, visual drag-and-d
 
 ### 📋 Accessible Structure & Braille Reference
 - **Chart Outline**: A dedicated, keyboard-navigable list reflecting nodes, types, and directional edges in reading order.
+- **Structured Chart Audit Engine**: Deterministic local checks identify missing or multiple entry points, missing exits, unreachable nodes, dead ends, incomplete or unlabelled decisions, paths without an exit, and duplicate labels. Stable issue targets are ready to drive synchronized visual, tactile, keyboard, and voice review.
 - **Documentation Field Guide**: A responsive route-based guide covering visual, voice, keyboard, tactile, testing, and export workflows.
 - **UEB Embossable Reference Files**: Downloadable Unified English Braille Grade 1 (uncontracted) and Grade 2 (contracted) `.brf` files generated via `liblouis`.
 
@@ -316,6 +317,7 @@ Koi-charts/
 Koi Charts maintains comprehensive automated test coverage across all subsystems:
 
 - **Graph Invariants**: Guarantees structural integrity, cycle safety, and immutable updates.
+- **Chart Audit Engine**: Covers all structural review rules, issue de-duplication, deterministic ordering, input immutability, and malformed connection references.
 - **Guided Playback Engine**: Covers Start selection, branch choices, exact route history, loops, dead ends, and graph-change invalidation.
 - **Command Engine**: Tests rollback on errors, multi-step history preservation, and fuzzy reference resolution.
 - **Grammar & Lexer**: Exercises all recognized spoken forms against plain and dictated inputs.

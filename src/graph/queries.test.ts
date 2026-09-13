@@ -29,10 +29,10 @@ describe("structural warnings", () => {
     const graph = graphFixture(); graph.nodes.push({ id: "island", type: "process", label: "Island" });
     expect(validateGraph(graph)).toContain('Unreachable from any start node: "Island" (island).');
   });
-  it("uses all starts when checking reachability", () => {
+  it("reports multiple starts while using all of them for reachability", () => {
     const graph = branch(); graph.nodes.push({ id: "s2", type: "start", label: "Second start" }, { id: "e2", type: "end", label: "Second end" });
     graph.edges.push({ id: "se2", source: "s2", target: "e2" });
-    expect(validateGraph(graph)).toEqual([]);
+    expect(validateGraph(graph)).toEqual(["More than one start node."]);
   });
   it("does not report a cycle as a structural error", () => {
     const graph = graphFixture(); graph.edges.push({ id: "retry", source: "n3", target: "n2", label: "no" });
