@@ -3,7 +3,15 @@ import { describe, expect, it, vi } from "vitest";
 import Editor from "./Editor";
 import { createEditorCoordinator } from "./coordinator";
 
-vi.mock("../visual/VisualCanvas", () => ({ default: () => <div data-testid="visual-canvas" /> }));
+vi.mock("../visual/VisualCanvas", () => ({
+  default: ({ centerRequest }: { centerRequest?: { key: string; nodeId: string } | null }) => (
+    <div
+      data-testid="visual-canvas"
+      data-center-key={centerRequest?.key}
+      data-center-node={centerRequest?.nodeId}
+    />
+  ),
+}));
 
 describe("editor playback integration", () => {
   it("keeps both review tools in one compact canvas group", () => {
@@ -23,6 +31,32 @@ describe("editor playback integration", () => {
     expect(screen.getByRole("region", { name: "Check chart" })).not.toHaveClass("is-compact");
     expect(screen.getByText("2 issues")).toBeVisible();
     expect(screen.getByRole("region", { name: "Test chart" })).toHaveClass("is-compact");
+  });
+
+  it("requests canvas centering when audit navigation changes the target node", () => {
+    const coordinator = createEditorCoordinator();
+    coordinator.dispatch({
+      type: "command",
+      idSeed: "a",
+      command: { kind: "add_node", type: "start", label: "Begin", placement: null },
+    });
+    coordinator.dispatch({
+      type: "command",
+      idSeed: "b",
+      command: { kind: "connect_new", source: { kind: "focus" }, type: "process", label: "Review" },
+    });
+    coordinator.dispatch({
+      type: "command",
+      idSeed: "c",
+      command: { kind: "add_node", type: "end", label: "Finish", placement: null },
+    });
+    render(<Editor coordinator={coordinator} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Check chart" }));
+    expect(screen.getByTestId("visual-canvas")).toHaveAttribute("data-center-node", "c-1");
+
+    fireEvent.click(screen.getByRole("button", { name: "Next issue" }));
+    expect(screen.getByTestId("visual-canvas")).toHaveAttribute("data-center-node", "b-1");
   });
 
   it("starts at the Start node, synchronizes focus, and preserves graph history", () => {

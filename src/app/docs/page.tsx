@@ -158,7 +158,7 @@ export default function Documentation() {
                 <ol className="docs-compact-steps">
                   <li><strong>Open.</strong> Select <strong>Check chart</strong> above the canvas, or say <code>check chart</code>.</li>
                   <li><strong>Read.</strong> Each item states whether it is <strong>Required</strong> for a complete route or a <strong>Review</strong> item that may cause ambiguity.</li>
-                  <li><strong>Navigate.</strong> Use <strong>Next issue</strong> and <strong>Previous issue</strong>, or speak those phrases. The corresponding shape receives shared focus.</li>
+                  <li><strong>Navigate.</strong> Use <strong>Next issue</strong> and <strong>Previous issue</strong>, or speak those phrases. The corresponding shape receives shared focus and is centred in the canvas.</li>
                   <li><strong>Repeat.</strong> Select or say <strong>Repeat issue</strong> to hear the current title again.</li>
                   <li><strong>Close.</strong> Select the close control or say <strong>Close check</strong>. Closing the review does not alter the chart.</li>
                 </ol>

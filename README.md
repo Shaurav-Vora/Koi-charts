@@ -226,7 +226,7 @@ Manual acceptance check:
 
 1. Create a Start, an unconnected Process, and a Decision with one unlabelled outgoing arrow.
 2. Select **Check chart**. Confirm the panel reports a count, severity, issue position, and suggested correction without displaying internal IDs.
-3. Move through the issues and confirm each related shape receives focus in the visual canvas, tactile display, and outline.
+3. Move through the issues and confirm each related shape receives focus in the visual canvas, tactile display, and outline. Pan an issue target outside the viewport first and confirm navigation centres it without reducing the current zoom.
 4. Correct one issue and confirm the open audit recalculates without resetting to the first item unnecessarily.
 5. Select **Test chart** while the audit is open and confirm the audit closes. Open **Check chart** during playback and confirm playback closes.
 6. Repeat the review using the local voice phrases and confirm the activity source says **Local command**.

@@ -52,6 +52,7 @@ export interface VisualCanvasProps {
   onDescribe?: () => void;
   onInspect?: () => void;
   playbackRoute?: PlaybackRouteStep[];
+  centerRequest?: { key: string; nodeId: string } | null;
 }
 
 function Canvas({
@@ -73,6 +74,7 @@ function Canvas({
   onDescribe,
   onInspect,
   playbackRoute = [],
+  centerRequest = null,
 }: VisualCanvasProps) {
   const { screenToFlowPosition, zoomIn, zoomOut, fitView, setCenter, getZoom } = useReactFlow();
   const [drag, setDrag] = useState<{ id: string; x: number; y: number } | null>(null);
@@ -91,6 +93,22 @@ function Canvas({
     return () => document.removeEventListener("keydown", removeSelectedEdge);
   }, [onCommand, selectedEdgeId]);
   const focusedBox = layout.nodes.find(box => box.id === focusedNodeId);
+  const lastCenterRequest = useRef<string | null>(null);
+  useEffect(() => {
+    if (!centerRequest) {
+      lastCenterRequest.current = null;
+      return;
+    }
+    if (lastCenterRequest.current === centerRequest.key) return;
+    const requestedBox = layout.nodes.find(box => box.id === centerRequest.nodeId);
+    if (!requestedBox) return;
+    lastCenterRequest.current = centerRequest.key;
+    void setCenter(
+      requestedBox.x + requestedBox.width / 2,
+      requestedBox.y + requestedBox.height / 2,
+      { zoom: Math.max(getZoom(), 1), duration: 220 },
+    );
+  }, [centerRequest, getZoom, layout.nodes, setCenter]);
   // Never zoom out to centre: an author who has zoomed in to read a label keeps that reading size.
   const centerOnFocus = () => { if (focusedBox) void setCenter(focusedBox.x + focusedBox.width / 2, focusedBox.y + focusedBox.height / 2, { zoom: Math.max(getZoom(), 1), duration: 220 }); };
   const currentRouteStep = playbackRoute.at(-1);

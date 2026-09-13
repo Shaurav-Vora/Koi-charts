@@ -5,6 +5,8 @@ import VisualCanvas from "./VisualCanvas";
 import { layoutGraph } from "./layout";
 import type { FlowGraph } from "../graph/types";
 
+const { setCenter } = vi.hoisted(() => ({ setCenter: vi.fn() }));
+
 vi.mock("@xyflow/react", async () => {
   const React = await import("react");
   return {
@@ -21,7 +23,7 @@ vi.mock("@xyflow/react", async () => {
       fitView: vi.fn(),
       getZoom: () => 1,
       screenToFlowPosition: ({ x, y }: { x: number; y: number }) => ({ x, y }),
-      setCenter: vi.fn(),
+      setCenter,
       zoomIn: vi.fn(),
       zoomOut: vi.fn(),
     }),
@@ -67,6 +69,25 @@ const graph: FlowGraph = {
 };
 
 describe("VisualCanvas playback route", () => {
+  it("centres a requested audit target while preserving the current zoom", () => {
+    const layout = layoutGraph(graph);
+    const target = layout.nodes.find(node => node.id === "review")!;
+
+    render(<VisualCanvas
+      graph={graph}
+      layout={layout}
+      focusedNodeId="review"
+      onCommand={vi.fn()}
+      centerRequest={{ key: "node:review:dead-end", nodeId: "review" }}
+    />);
+
+    expect(setCenter).toHaveBeenCalledWith(
+      target.x + target.width / 2,
+      target.y + target.height / 2,
+      { zoom: 1, duration: 220 },
+    );
+  });
+
   it("marks visited, current, and unrelated route elements without relying on color", () => {
     render(<VisualCanvas
       graph={graph}
