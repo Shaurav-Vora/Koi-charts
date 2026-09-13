@@ -64,7 +64,7 @@ Every action—whether initiated via speech, keyboard hotkeys, visual drag-and-d
 - **Tactile Information & Braille Strip**: Real-time status display featuring directional connection lists and English Braille cell previews.
 
 ### 🎨 Visual Flowchart Canvas
-- **Purposeful Landing State**: New charts open with a compact introduction and direct routes into voice or shape-based authoring; the introduction disappears as soon as building begins.
+- **Dedicated Product Homepage**: The public root route explains Koi Charts and leads into the full editor at `/workspace`.
 - **Custom Semantic Nodes**: Start (entry), Process (step), Decision (branch), and End (exit) shapes with accessible semantic color coding.
 - **Smart Connection Routing**: Interactive connection ports that automatically determine optimal orthogonal routing based on relative node positioning.
 - **Free Positioning & Auto-Layout**: Drag shapes freely across the canvas or use structured relative placements (`move Process below Start`).
@@ -179,7 +179,7 @@ TRUST_PROXY=0
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser. The interactive documentation is available at [http://localhost:3000/docs](http://localhost:3000/docs).
+Open [http://localhost:3000](http://localhost:3000) to view the homepage. The editor is available at [http://localhost:3000/workspace](http://localhost:3000/workspace), and the documentation is available at [http://localhost:3000/docs](http://localhost:3000/docs).
 
 ---
 
@@ -290,7 +290,7 @@ Koi-charts/
 │   ├── braille/            # Embossable UEB Grade 1 & 2 .brf references
 │   └── koi.svg             # Vector brand logo
 ├── src/
-│   ├── app/                # Next.js App Router (workspace layout, docs page, styles)
+│   ├── app/                # Next.js routes for the homepage, /workspace editor, documentation, and APIs
 │   ├── commands/           # Command grammar, Zod schemas, resolve & execute engine
 │   ├── editor/             # Canvas editor coordinator, status management, UI components
 │   ├── feedback/           # Natural language chart descriptions and query generators

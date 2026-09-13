@@ -1,7 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 
-export default function AppHeader({ page }: { page: "workspace" | "documentation" }) {
+type AppPage = "home" | "workspace" | "documentation";
+
+const navItems: Array<{ page: AppPage; label: string; href: string }> = [
+ { page: "home", label: "Home", href: "/" },
+ { page: "workspace", label: "Workspace", href: "/workspace" },
+ { page: "documentation", label: "Documentation", href: "/docs" },
+];
+
+export default function AppHeader({ page }: { page: AppPage }) {
  return <header className="app-header koi-header">
   <div className="header-identity">
    <Image className="header-koi" src="/koi.svg" width={48} height={48} alt="" />
@@ -11,8 +19,10 @@ export default function AppHeader({ page }: { page: "workspace" | "documentation
    <span className="header-preview">Preview</span>
   </div>
   <nav className="header-navigation" aria-label="Main navigation">
-   {page === "workspace" ? <span aria-current="page">Workspace</span> : <Link href="/">Workspace</Link>}
-   {page === "documentation" ? <span aria-current="page">Documentation</span> : <Link href="/docs" target="_blank" rel="noopener noreferrer" title="Open documentation in a new tab">Documentation<svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M9 3h4v4M13 3 7 9M6 3H3v10h10v-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg></Link>}
+   {navItems.map(item => item.page === page
+    ? <span key={item.page} aria-current="page">{item.label}</span>
+    : <Link key={item.page} href={item.href}>{item.label}</Link>
+   )}
   </nav>
  </header>;
 }
