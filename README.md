@@ -65,6 +65,7 @@ Every action—whether initiated via speech, keyboard hotkeys, visual drag-and-d
 
 ### 🎨 Visual Flowchart Canvas
 - **Dedicated Product Homepage**: The public root route explains Koi Charts and leads into the full editor at `/workspace`.
+- **Synchronized-View Walkthrough**: The homepage explains the build, inspect, and test workflow and demonstrates how one decision appears on the canvas, tactile display, and spoken outline.
 - **Custom Semantic Nodes**: Start (entry), Process (step), Decision (branch), and End (exit) shapes with accessible semantic color coding.
 - **Smart Connection Routing**: Interactive connection ports that automatically determine optimal orthogonal routing based on relative node positioning.
 - **Free Positioning & Auto-Layout**: Drag shapes freely across the canvas or use structured relative placements (`move Process below Start`).

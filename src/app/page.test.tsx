@@ -15,9 +15,19 @@ describe("public homepage", () => {
     render(<Home />);
 
     const demonstration = screen.getByRole("region", { name: "One chart, three ways to understand it" });
-    expect(within(demonstration).getByText("Visual canvas")).toBeVisible();
-    expect(within(demonstration).getByText("Tactile display")).toBeVisible();
-    expect(within(demonstration).getByText("Spoken outline")).toBeVisible();
+    expect(within(demonstration).getByRole("heading", { name: "Visual canvas" })).toBeVisible();
+    expect(within(demonstration).getByRole("heading", { name: "Tactile display" })).toBeVisible();
+    expect(within(demonstration).getByRole("heading", { name: "Spoken outline" })).toBeVisible();
+    expect(within(demonstration).getByText(/Changes appear everywhere at once/i)).toBeVisible();
     expect(screen.queryByRole("region", { name: "Visual flowchart" })).not.toBeInTheDocument();
+  });
+
+  it("explains the authoring workflow as three clear steps", () => {
+    render(<Home />);
+
+    const workflow = screen.getByRole("region", { name: "How Koi Charts works" });
+    expect(within(workflow).getByRole("heading", { name: "Build the structure" })).toBeVisible();
+    expect(within(workflow).getByRole("heading", { name: "Follow every view" })).toBeVisible();
+    expect(within(workflow).getByRole("heading", { name: "Test the route" })).toBeVisible();
   });
 });
