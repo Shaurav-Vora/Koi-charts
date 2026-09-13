@@ -10,6 +10,16 @@ it("provides documentation navigation, command reference, and export guidance", 
  expect(screen.getByRole("heading",{name:"Exporting charts"})).toBeVisible();
 });
 
+it("presents the documentation as a structured flowchart field guide", () => {
+ const { container } = render(<Documentation />);
+
+ expect(container.querySelector(".docs-hero-route")).not.toBeNull();
+ expect(container.querySelectorAll(".docs-nav-group")).toHaveLength(3);
+ expect(screen.getByRole("link", { name: "Start building" })).toHaveAttribute("href", "#getting-started");
+ expect(screen.getByRole("link", { name: "Test a route" })).toHaveAttribute("href", "#testing-chart");
+ expect(screen.getByRole("heading", { name: "Choose how you work" })).toBeVisible();
+});
+
 it("documents guided chart testing as a verification workflow", () => {
  const { container } = render(<Documentation />);
  const section = container.querySelector("#testing-chart");

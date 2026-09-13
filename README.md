@@ -73,6 +73,7 @@ Every action—whether initiated via speech, keyboard hotkeys, visual drag-and-d
 
 ### 📋 Accessible Structure & Braille Reference
 - **Chart Outline**: A dedicated, keyboard-navigable list reflecting nodes, types, and directional edges in reading order.
+- **Documentation Field Guide**: A responsive route-based guide covering visual, voice, keyboard, tactile, testing, and export workflows.
 - **UEB Embossable Reference Files**: Downloadable Unified English Braille Grade 1 (uncontracted) and Grade 2 (contracted) `.brf` files generated via `liblouis`.
 
 ### 📤 Publication-Ready Vector & Raster Exports
