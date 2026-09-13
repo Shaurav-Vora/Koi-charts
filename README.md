@@ -64,6 +64,7 @@ Every action—whether initiated via speech, keyboard hotkeys, visual drag-and-d
 - **Tactile Information & Braille Strip**: Real-time status display featuring directional connection lists and English Braille cell previews.
 
 ### 🎨 Visual Flowchart Canvas
+- **Purposeful Landing State**: New charts open with a compact introduction and direct routes into voice or shape-based authoring; the introduction disappears as soon as building begins.
 - **Custom Semantic Nodes**: Start (entry), Process (step), Decision (branch), and End (exit) shapes with accessible semantic color coding.
 - **Smart Connection Routing**: Interactive connection ports that automatically determine optimal orthogonal routing based on relative node positioning.
 - **Free Positioning & Auto-Layout**: Drag shapes freely across the canvas or use structured relative placements (`move Process below Start`).

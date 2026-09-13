@@ -4,6 +4,89 @@
 #workspace .workspace-heading h2 { font-size: 20px; font-weight: 650; letter-spacing: -.5px; margin: 0; }
 #workspace .workspace-heading .workspace-tagline { font-size: 13px; color: var(--muted); }
 
+#workspace .workspace-welcome-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(290px, .7fr);
+  min-height: 208px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  border: 1px solid #273d5d;
+  border-radius: 12px;
+  background: #172842;
+  color: #ffffff;
+  box-shadow: 0 12px 30px rgba(23, 40, 66, .12);
+}
+#workspace .workspace-welcome-copy { align-self: center; padding: 30px clamp(28px, 4vw, 54px); }
+#workspace .workspace-welcome-kicker { margin: 0 0 8px; color: #f2a06e; font-size: 12px; font-weight: 700; }
+#workspace .workspace-welcome-copy h2 {
+  max-width: 680px;
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(30px, 4vw, 46px);
+  font-weight: 680;
+  line-height: 1.05;
+  letter-spacing: -1.8px;
+}
+#workspace .workspace-welcome-copy > p:not(.workspace-welcome-kicker) {
+  max-width: 620px;
+  margin: 13px 0 0;
+  color: #c8d4e6;
+  font-size: 14px;
+  line-height: 1.55;
+}
+#workspace .workspace-welcome-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 20px; }
+#workspace .workspace-welcome-actions a {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 14px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+#workspace .welcome-primary-action { border: 1px solid var(--accent); background: var(--accent); color: #ffffff; }
+#workspace .welcome-primary-action:hover { border-color: var(--accent-hover); background: var(--accent-hover); }
+#workspace .welcome-secondary-action { border: 1px solid #6f819c; background: transparent; color: #ffffff; }
+#workspace .welcome-secondary-action:hover { border-color: #ffffff; background: rgba(255, 255, 255, .07); }
+#workspace .workspace-welcome-paths {
+  position: relative;
+  display: grid;
+  align-content: center;
+  gap: 0;
+  padding: 28px 34px;
+  margin: 0;
+  border-left: 1px solid #344b6a;
+  background: #1d314e;
+  list-style: none;
+}
+#workspace .workspace-welcome-paths::before {
+  content: "";
+  position: absolute;
+  top: 48px;
+  bottom: 48px;
+  left: 42px;
+  width: 2px;
+  background: #7085a5;
+}
+#workspace .workspace-welcome-paths > li { position: relative; display: flex; align-items: center; gap: 16px; min-height: 50px; }
+#workspace .workspace-welcome-paths > li > span {
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  border: 5px solid #1d314e;
+  border-radius: 50%;
+  background: #f08a4b;
+  box-shadow: 0 0 0 2px #f08a4b;
+}
+#workspace .workspace-welcome-paths > li:nth-child(2) > span { border-radius: 3px; background: #7fa2ee; box-shadow: 0 0 0 2px #7fa2ee; }
+#workspace .workspace-welcome-paths > li:nth-child(3) > span { transform: rotate(45deg) scale(.82); background: #68b98f; box-shadow: 0 0 0 2px #68b98f; }
+#workspace .workspace-welcome-paths p { display: grid; gap: 1px; margin: 0; }
+#workspace .workspace-welcome-paths strong { color: #ffffff; font-size: 13px; }
+#workspace .workspace-welcome-paths small { color: #aebdd2; font-size: 11px; }
+#workspace #voice-workspace, #workspace #shape-palette { scroll-margin-top: 18px; }
+
 /* Workspace Deck: Voice controls & Command feedback side-by-side */
 #workspace .workspace-deck {
   display: grid;
@@ -898,6 +981,10 @@ kbd { font-family: inherit; font-size: .9em; border: 1px solid #c7d3e5; border-b
 }
 @media(max-width: 900px) {
  #workspace { padding: 22px 18px 28px; }
+ #workspace .workspace-welcome-panel { grid-template-columns: minmax(0, 1.3fr) minmax(250px, .7fr); }
+ #workspace .workspace-welcome-copy { padding: 28px; }
+ #workspace .workspace-welcome-paths { padding-inline: 28px; }
+ #workspace .workspace-welcome-paths::before { left: 36px; }
  #workspace .diagram-workbench { grid-template-columns: 152px minmax(0,1fr); }
  #workspace .display-heading { padding: 12px; }
  #workspace .export-controls { flex-basis: 100%; margin-left: 0; }
@@ -905,6 +992,19 @@ kbd { font-family: inherit; font-size: .9em; border: 1px solid #c7d3e5; border-b
 }
 @media(max-width: 600px) {
  #workspace { padding: 20px 12px 28px; }
+ #workspace .workspace-welcome-panel { grid-template-columns: 1fr; }
+ #workspace .workspace-welcome-copy { padding: 26px 22px; }
+ #workspace .workspace-welcome-copy h2 { font-size: 34px; letter-spacing: -1.2px; }
+ #workspace .workspace-welcome-paths {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 20px 22px;
+  border-top: 1px solid #344b6a;
+  border-left: 0;
+ }
+ #workspace .workspace-welcome-paths::before { top: 28px; right: 18%; bottom: auto; left: 18%; width: auto; height: 2px; }
+ #workspace .workspace-welcome-paths > li { min-width: 0; flex-direction: column; align-items: flex-start; gap: 10px; }
+ #workspace .workspace-welcome-paths small { line-height: 1.35; }
  #workspace .diagram-workbench { grid-template-columns: 1fr; }
  #workspace .palette-column { border-right: 0; border-bottom: 1px solid #c7d3e5; }
  #workspace .shape-palette { padding: 4px 0; }

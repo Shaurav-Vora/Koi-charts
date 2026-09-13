@@ -98,9 +98,28 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const outcomeTone = hasError ? "error" : state.outcome === "committed" ? "success" : state.outcome === "confirmation" || state.outcome === "clarification" ? "warning" : state.outcome === "focused" || state.outcome === "explored" ? "info" : "idle";
   const isIdle = state.outcome === "idle" && !presentation;
   return <>
-    <div className="workspace-heading"><h2>Your workspace</h2><span className="workspace-tagline">Build a flowchart, one clear step at a time.</span></div>
+    {graph.nodes.length === 0 ? (
+      <section className="workspace-welcome-panel" aria-labelledby="workspace-welcome-title">
+        <div className="workspace-welcome-copy">
+          <p className="workspace-welcome-kicker">An accessible flowchart workspace</p>
+          <h2 id="workspace-welcome-title">Flowcharts everyone can follow.</h2>
+          <p>Build one chart through voice, touch, keyboard, or mouse. Every view stays synchronized as the structure changes.</p>
+          <div className="workspace-welcome-actions">
+            <a className="welcome-primary-action" href="#voice-workspace">Start with voice</a>
+            <a className="welcome-secondary-action" href="#shape-palette">Choose a shape</a>
+          </div>
+        </div>
+        <ul className="workspace-welcome-paths" aria-label="Three synchronized ways to follow the chart">
+          <li><span aria-hidden="true" /><p><strong>Visual canvas</strong><small>Arrange and connect</small></p></li>
+          <li><span aria-hidden="true" /><p><strong>Tactile display</strong><small>Read shape and direction</small></p></li>
+          <li><span aria-hidden="true" /><p><strong>Spoken guidance</strong><small>Build and inspect hands-free</small></p></li>
+        </ul>
+      </section>
+    ) : (
+      <div className="workspace-heading"><h2>Your workspace</h2><span className="workspace-tagline">Build a flowchart, one clear step at a time.</span></div>
+    )}
     <div className="workspace-deck">
-      <div className="voice-controls" data-tone={indicator.tone} role="group" aria-label="Voice workspace">
+      <div id="voice-workspace" className="voice-controls" data-tone={indicator.tone} role="group" aria-label="Voice workspace">
         <div className="voice-readout">
           <div className="status" role="status" aria-live="polite"><span className="status-dot" aria-hidden="true" />{indicator.label}</div>
           <p className="voice-hint">{indicator.hint}</p>
@@ -133,7 +152,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
         </div>}
       </section>
     </div>
-    <div className="diagram-workbench"><div className="palette-column"><ShapePalette lastNodeId={graph.nodes.at(-1)?.id} onCommand={onCommand} /></div>
+    <div className="diagram-workbench"><div id="shape-palette" className="palette-column"><ShapePalette lastNodeId={graph.nodes.at(-1)?.id} onCommand={onCommand} /></div>
       <section className="display visual-display" aria-labelledby="visual-title" data-graph-version={version}>
         <div className="display-heading"><h3 id="visual-title">Visual flowchart</h3><span className="count">{graph.nodes.length} nodes · {graph.edges.length} connections</span><ExportMenu graph={graph} layout={layout} /></div>
         <div className="canvas-wrap"><CanvasBoundary><VisualCanvas

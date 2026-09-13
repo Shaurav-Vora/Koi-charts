@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import Home from "./page";
 
@@ -23,5 +23,26 @@ describe("application shell", () => {
     expect(screen.queryByText("Voice is not connected yet.")).not.toBeInTheDocument();
     expect(screen.getByRole("complementary",{name:"Workspace shortcuts"})).toBeVisible();
     expect(screen.queryByRole("button", { name: /start listening/i })).not.toBeInTheDocument();
+  });
+
+  it("introduces the empty workspace with direct paths into voice and visual authoring", () => {
+    render(<Home />);
+
+    const welcome = screen.getByRole("region", { name: "Flowcharts everyone can follow." });
+    expect(within(welcome).getByRole("heading", { name: "Flowcharts everyone can follow." })).toBeVisible();
+    expect(within(welcome).getByRole("link", { name: "Start with voice" })).toHaveAttribute("href", "#voice-workspace");
+    expect(within(welcome).getByRole("link", { name: "Choose a shape" })).toHaveAttribute("href", "#shape-palette");
+    expect(within(welcome).getByText("Visual canvas")).toBeVisible();
+    expect(within(welcome).getByText("Tactile display")).toBeVisible();
+    expect(within(welcome).getByText("Spoken guidance")).toBeVisible();
+  });
+
+  it("returns to the compact workspace heading after building begins", () => {
+    render(<Home />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Insert start" }));
+
+    expect(screen.queryByRole("region", { name: "Flowcharts everyone can follow." })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Your workspace" })).toBeVisible();
   });
 });
