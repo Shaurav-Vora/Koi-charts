@@ -38,6 +38,8 @@ describe("PlaybackPanel", () => {
     const state = playbackTransition(graph, createPlaybackState(), { type: "start", graphVersion: 3 });
     render(<PlaybackPanel graph={graph} graphVersion={3} state={state} onAction={onAction} />);
 
+    expect(screen.getByRole("button", { name: "Test chart" })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("region", { name: "Test chart" })).toHaveClass("is-compact");
     expect(screen.getByText("Step 1 · Begin")).toBeVisible();
     expect(screen.getByRole("button", { name: "Back one step" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Repeat step" })).toBeEnabled();

@@ -143,6 +143,8 @@ describe("editor playback integration", () => {
 
     render(<Editor coordinator={coordinator} />);
 
+    expect(screen.getByRole("button", { name: "Test chart" })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.queryByRole("form", { name: "Selected shape" })).not.toBeInTheDocument();
     const route = screen.getByRole("list", { name: "Playback route" });
     expect(within(route).getAllByRole("listitem")).toHaveLength(2);
     expect(within(route).getByText("Begin")).not.toHaveAttribute("aria-current");

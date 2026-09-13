@@ -250,7 +250,7 @@ npm run braille
 
 ## Guided Chart Testing
 
-The compact **Test chart** control sits inside the visual canvas instead of taking a permanent workspace row. It expands into an in-canvas panel only while testing, then returns to one button when stopped. This is a verification and walkthrough mode for an existing chart: it follows the graph one node at a time without creating content or changing undo history. Starting a test focuses the Start node across the visual canvas, tactile display, and chart outline. **Next step** follows a single outgoing connection, while charts with multiple outgoing connections require an explicit branch choice.
+The compact **Test chart** control sits inside the visual canvas instead of taking a permanent workspace row. Its in-canvas panel opens directly beneath the control while testing, and the control remains visible. This is a verification and walkthrough mode for an existing chart: it follows the graph one node at a time without creating content or changing undo history. Starting a test focuses the Start node across the visual canvas, tactile display, and chart outline without opening the shape editor. **Next step** follows a single outgoing connection, while charts with multiple outgoing connections require an explicit branch choice.
 
 - **Back one step** returns through the route actually taken.
 - **Repeat step** repeats the current node guidance.
@@ -268,7 +268,7 @@ Voice control uses exact local commands: **test chart** or **start test**, **nex
 Manual acceptance check:
 
 1. Create a Start leading to a Decision with labelled **Yes** and **No** branches, then place an End after each branch.
-2. Select **Test chart**, advance to the Decision, and take one branch. Confirm that the visual route, Braille information strip, and outline **Test route** identify the same current step.
+2. Select **Test chart** and confirm its button remains visible, the panel opens beneath the review controls, and no shape editor appears. Advance to the Decision and take one branch. Confirm that the visual route, Braille information strip, and outline **Test route** identify the same current step.
 3. Use **Back one step** and **Repeat step**, then complete and restart the route. Confirm each status is announced and contains chart labels rather than internal IDs.
 4. Test an unlabelled branch, a dead end, a loop, and an unreachable shape. Confirm each condition is stated and playback waits instead of choosing a route.
 5. Edit the graph during playback and confirm advancement stays blocked until restart.

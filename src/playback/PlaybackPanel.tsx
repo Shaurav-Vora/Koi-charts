@@ -26,8 +26,9 @@ export default function PlaybackPanel({ graph, graphVersion, state, onAction, an
   const canBack = currentGraph && state.route.length > 1;
   const dispatch = (action: PlaybackAction) => onAction(action);
 
-  return <section className={`playback-panel${active ? "" : " is-compact"}`} data-status={state.status} role="region" aria-label="Test chart">
-    {!active ? <button className="playback-launch" type="button" onClick={() => dispatch({ type: "start", graphVersion })}>Test chart</button> : <>
+  return <section className="playback-panel is-compact" data-status={state.status} role="region" aria-label="Test chart">
+    <button className={`playback-launch${active ? " is-active" : ""}`} type="button" aria-expanded={active} onClick={() => dispatch({ type: active ? "stop" : "start", graphVersion })}>Test chart</button>
+    {active && <div className="playback-popover">
       <div className="playback-heading">
         <h3>Test chart</h3>
         <span className="playback-status"><span aria-hidden="true" />{statusLabels[state.status]}</span>
@@ -55,6 +56,6 @@ export default function PlaybackPanel({ graph, graphVersion, state, onAction, an
         {(state.status === "complete" || state.status === "blocked") && <button type="button" onClick={() => dispatch({ type: "restart", graphVersion })}>Restart test</button>}
         <button type="button" onClick={() => dispatch({ type: "stop", graphVersion })}>Stop test</button>
       </div>
-    </>}
+    </div>}
   </section>;
 }
