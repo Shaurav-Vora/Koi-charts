@@ -75,7 +75,7 @@ Every action—whether initiated via speech, keyboard hotkeys, visual drag-and-d
 
 ### 📋 Accessible Structure & Braille Reference
 - **Chart Outline**: A dedicated, keyboard-navigable list reflecting nodes, types, and directional edges in reading order.
-- **Structured Chart Audit Engine**: Deterministic local checks identify missing or multiple entry points, missing exits, unreachable nodes, dead ends, incomplete or unlabelled decisions, paths without an exit, and duplicate labels. Stable issue targets are ready to drive synchronized visual, tactile, keyboard, and voice review.
+- **Structured Chart Audit Engine**: Deterministic local checks identify missing or multiple entry points, missing exits, unreachable nodes, dead ends, incomplete or unlabelled decisions, paths without an exit, and duplicate labels. Stable issue targets drive synchronized focus and remain selected while the chart changes.
 - **Documentation Field Guide**: A responsive route-based guide covering visual, voice, keyboard, tactile, testing, and export workflows.
 - **UEB Embossable Reference Files**: Downloadable Unified English Braille Grade 1 (uncontracted) and Grade 2 (contracted) `.brf` files generated via `liblouis`.
 
@@ -203,6 +203,7 @@ Koi Charts features an on-device deterministic grammar parser (`src/commands/gra
 | **Navigation** | `next` / `back` / `go to start` / `go to end` | *"Next"* or *"Go to start"* |
 | **Branch Choice** | `take <branch>` | *"Take Yes"* |
 | **Test Chart** | `test chart` / `start test` / `repeat` / `restart test` / `stop test` | *"Test chart"* or *"Stop test"* |
+| **Check Chart** | `check chart` / `next issue` / `previous issue` / `repeat issue` / `close check` | *"Check chart"* or *"Next issue"* |
 | **Inspect / Query** | `where am I` / `inspect <shape>` / `describe the chart` | *"Describe the chart"* |
 | **Trace Path** | `trace the path from <shape> [to <shape>]` | *"Trace the path from Start to End"* |
 | **History & Guard** | `undo` / `redo` / `confirm` / `cancel` | *"Undo"* or *"Confirm"* |

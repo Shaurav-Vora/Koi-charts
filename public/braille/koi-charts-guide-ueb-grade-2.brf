@@ -184,17 +184,27 @@
   ,say3 trace ! pa? f ,/>t to ,5d
   ,say3 trace ! pa? f ,/>t
 
-  validate ! *>t
-  ,reports :at is unf9i%$3 miss+ />t1
-    d1d 5ds1 unlabell$ bran*es4
-  ,al3 validate ! *>t2 *eck ! *>t4
+  *eck *>t _/ validate ! *>t
+  ,op5s a /ructur$ local review (
+    unf9i%$ or ambigu|s *>t /ructure4
+  ,al3 *eck ! *>t4
+  ,say3 *eck *>t
   ,say3 validate ! *>t
+
+  next issue _/ previ|s issue _/ rep1t
+    issue _/ close *eck
+  ,moves "?1 rep1ts1 or closes ! curr5t
+    *>t review4
+  ,say3 next issue
+  ,say3 previ|s issue
+  ,say3 rep1t issue
+  ,say3 close *eck
 
 ,,,take x back,'
 
   undo _/ r$o
   ,/eps back or =w>d "? yr $its4 ,walk+
-    ! *>t is n an $it4
+    ! *>t is n an $it4
   ,say3 undo
   ,say3 r$o
 
@@ -209,7 +219,7 @@
 
   ,say3 add a />t node & 3nect x to a
     new deci.n
-  ,3ta9s multiple op}a;ns4 ,use sep>ate
+  ,3ta9s multiple op}a;ns4 ,use sep>ate
     comm&s = local process+4
 
   ,say3 add ?ree /eps = onbo>d+
@@ -219,7 +229,7 @@
   ,say3 delete "ey?+
   ,reque/s a bulk op}a;n4 ,de/ructive
     *anges require 3firma;n4
-
+
   ,say3 d n add a />t node
   ,3ta9s nega;n & is n tr1t$ z a local
     add comm&4

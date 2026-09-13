@@ -251,10 +251,23 @@ export const grammar: GrammarSection[] = [
         ],
       },
       {
-        form: "validate the chart",
-        purpose: "Reports what is unfinished: missing start, dead ends, unlabelled branches.",
-        alternatives: ["validate the chart", "check the chart"],
-        examples: [{ say: "validate the chart", command: { kind: "validate" } }],
+        form: "check chart / validate the chart",
+        purpose: "Opens a structured local review of unfinished or ambiguous chart structure.",
+        alternatives: ["check the chart"],
+        examples: [
+          { say: "check chart", command: { kind: "audit", action: "open" } },
+          { say: "validate the chart", command: { kind: "audit", action: "open" } },
+        ],
+      },
+      {
+        form: "next issue / previous issue / repeat issue / close check",
+        purpose: "Moves through, repeats, or closes the current chart review.",
+        examples: [
+          { say: "next issue", command: { kind: "audit", action: "next" } },
+          { say: "previous issue", command: { kind: "audit", action: "previous" } },
+          { say: "repeat issue", command: { kind: "audit", action: "repeat" } },
+          { say: "close check", command: { kind: "audit", action: "close" } },
+        ],
       },
     ],
   },

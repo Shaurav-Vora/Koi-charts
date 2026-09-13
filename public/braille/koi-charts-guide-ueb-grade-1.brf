@@ -216,14 +216,23 @@
     ,end
   ,say3 trace the path from ,start
 
-  validate the chart
-  ,reports what is unfinished3 missing
-    start1 dead ends1 unlabelled
-    branches4
-  ,also3 validate the chart2 check the
-    chart4
+  check chart _/ validate the chart
+  ,opens a structured local review of
+    unfinished or ambiguous chart
+    structure4
+  ,also3 check the chart4
+  ,say3 check chart
   ,say3 validate the chart
 
+  next issue _/ previous issue _/ repeat
+    issue _/ close check
+  ,moves through1 repeats1 or closes the
+    current chart review4
+  ,say3 next issue
+  ,say3 previous issue
+  ,say3 repeat issue
+  ,say3 close check
+
 ,,,take it back,'
 
   undo _/ redo
@@ -239,7 +248,7 @@
     word for word only1 never
     approximately4
   ,say3 confirm
-  ,say3 cancel
+  ,say3 cancel
 
 ,,,sent to be interpreted,'
 
@@ -248,7 +257,7 @@
   ,contains multiple operations4 ,use
     separate commands for local
     processing4
-
+
   ,say3 add three steps for onboarding
   ,requires interpretation of the
     requested number and labels of new
@@ -264,7 +273,7 @@
     as a local add command4
 
   ,say3 move ,start somewhere sensible
-  ,does not specify a destination or a
+  ,does not specify a destination or a
     position relative to another node4
 
   ,say3 label the arrow between ,start
@@ -273,4 +282,3 @@
     relabelling an existing arrow by its
     endpoints4 ,select the arrow to edit
     its label4
-

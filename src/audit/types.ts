@@ -27,3 +27,19 @@ export interface AuditIssue {
   suggestion: string;
   target: AuditTarget;
 }
+
+export interface AuditState {
+  status: "closed" | "open";
+  issues: AuditIssue[];
+  currentIssueId: string | null;
+  graphVersion: number | null;
+  message: string;
+}
+
+export type AuditAction =
+  | { type: "open"; graphVersion: number }
+  | { type: "next"; graphVersion: number }
+  | { type: "previous"; graphVersion: number }
+  | { type: "repeat"; graphVersion: number }
+  | { type: "close"; graphVersion: number }
+  | { type: "graph_changed"; graphVersion: number };

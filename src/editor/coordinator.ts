@@ -6,17 +6,26 @@ import type { GraphCommand } from "../commands/schema";
 import type { CommandResult } from "../graph/types";
 import { createPlaybackState, playbackTransition } from "../playback/engine";
 import type { PlaybackAction } from "../playback/types";
+import { auditTransition, createAuditState, currentAuditIssue } from "../audit/state";
+import type { AuditAction, AuditState } from "../audit/types";
 export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
- let state={editor:createEditorState(),presentation:null as Presentation|null,playback:createPlaybackState()};
+ let state={editor:createEditorState(),presentation:null as Presentation|null,playback:createPlaybackState(),audit:createAuditState()};
  const listeners=new Set<()=>void>();
  const publish=()=>listeners.forEach(listener=>listener());
  const dispatch=(action:EditorAction)=>{
   const previousVersion=state.editor.engine.version;
-  const editor=editorReducer(state.editor,action);
+  let editor=editorReducer(state.editor,action);
   const playback=previousVersion!==editor.engine.version&&state.playback.status!=="idle"
    ?playbackTransition(editor.engine.graph,state.playback,{type:"graph_changed",graphVersion:editor.engine.version})
    :state.playback;
-  state={...state,editor,presentation:null,playback};publish();
+  const audit=previousVersion!==editor.engine.version&&state.audit.status==="open"
+   ?auditTransition(editor.engine.graph,state.audit,{type:"graph_changed",graphVersion:editor.engine.version})
+   :state.audit;
+  const auditFocus=currentAuditIssue(audit)?.target.focusNodeId;
+  if(auditFocus&&editor.engine.graph.nodes.some(node=>node.id===auditFocus)&&auditFocus!==editor.engine.focusedNodeId){
+   editor=editorReducer(editor,{type:"command",idSeed:crypto.randomUUID(),command:{kind:"focus",node:{kind:"id",value:auditFocus}}});
+  }
+  state={...state,editor,presentation:null,playback,audit};publish();
  };
  const result=():CommandResult=>({state:state.editor.engine,outcome:state.editor.outcome==="idle"?"error":state.editor.outcome,message:state.editor.message});
  const playbackResult=(action:PlaybackAction):CommandResult=>({
@@ -27,12 +36,28 @@ export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
  });
  const playbackDispatch=(action:PlaybackAction):CommandResult=>{
   const playback=playbackTransition(state.editor.engine.graph,state.playback,action);
+  const audit=(action.type==="start"||action.type==="restart")&&state.audit.status==="open"?createAuditState():state.audit;
   let editor=state.editor;
   if(playback.currentNodeId&&playback.currentNodeId!==editor.engine.focusedNodeId){
    editor=editorReducer(editor,{type:"command",idSeed:crypto.randomUUID(),command:{kind:"focus",node:{kind:"id",value:playback.currentNodeId}}});
   }
-  state={...state,editor,presentation:null,playback};publish();
+  state={...state,editor,presentation:null,playback,audit};publish();
   return playbackResult(action);
+ };
+ const auditResult=(audit:AuditState,outcome:CommandResult["outcome"]="explored"):CommandResult=>({
+  state:state.editor.engine,outcome,message:audit.message,
+ });
+ const auditDispatch=(action:AuditAction):CommandResult=>{
+  const wasClosed=state.audit.status==="closed";
+  const audit=auditTransition(state.editor.engine.graph,state.audit,action);
+  let editor=state.editor;
+  const focusId=currentAuditIssue(audit)?.target.focusNodeId;
+  if(focusId&&editor.engine.graph.nodes.some(node=>node.id===focusId)&&focusId!==editor.engine.focusedNodeId){
+   editor=editorReducer(editor,{type:"command",idSeed:crypto.randomUUID(),command:{kind:"focus",node:{kind:"id",value:focusId}}});
+  }
+  const playback=action.type==="open"&&state.playback.status!=="idle"?createPlaybackState():state.playback;
+  state={...state,editor,presentation:null,playback,audit};publish();
+  return auditResult(audit,wasClosed&&action.type!=="open"&&action.type!=="close"?"error":"explored");
  };
  const normalize=(value:string)=>value.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu," ").trim();
  const playbackFeedback=(message:string,outcome:"error"|"clarification"):CommandResult=>{
@@ -65,6 +90,8 @@ export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
   return playbackFeedback(`Several branches match ${spoken}: ${matches.map(choice=>choice.label).join("; ")}. Say the destination.`,"clarification");
  };
  const applyCommand=(command:GraphCommand):CommandResult=>{
+  if(command.kind==="audit")return auditDispatch({type:command.action,graphVersion:state.editor.engine.version});
+  if(command.kind==="validate")return auditDispatch({type:"open",graphVersion:state.editor.engine.version});
   if(command.kind==="playback"){
    if(command.action==="choose")return choosePlayback(command.choice);
    return playbackDispatch({type:command.action,graphVersion:state.editor.engine.version});
@@ -83,5 +110,5 @@ export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
  });
  // The connection layer reports through the same channel as turns, so one status line covers both.
  const present=(value:Presentation)=>{state={...state,presentation:value};publish();};
- return {turns,dispatch,playbackDispatch,present,getSnapshot:()=>state,subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener);};}};
+ return {turns,dispatch,playbackDispatch,auditDispatch,present,getSnapshot:()=>state,subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener);};}};
 }

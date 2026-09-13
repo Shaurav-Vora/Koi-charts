@@ -59,6 +59,7 @@ export function execute(state: EngineState, input: unknown, newId: () => string)
       return { state: restoreHistory(state, command.kind), outcome: "committed", message: command.kind === "undo" ? "Undid last edit." : "Redid last edit." };
     }
     if (command.kind === "playback") return failure(state, "Start Test chart mode first.");
+    if (command.kind === "audit") return failure(state, "Use Check chart to open the chart review.");
     const walked = walkCommand(state, command);
     if (walked) return walked;
     return run(state, command, newId);
