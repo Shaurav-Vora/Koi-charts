@@ -226,20 +226,29 @@ npm run braille
 
 ## Guided Chart Testing
 
-The compact **Test chart** control sits inside the visual canvas instead of taking a permanent workspace row. It expands into an in-canvas panel only while testing, then returns to one button when stopped. Playback follows a flowchart one node at a time without changing the chart or its undo history. Starting a test focuses the Start node across the visual canvas, tactile display, and chart outline. **Next step** follows a single outgoing connection, while charts with multiple outgoing connections require an explicit branch choice.
+The compact **Test chart** control sits inside the visual canvas instead of taking a permanent workspace row. It expands into an in-canvas panel only while testing, then returns to one button when stopped. This is a verification and walkthrough mode for an existing chart: it follows the graph one node at a time without creating content or changing undo history. Starting a test focuses the Start node across the visual canvas, tactile display, and chart outline. **Next step** follows a single outgoing connection, while charts with multiple outgoing connections require an explicit branch choice.
 
 - **Back one step** returns through the route actually taken.
 - **Repeat step** repeats the current node guidance.
 - **Restart test** begins again after completion, a dead end, or a chart change.
 - **Stop test** closes the active route and returns the panel to its ready state.
 - Editing the graph during a test pauses playback and asks for a restart, preventing stale connections from being followed.
+- A missing Start prevents playback. Unreachable shapes are reported before the walkthrough, dead ends pause advancement, and revisiting a shape announces a loop.
+- Unlabelled branches remain selectable by destination, although arrow labels provide clearer decision choices across speech, Braille, and the outline.
 - The visual canvas marks earlier route connections with a wider solid line and the current connection with a wider dashed line. Route nodes use matching visited and current outlines.
 - The Braille information strip begins with the playback step and, after the first node, names the arrow and source node used to enter the current shape.
 - The chart outline contains a compact numbered **Test route** list while playback has recorded steps. Its current item is marked as the active step.
 
 Voice control uses exact local commands: **test chart** or **start test**, **next**, **back**, **repeat**, **take _branch label or destination_**, **restart test**, and **stop test**. These commands run locally without calling Gemini. Branch choices must match an arrow label or destination node; Koi Charts does not guess an unspoken choice.
 
-Manual check: create a Start leading to a Decision with labelled **Yes** and **No** branches. Select **Test chart**, advance to the Decision, and take one branch. Verify that earlier connections are solid, the incoming current connection is dashed, the Braille strip names the chosen arrow and its source, and **Test route** marks the current node. Choose **Back one step** and confirm the final route item and highlight are removed. Every control should be reachable with <kbd>Tab</kbd> and usable with <kbd>Enter</kbd> or <kbd>Space</kbd>.
+Manual acceptance check:
+
+1. Create a Start leading to a Decision with labelled **Yes** and **No** branches, then place an End after each branch.
+2. Select **Test chart**, advance to the Decision, and take one branch. Confirm that the visual route, Braille information strip, and outline **Test route** identify the same current step.
+3. Use **Back one step** and **Repeat step**, then complete and restart the route. Confirm each status is announced and contains chart labels rather than internal IDs.
+4. Test an unlabelled branch, a dead end, a loop, and an unreachable shape. Confirm each condition is stated and playback waits instead of choosing a route.
+5. Edit the graph during playback and confirm advancement stays blocked until restart.
+6. Repeat the walkthrough with the local voice phrases and with <kbd>Tab</kbd>, <kbd>Enter</kbd>, and <kbd>Space</kbd>.
 
 ---
 

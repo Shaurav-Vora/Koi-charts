@@ -17,6 +17,7 @@ export default function Documentation() {
         <nav className="docs-nav" aria-label="Documentation sections">
           <p>On this page</p>
           <a href="#getting-started">Getting started</a>
+          <a href="#testing-chart">Testing a chart</a>
           {grammar.map(section => (
             <a key={section.title} href={`#guide-${section.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
               {section.title}
@@ -67,7 +68,7 @@ export default function Documentation() {
                     <strong>Renaming:</strong> Double-click any shape on the canvas to edit its label inline, or say <code>&ldquo;rename Start to Launch&rdquo;</code>. Click on any connecting arrow to open the arrow inspector and label branches (e.g., <code>Yes</code> or <code>No</code>).
                   </p>
                   <p>
-                    <strong>Deleting:</strong> Select any node and press <kbd>Delete</kbd>, or say <code>&ldquo;delete Login&rdquo;</code>. Connected nodes will request confirmation before links are removed.
+                    <strong>Deleting:</strong> Select a shape or connection and press <kbd>Delete</kbd>. The lower-right selection card also provides a mouse-accessible delete button. Connected shapes request confirmation before their links are removed.
                   </p>
                 </div>
               </div>
@@ -99,6 +100,54 @@ export default function Documentation() {
                 <li>Toggle <strong>Speak replies</strong> to enable or mute spoken voice feedback.</li>
               </ul>
             </div>
+          </section>
+
+          <section id="testing-chart" className="docs-section" aria-labelledby="testing-chart-title">
+            <h2 id="testing-chart-title">Testing a chart</h2>
+            <p>
+              <strong>Test chart</strong> is a verification and walkthrough mode for a chart you have already built. It follows existing shapes and connections one step at a time; it does not create, reconnect, rename, or delete chart content.
+            </p>
+
+            <h3>Run a walkthrough</h3>
+            <ol>
+              <li>
+                Select <strong>Test chart</strong>, or say <code>test chart</code> or <code>start test</code>. Playback begins at the Start shape. If the chart has more than one Start, choose the one you want to test.
+              </li>
+              <li>
+                Select <strong>Next step</strong> or say <code>next</code> to follow the next connection. Playback pauses at every shape so you can confirm the route before continuing.
+              </li>
+              <li>
+                At a decision or any shape with multiple outgoing connections, choose a branch label or destination. For example, say <code>take Yes</code>. An arrow without a label is announced as <em>Unlabelled to destination</em>; Koi Charts never guesses between branches.
+              </li>
+              <li>
+                Use <strong>Back one step</strong> or say <code>back</code> to retrace the route you took. Use <strong>Repeat step</strong> or say <code>repeat</code> to hear the current guidance again.
+              </li>
+              <li>
+                Use <strong>Restart test</strong> or say <code>restart test</code> to return to the chosen Start. Use <strong>Stop test</strong> or say <code>stop test</code> to close the walkthrough.
+              </li>
+            </ol>
+
+            <h3>Route checks</h3>
+            <dl>
+              <dt>Missing or unreachable shapes</dt>
+              <dd>A chart without a Start cannot begin. Shapes that cannot be reached from the chosen Start are reported before the walkthrough.</dd>
+              <dt>Missing branch labels</dt>
+              <dd>Unlabelled branches remain available by destination name, but labelled arrows make decision routes clearer in speech, Braille, and the outline.</dd>
+              <dt>Dead end</dt>
+              <dd>Playback pauses when the current shape has no outgoing connection. Add the missing connection or stop the test.</dd>
+              <dt>Loop</dt>
+              <dd>Playback announces a loop when the route returns to a shape already visited and remains paused for your decision.</dd>
+              <dt>Chart changes</dt>
+              <dd>Editing the chart during playback stops route advancement. Restart the test so the walkthrough uses the current graph.</dd>
+            </dl>
+
+            <h3>Feedback and access</h3>
+            <p>
+              The visual canvas marks visited and current shapes and connections. The <strong>Braille information strip</strong> states the current testing step and the incoming arrow. The chart outline adds an ordered <strong>Test route</strong> and marks its current item. These three views describe the same route.
+            </p>
+            <p>
+              Playback commands are fast local commands and run without calling Gemini or using Gemini quota. All playback buttons are reachable with <kbd>Tab</kbd> and activate with <kbd>Enter</kbd> or <kbd>Space</kbd>. Status changes use live announcements for a screen reader, and spoken guidance uses chart labels instead of internal identifiers.
+            </p>
           </section>
 
           <CommandGuide />

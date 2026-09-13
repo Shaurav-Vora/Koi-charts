@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { expect, it } from "vitest";
 import Documentation from "./page";
 it("provides documentation navigation, command reference, and export guidance", () => {
@@ -8,4 +8,47 @@ it("provides documentation navigation, command reference, and export guidance", 
   expect(container.querySelector(link.getAttribute("href")!)).not.toBeNull();
  }
  expect(screen.getByRole("heading",{name:"Exporting charts"})).toBeVisible();
+});
+
+it("documents guided chart testing as a verification workflow", () => {
+ const { container } = render(<Documentation />);
+ const section = container.querySelector("#testing-chart");
+
+ expect(section).not.toBeNull();
+ const testing = within(section as HTMLElement);
+ expect(testing.getByRole("heading", { name: "Testing a chart" })).toBeVisible();
+ expect(testing.getByText(/verification and walkthrough mode/i)).toBeVisible();
+
+ const text = section?.textContent ?? "";
+ for (const instruction of [
+  "Test chart",
+  "Next step",
+  "Back one step",
+  "Repeat step",
+  "Restart test",
+  "Stop test",
+  "branch label",
+  "dead end",
+  "loop",
+  "unreachable",
+  "chart changes",
+ ]) {
+  expect(text.toLowerCase()).toContain(instruction.toLowerCase());
+ }
+});
+
+it("documents local voice control and synchronized accessible feedback", () => {
+ const { container } = render(<Documentation />);
+ const section = container.querySelector("#testing-chart");
+ const text = section?.textContent ?? "";
+
+ for (const phrase of ["test chart", "next", "back", "repeat", "take Yes", "restart test", "stop test"]) {
+  expect(text).toContain(phrase);
+ }
+ expect(text).toMatch(/without calling Gemini/i);
+ expect(text).toMatch(/visual canvas/i);
+ expect(text).toMatch(/Braille information strip/i);
+ expect(text).toMatch(/Test route/i);
+ expect(text).toMatch(/screen reader/i);
+ expect(text).toMatch(/Enter[\s\S]*Space/);
 });
