@@ -6,9 +6,10 @@ describe("public homepage", () => {
   it("introduces Koi Charts and leads into the workspace", () => {
     render(<Home />);
 
-    expect(screen.getByRole("heading", { level: 1, name: "Flowcharts everyone can follow." })).toBeVisible();
-    expect(screen.getByRole("link", { name: "Open workspace" })).toHaveAttribute("href", "/workspace");
-    expect(screen.getByRole("link", { name: "Read documentation" })).toHaveAttribute("href", "/docs");
+    const hero = screen.getByRole("region", { name: "Flowcharts everyone can follow." });
+    expect(within(hero).getByRole("heading", { level: 1, name: "Flowcharts everyone can follow." })).toBeVisible();
+    expect(within(hero).getByRole("link", { name: "Open workspace" })).toHaveAttribute("href", "/workspace");
+    expect(within(hero).getByRole("link", { name: "Read documentation" })).toHaveAttribute("href", "/docs");
   });
 
   it("demonstrates the synchronized chart views without rendering the editor", () => {
@@ -29,5 +30,13 @@ describe("public homepage", () => {
     expect(within(workflow).getByRole("heading", { name: "Build the structure" })).toBeVisible();
     expect(within(workflow).getByRole("heading", { name: "Follow every view" })).toBeVisible();
     expect(within(workflow).getByRole("heading", { name: "Test the route" })).toBeVisible();
+  });
+
+  it("ends with a clear workspace action", () => {
+    render(<Home />);
+
+    const closingAction = screen.getByRole("region", { name: "Start building" });
+    expect(within(closingAction).getByRole("link", { name: "Open workspace" })).toHaveAttribute("href", "/workspace");
+    expect(within(closingAction).getByText(/charts remain in this browser session/i)).toBeVisible();
   });
 });

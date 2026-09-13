@@ -103,6 +103,17 @@ export default function Home() {
             <p><strong>One edit updates all three.</strong> Focus a shape in any view and every representation identifies the same point in the flow.</p>
           </div>
         </section>
+
+        <section className="home-closing-action" aria-labelledby="home-closing-title">
+          <div>
+            <p className="home-kicker">Ready when you are</p>
+            <h2 id="home-closing-title">Start building</h2>
+            <p>Open the editor and create your first accessible flowchart. Charts remain in this browser session until workflow saving is introduced.</p>
+          </div>
+          <Link className="home-primary-action" href="/workspace">
+            Open workspace <span aria-hidden="true">→</span>
+          </Link>
+        </section>
       </main>
 
       <footer className="home-footer">

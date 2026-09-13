@@ -182,6 +182,8 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the homepage. The editor is available at [http://localhost:3000/workspace](http://localhost:3000/workspace), and the documentation is available at [http://localhost:3000/docs](http://localhost:3000/docs).
 
+The current workspace stores its chart only in page memory. Reloading or closing the workspace clears the editable chart, so export any work you need to keep. Persistent workflow saving is planned for a future release.
+
 ---
 
 ## Voice Command Grammar
@@ -291,7 +293,7 @@ Koi-charts/
 │   ├── braille/            # Embossable UEB Grade 1 & 2 .brf references
 │   └── koi.svg             # Vector brand logo
 ├── src/
-│   ├── app/                # Next.js routes for the homepage, /workspace editor, documentation, and APIs
+│   ├── app/                # Public homepage, /workspace editor, /docs guide, and API routes
 │   ├── commands/           # Command grammar, Zod schemas, resolve & execute engine
 │   ├── editor/             # Canvas editor coordinator, status management, UI components
 │   ├── feedback/           # Natural language chart descriptions and query generators
