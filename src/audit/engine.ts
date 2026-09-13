@@ -81,7 +81,7 @@ export function auditGraph(graph: FlowGraph): AuditIssue[] {
       if (!reachable.has(node.id)) {
         issues.push(issue(
           `node:${node.id}:unreachable`, "unreachable-node", "required", "Connect this node to the flow",
-          `Unreachable from any start node: "${node.label}" (${node.id}).`,
+          `${node.label} cannot be reached from a Start node.`,
           "Connect this node to a path that begins at the Start node.", nodeTarget(node.id),
         ));
       }
@@ -94,7 +94,7 @@ export function auditGraph(graph: FlowGraph): AuditIssue[] {
       deadEnds.add(node.id);
       issues.push(issue(
         `node:${node.id}:dead-end`, "dead-end", "required", "Continue or end this path",
-        `Non-end node "${node.label}" (${node.id}) has no outgoing connection.`,
+        `${node.label} has no outgoing connection.`,
         "Connect this node to the next step or change it to an End node.", nodeTarget(node.id),
       ));
     }
@@ -105,7 +105,7 @@ export function auditGraph(graph: FlowGraph): AuditIssue[] {
     if (branches.length < 2) {
       issues.push(issue(
         `node:${node.id}:decision-branch-count`, "decision-branch-count", "required", "Add another decision branch",
-        `Decision "${node.label}" (${node.id}) has fewer than two outgoing branches.`,
+        `${node.label} has fewer than two outgoing branches.`,
         "Connect the decision to at least two possible outcomes.", nodeTarget(node.id),
       ));
     }
@@ -113,7 +113,7 @@ export function auditGraph(graph: FlowGraph): AuditIssue[] {
       if (!edge.label?.trim()) {
         issues.push(issue(
           `edge:${edge.id}:unlabeled-decision-branch`, "unlabeled-decision-branch", "review", "Label this decision branch",
-          `Decision "${node.label}" (${node.id}) has an unlabeled outgoing connection (${edge.id}).`,
+          `${node.label} has an unlabelled outgoing connection.`,
           "Add a short outcome label such as Yes or No.", edgeTarget(edge.id, node.id),
         ));
       }
@@ -131,7 +131,7 @@ export function auditGraph(graph: FlowGraph): AuditIssue[] {
       ) {
         issues.push(issue(
           `node:${node.id}:no-route-to-end`, "no-route-to-end", "required", "Create a route to an End node",
-          `Node "${node.label}" (${node.id}) cannot reach an end node.`,
+          `${node.label} cannot reach an End node.`,
           "Connect this path to a node that can eventually reach an End node.", nodeTarget(node.id),
         ));
       }

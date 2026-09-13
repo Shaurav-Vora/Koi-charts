@@ -51,7 +51,6 @@ export interface VisualCanvasProps {
   onExample?: () => void;
   onDescribe?: () => void;
   onInspect?: () => void;
-  onValidate?: () => void;
   playbackRoute?: PlaybackRouteStep[];
 }
 
@@ -73,7 +72,6 @@ function Canvas({
   onExample,
   onDescribe,
   onInspect,
-  onValidate,
   playbackRoute = [],
 }: VisualCanvasProps) {
   const { screenToFlowPosition, zoomIn, zoomOut, fitView, setCenter, getZoom } = useReactFlow();
@@ -144,7 +142,7 @@ function Canvas({
     onFit={() => void fitView({ padding: 0.25, maxZoom: 1, duration: 220 })} onCenter={centerOnFocus}
     canUndo={canUndo} canRedo={canRedo} onUndo={onUndo} onRedo={onRedo}
     canClear={canClear} onClear={onClear} />
-  {onWalk && onDescribe && onInspect && onValidate && (
+  {onWalk && onDescribe && onInspect && (
     <div className="canvas-dock nodrag nopan" role="toolbar" aria-label="Chart navigation and inspection">
       <div className="canvas-control-group walk-controls" role="group" aria-label="Walk the chart">
         <button type="button" disabled={!canWalk} onClick={() => onWalk("first")} title="Go to start">Go to start</button>
@@ -157,7 +155,6 @@ function Canvas({
         {canExample && onExample && <button type="button" onClick={onExample} title="Load large example">Load large example</button>}
         <button type="button" onClick={onDescribe} title="Describe chart">Describe chart</button>
         <button type="button" disabled={!canStep} onClick={onInspect} title="Inspect focus">Inspect focus</button>
-        <button type="button" onClick={onValidate} title="Validate chart">Validate chart</button>
       </div>
     </div>
   )}

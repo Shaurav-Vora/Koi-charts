@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import Editor from "./Editor";
 import { createEditorCoordinator } from "./coordinator";
@@ -6,12 +6,23 @@ import { createEditorCoordinator } from "./coordinator";
 vi.mock("../visual/VisualCanvas", () => ({ default: () => <div data-testid="visual-canvas" /> }));
 
 describe("editor playback integration", () => {
-  it("keeps the guided test control inside the canvas instead of a workspace row", () => {
+  it("keeps both review tools in one compact canvas group", () => {
     render(<Editor />);
 
-    const panel = screen.getByRole("region", { name: "Test chart" });
-    expect(panel).toHaveClass("is-compact");
-    expect(panel.parentElement).toHaveClass("canvas-wrap");
+    const tools = screen.getByRole("group", { name: "Chart review tools" });
+    expect(tools.parentElement).toHaveClass("canvas-wrap");
+    expect(within(tools).getByRole("region", { name: "Test chart" })).toHaveClass("is-compact");
+    expect(within(tools).getByRole("region", { name: "Check chart" })).toHaveClass("is-compact");
+  });
+
+  it("opens the structured chart check without showing guided playback over it", () => {
+    render(<Editor />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Check chart" }));
+
+    expect(screen.getByRole("region", { name: "Check chart" })).not.toHaveClass("is-compact");
+    expect(screen.getByText("2 issues")).toBeVisible();
+    expect(screen.getByRole("region", { name: "Test chart" })).toHaveClass("is-compact");
   });
 
   it("starts at the Start node, synchronizes focus, and preserves graph history", () => {

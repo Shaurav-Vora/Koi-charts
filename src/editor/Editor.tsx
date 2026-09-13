@@ -18,6 +18,7 @@ import { briefReply } from "./brief-reply";
 import { choiceLabels } from "../feedback/choices";
 import PreviewOverlay from "../visual/PreviewOverlay";
 import PlaybackPanel from "../playback/PlaybackPanel";
+import AuditPanel from "../audit/AuditPanel";
 
 const editableTarget = (target: EventTarget | null) =>
   target instanceof Element && !!target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]');
@@ -30,7 +31,7 @@ class CanvasBoundary extends Component<{ children: ReactNode }, { failed: boolea
 export default function Editor({ coordinator: supplied }: { coordinator?: ReturnType<typeof createEditorCoordinator> } = {}) {
   const [local] = useState(() => createEditorCoordinator());
   const coordinator = supplied ?? local;
-  const { editor: state, presentation, playback } = useSyncExternalStore(coordinator.subscribe, coordinator.getSnapshot, coordinator.getSnapshot);
+  const { editor: state, presentation, playback, audit } = useSyncExternalStore(coordinator.subscribe, coordinator.getSnapshot, coordinator.getSnapshot);
   const dispatch = coordinator.dispatch;
   const speaker = useMemo(() => createSpeaker(), []);
   // Talking over a reply stops it: the microphone is muted while one plays, so without this
@@ -55,7 +56,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
     return () => document.removeEventListener("keydown", removeSelected);
   }, [focusedNodeId, pending, onCommand]);
   const message = presentation?.error ?? presentation?.text ?? state.message;
-  const spokenMessage = playback.status === "idle" ? briefReply(state, message) : playback.message;
+  const spokenMessage = audit.status === "open" ? audit.message : playback.status === "idle" ? briefReply(state, message) : playback.message;
   const supported = useSyncExternalStore(speaker.subscribe, () => speaker.supported, () => false);
   const inputPaused = useSyncExternalStore(speaker.subscribe, speaker.getSnapshot, () => false);
   const toggleVoice = useCallback(() => {
@@ -91,7 +92,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
     speaker.speak(spokenMessage);
     // Depending on the store objects rather than the text repeats an identical reply, which is
     // how pressing Back twice at a dead end confirms twice that there is still nothing behind.
-  }, [state, presentation, playback, speaks, speaker, spokenMessage]);
+  }, [state, presentation, playback, audit, speaks, speaker, spokenMessage]);
   const toggleSpeech = (next: boolean) => { speechPreference.write(next); if (!next) speaker.cancel(); };
   const indicator = voiceIndicator(voiceConnectionStatus, inputPaused, presentation?.status);
   const status = presentation ? statusLabels[presentation.status] : state.outcome === "idle" ? "Idle" : state.outcome === "error" ? "Command not applied" : state.outcome === "confirmation" ? "Confirmation needed" : state.outcome === "clarification" ? "Clarification needed" : state.outcome === "committed" ? "Change applied" : state.outcome === "focused" ? "Focus updated" : state.outcome === "cancelled" ? "Cancelled" : "Chart explored";
@@ -154,9 +155,8 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
           onExample={() => dispatch({ type: "example" })}
           onDescribe={() => onCommand({ kind: "describe", scope: "chart" })}
           onInspect={() => onCommand({ kind: "inspect", node: null })}
-          onValidate={() => onCommand({ kind: "validate" })}
           playbackRoute={playback.route}
-        /></CanvasBoundary><PreviewOverlay command={presentation?.preview ?? null} /><PlaybackPanel graph={graph} graphVersion={version} state={playback} onAction={coordinator.playbackDispatch} announce={!speaks} />{focused && <NodeInspector key={`${focused.id}-${focused.label}`} node={focused} onCommand={onCommand} onClose={() => onCommand({ kind: "clear_focus" })} />}{!presentation?.preview && !graph.nodes.length && <div className="canvas-welcome"><svg className="welcome-koi" viewBox="0 0 64 64" fill="none" aria-hidden="true"><g stroke="#315ac8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 40C10 41 7 48 6 57c8-1 13-6 16-10 0 6 4 10 10 12 2-8-1-14-6-18" fill="#f4f7ff"/><path d="M26 25c-9-2-13 1-16 6l11 5M38 34c7 2 8 7 7 12l-12-6" fill="#e4edff"/><path d="M45 13C32 11 18 25 19 38c0 8 6 12 12 8 12-8 19-24 14-33Z" fill="#fffaf3"/><path d="M42 14c-5 0-10 3-13 7 3 4 7 5 12 3 2-4 3-7 1-10ZM22 29c-3 5-3 10-1 14 5-1 9-4 9-8-3-1-5-3-8-6Z" fill="#ed704b" stroke="none"/><path d="M35 31c-1 5-5 10-9 13M18 46l-7 7M24 48l4 7"/><circle cx="41" cy="18" r="1.5" fill="#244c9d" stroke="none"/><path d="M45 13l3-2M43 13l-1-3"/><circle cx="51" cy="8" r="2.2" fill="#e7f3ff"/><circle cx="58" cy="4" r="1.3" fill="#e7f3ff" strokeWidth="1.2"/></g></svg><h4>Your chart starts here</h4><p className="welcome-subtext">Say <strong>&ldquo;add a start&rdquo;</strong> to begin with voice, or drag a shape from the left.</p><div className="welcome-prompts" aria-hidden="true"><span>Try saying:</span><code>&ldquo;add a start&rdquo;</code><code>&ldquo;add step Login&rdquo;</code><code>&ldquo;add decision Approved&rdquo;</code></div></div>}</div>
+        /></CanvasBoundary><PreviewOverlay command={presentation?.preview ?? null} /><div className="canvas-review-tools nodrag nopan" role="group" aria-label="Chart review tools"><AuditPanel graphVersion={version} state={audit} onAction={coordinator.auditDispatch} announce={!speaks} /><PlaybackPanel graph={graph} graphVersion={version} state={playback} onAction={coordinator.playbackDispatch} announce={!speaks} /></div>{focused && <NodeInspector key={`${focused.id}-${focused.label}`} node={focused} onCommand={onCommand} onClose={() => onCommand({ kind: "clear_focus" })} />}{!presentation?.preview && !graph.nodes.length && <div className="canvas-welcome"><svg className="welcome-koi" viewBox="0 0 64 64" fill="none" aria-hidden="true"><g stroke="#315ac8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 40C10 41 7 48 6 57c8-1 13-6 16-10 0 6 4 10 10 12 2-8-1-14-6-18" fill="#f4f7ff"/><path d="M26 25c-9-2-13 1-16 6l11 5M38 34c7 2 8 7 7 12l-12-6" fill="#e4edff"/><path d="M45 13C32 11 18 25 19 38c0 8 6 12 12 8 12-8 19-24 14-33Z" fill="#fffaf3"/><path d="M42 14c-5 0-10 3-13 7 3 4 7 5 12 3 2-4 3-7 1-10ZM22 29c-3 5-3 10-1 14 5-1 9-4 9-8-3-1-5-3-8-6Z" fill="#ed704b" stroke="none"/><path d="M35 31c-1 5-5 10-9 13M18 46l-7 7M24 48l4 7"/><circle cx="41" cy="18" r="1.5" fill="#244c9d" stroke="none"/><path d="M45 13l3-2M43 13l-1-3"/><circle cx="51" cy="8" r="2.2" fill="#e7f3ff"/><circle cx="58" cy="4" r="1.3" fill="#e7f3ff" strokeWidth="1.2"/></g></svg><h4>Your chart starts here</h4><p className="welcome-subtext">Say <strong>&ldquo;add a start&rdquo;</strong> to begin with voice, or drag a shape from the left.</p><div className="welcome-prompts" aria-hidden="true"><span>Try saying:</span><code>&ldquo;add a start&rdquo;</code><code>&ldquo;add step Login&rdquo;</code><code>&ldquo;add decision Approved&rdquo;</code></div></div>}</div>
         <div className="display-footer"><p>Drag shapes to move them. Use the dots to connect. Double-click a shape to rename it, or click an arrow to label it.</p></div>
       </section>
     </div><details className="keyboard-editor"><summary>Keyboard editing &amp; advanced commands</summary><CommandForm graph={graph} focusedNodeId={focusedNodeId} onCommand={onCommand} /></details><div className="secondary-displays">

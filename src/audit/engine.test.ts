@@ -131,4 +131,15 @@ describe("chart audit", () => {
 
     expect(auditGraph(graph)).toEqual([]);
   });
+
+  it("keeps internal identifiers out of user-facing issue copy", () => {
+    const internalId = "7b338db9-a6e5-42ad-aa3f-a9de21fb90f8-2";
+    const graph = completeGraph();
+    graph.nodes.push({ id: internalId, type: "process", label: "Review request" });
+
+    const copy = auditGraph(graph).flatMap(issue => [issue.title, issue.message, issue.suggestion]).join(" ");
+
+    expect(copy).not.toContain(internalId);
+    expect(copy).toContain("Review request");
+  });
 });

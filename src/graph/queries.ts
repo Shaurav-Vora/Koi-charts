@@ -1,10 +1,27 @@
 import { assertGraph } from "./invariants";
 import type { FlowGraph } from "./types";
 import { auditGraph } from "../audit/engine";
+import type { AuditIssue } from "../audit/types";
+
+function diagnosticMessage(graph: FlowGraph, issue: AuditIssue): string {
+  const node = issue.target.focusNodeId
+    ? graph.nodes.find(candidate => candidate.id === issue.target.focusNodeId)
+    : undefined;
+  switch (issue.code) {
+    case "unreachable-node": return node ? `Unreachable from any start node: "${node.label}" (${node.id}).` : issue.message;
+    case "dead-end": return node ? `Non-end node "${node.label}" (${node.id}) has no outgoing connection.` : issue.message;
+    case "decision-branch-count": return node ? `Decision "${node.label}" (${node.id}) has fewer than two outgoing branches.` : issue.message;
+    case "unlabeled-decision-branch": return node && issue.target.kind === "edge"
+      ? `Decision "${node.label}" (${node.id}) has an unlabeled outgoing connection (${issue.target.edgeId}).`
+      : issue.message;
+    case "no-route-to-end": return node ? `Node "${node.label}" (${node.id}) cannot reach an end node.` : issue.message;
+    default: return issue.message;
+  }
+}
 
 /** Authoring warnings are separate from graph-integrity errors. */
 export function validateGraph(graph: FlowGraph): string[] {
-  return auditGraph(graph).map(issue => issue.message);
+  return auditGraph(graph).map(issue => diagnosticMessage(graph, issue));
 }
 
 /** With a target, find one shortest directed route. Without one, never choose a branch. */
