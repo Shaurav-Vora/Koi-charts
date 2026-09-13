@@ -5,7 +5,7 @@ import { grammar } from "../../commands/grammar";
 
 export const metadata: Metadata = {
   title: "Documentation | Koi charts",
-  description: "Voice commands, chart editing, guided testing, and export reference for Koi charts.",
+  description: "Voice commands, chart editing, structural review, guided testing, and export reference for Koi charts.",
 };
 
 const guideHref = (title: string) => `#guide-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
@@ -26,6 +26,7 @@ export default function Documentation() {
             <div className="docs-nav-group">
               <p>Learn</p>
               <a href="#getting-started">Getting started</a>
+              <a href="#checking-chart">Checking a chart</a>
               <a href="#testing-chart">Testing a chart</a>
             </div>
 
@@ -138,6 +139,79 @@ export default function Documentation() {
                 <li>Quote labels containing command words: <code>add a process called &ldquo;Sign in with Google&rdquo;</code>.</li>
                 <li><strong>Fast local commands</strong> handles common phrases without a network request. <strong>Speak replies</strong> controls spoken feedback.</li>
               </ul>
+            </div>
+          </section>
+
+          <section id="checking-chart" className="docs-section" aria-labelledby="checking-chart-title">
+            <div className="docs-section-heading">
+              <p>Structural review</p>
+              <h2 id="checking-chart-title">Checking a chart</h2>
+              <span>Find gaps and ambiguity before walking a route.</span>
+            </div>
+            <p>
+              <strong>Check chart</strong> reviews the whole flow without changing it. It presents one issue at a time, focuses the relevant shape across the canvas, tactile display, and outline, and recalculates as you edit.
+            </p>
+
+            <div className="docs-testing-layout">
+              <div>
+                <h3>Review the structure</h3>
+                <ol className="docs-compact-steps">
+                  <li><strong>Open.</strong> Select <strong>Check chart</strong> above the canvas, or say <code>check chart</code>.</li>
+                  <li><strong>Read.</strong> Each item states whether it is <strong>Required</strong> for a complete route or a <strong>Review</strong> item that may cause ambiguity.</li>
+                  <li><strong>Navigate.</strong> Use <strong>Next issue</strong> and <strong>Previous issue</strong>, or speak those phrases. The corresponding shape receives shared focus.</li>
+                  <li><strong>Repeat.</strong> Select or say <strong>Repeat issue</strong> to hear the current title again.</li>
+                  <li><strong>Close.</strong> Select the close control or say <strong>Close check</strong>. Closing the review does not alter the chart.</li>
+                </ol>
+              </div>
+
+              <aside className="docs-feedback-panel" aria-labelledby="audit-feedback-title">
+                <h3 id="audit-feedback-title">How results behave</h3>
+                <dl>
+                  <div>
+                    <dt>Stable position</dt>
+                    <dd>The current issue stays selected after an unrelated edit.</dd>
+                  </div>
+                  <div>
+                    <dt>Resolved issue</dt>
+                    <dd>The review advances to the next remaining item.</dd>
+                  </div>
+                  <div>
+                    <dt>Clear result</dt>
+                    <dd>The panel remains open and confirms that no issues were found.</dd>
+                  </div>
+                </dl>
+              </aside>
+            </div>
+
+            <h3>What the audit checks</h3>
+            <dl className="docs-check-grid">
+              <div>
+                <dt>Entry and exit</dt>
+                <dd>A chart needs one Start and at least one End. Multiple Starts are identified for review.</dd>
+              </div>
+              <div>
+                <dt>Reachability</dt>
+                <dd>Every shape should belong to a route that begins at the Start.</dd>
+              </div>
+              <div>
+                <dt>Complete paths</dt>
+                <dd>Non-End dead ends and connected paths that cannot reach an End are reported separately.</dd>
+              </div>
+              <div>
+                <dt>Decision branches</dt>
+                <dd>Each Decision needs at least two outgoing arrows, and each arrow should have an outcome label.</dd>
+              </div>
+              <div>
+                <dt>Distinct labels</dt>
+                <dd>Duplicate labels are identified because voice and keyboard references need an unambiguous name.</dd>
+              </div>
+            </dl>
+
+            <div className="docs-access-note">
+              <h3>Private, concise feedback</h3>
+              <p>
+                Chart checking runs locally without calling Gemini or using Gemini quota. Spoken and visible issue copy uses chart labels and never exposes internal identifiers. Opening <strong>Test chart</strong> closes the audit so the two review modes do not overlap.
+              </p>
             </div>
           </section>
 

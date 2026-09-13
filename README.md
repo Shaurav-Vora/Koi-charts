@@ -216,6 +216,23 @@ Koi Charts features an on-device deterministic grammar parser (`src/commands/gra
 
 ---
 
+## Checking a Chart
+
+**Check chart** opens a compact structural review above the visual canvas. It examines the graph locally, presents one issue at a time, and focuses the relevant shape across the canvas, tactile display, and outline. **Required** items block a clear start-to-finish structure; **Review** items identify ambiguity such as duplicate labels or unlabelled decision branches.
+
+Use **Previous**, **Repeat**, and **Next** in the panel, or say `previous issue`, `repeat issue`, and `next issue`. The audit recalculates after every chart edit, keeps the current issue when it still exists, and advances when that issue is resolved. Say `close check` to close it. These commands do not call Gemini.
+
+Manual acceptance check:
+
+1. Create a Start, an unconnected Process, and a Decision with one unlabelled outgoing arrow.
+2. Select **Check chart**. Confirm the panel reports a count, severity, issue position, and suggested correction without displaying internal IDs.
+3. Move through the issues and confirm each related shape receives focus in the visual canvas, tactile display, and outline.
+4. Correct one issue and confirm the open audit recalculates without resetting to the first item unnecessarily.
+5. Select **Test chart** while the audit is open and confirm the audit closes. Open **Check chart** during playback and confirm playback closes.
+6. Repeat the review using the local voice phrases and confirm the activity source says **Local command**.
+
+---
+
 ## Tactile Simulator & Braille
 
 The tactile simulator models a **120 × 80 pin matrix** representing modern refreshable tactile pin arrays:

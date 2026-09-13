@@ -47,6 +47,24 @@ it("documents guided chart testing as a verification workflow", () => {
  }
 });
 
+it("documents structured chart checking as a local accessible workflow", () => {
+ const { container } = render(<Documentation />);
+ const section = container.querySelector("#checking-chart");
+
+ expect(section).not.toBeNull();
+ expect(screen.getByRole("link", { name: "Checking a chart" })).toHaveAttribute("href", "#checking-chart");
+ const checking = within(section as HTMLElement);
+ expect(checking.getByRole("heading", { name: "Checking a chart" })).toBeVisible();
+
+ const text = section?.textContent ?? "";
+ for (const phrase of ["Check chart", "Next issue", "Previous issue", "Repeat issue", "Close check", "Required", "Review"]) {
+  expect(text).toContain(phrase);
+ }
+ expect(text).toMatch(/without calling Gemini/i);
+ expect(text).toMatch(/recalculates as you edit/i);
+ expect(text).toMatch(/internal identifiers/i);
+});
+
 it("documents local voice control and synchronized accessible feedback", () => {
  const { container } = render(<Documentation />);
  const section = container.querySelector("#testing-chart");
