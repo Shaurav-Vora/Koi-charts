@@ -14,8 +14,9 @@ export default function AuditPanel({ graphVersion, state, onAction, announce = t
   const index = current ? state.issues.findIndex(issue => issue.id === current.id) : -1;
   const dispatch = (type: AuditAction["type"]) => onAction({ type, graphVersion } as AuditAction);
 
-  return <section className={`audit-panel${active ? "" : " is-compact"}`} data-result={current?.severity ?? (active ? "clear" : "closed")} role="region" aria-label="Check chart">
-    {!active ? <button className="audit-launch" type="button" onClick={() => dispatch("open")}>Check chart</button> : <>
+  return <section className="audit-panel is-compact" data-result={current?.severity ?? (active ? "clear" : "closed")} role="region" aria-label="Check chart">
+    <button className={`audit-launch${active ? " is-active" : ""}`} type="button" aria-expanded={active} onClick={() => dispatch(active ? "close" : "open")}>Check chart</button>
+    {active && <div className="audit-popover">
       <div className="audit-heading">
         <div>
           <span className="audit-eyebrow">Chart review</span>
@@ -48,6 +49,6 @@ export default function AuditPanel({ graphVersion, state, onAction, announce = t
         <span aria-hidden="true">✓</span>
         <div><h4>No issues found</h4><p>The chart has a clear structure from Start to End.</p></div>
       </div>}
-    </>}
+    </div>}
   </section>;
 }

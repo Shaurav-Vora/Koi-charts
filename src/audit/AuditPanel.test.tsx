@@ -22,6 +22,8 @@ describe("AuditPanel", () => {
     const state = auditTransition(empty, createAuditState(), { type: "open", graphVersion: 2 });
     render(<AuditPanel graphVersion={2} state={state} onAction={vi.fn()} />);
 
+    expect(screen.getByRole("button", { name: "Check chart" })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("region", { name: "Check chart" })).toHaveClass("is-compact");
     expect(screen.getByRole("heading", { name: "Check chart" })).toBeVisible();
     expect(screen.getByText("2 issues")).toBeVisible();
     expect(screen.getByText("Issue 1 of 2")).toBeVisible();

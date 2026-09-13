@@ -28,7 +28,8 @@ describe("editor playback integration", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Check chart" }));
 
-    expect(screen.getByRole("region", { name: "Check chart" })).not.toHaveClass("is-compact");
+    expect(screen.getByRole("region", { name: "Check chart" })).toHaveClass("is-compact");
+    expect(screen.getByRole("button", { name: "Check chart" })).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByText("2 issues")).toBeVisible();
     expect(screen.getByRole("region", { name: "Test chart" })).toHaveClass("is-compact");
   });
@@ -54,6 +55,7 @@ describe("editor playback integration", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Check chart" }));
     expect(screen.getByTestId("visual-canvas")).toHaveAttribute("data-center-node", "c-1");
+    expect(screen.queryByRole("form", { name: "Selected shape" })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Next issue" }));
     expect(screen.getByTestId("visual-canvas")).toHaveAttribute("data-center-node", "b-1");
