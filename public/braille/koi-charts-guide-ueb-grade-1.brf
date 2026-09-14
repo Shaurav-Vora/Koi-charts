@@ -9,9 +9,10 @@
 
 ,,three ,,rules
 
-#a4 ,one command per utterance4 ,two
-  joined with 8and0 are read as a single
-  request and go to the model4
+#a4 ,join up to ten exact local edits
+  with 8then0 or 8and,74 ,if any part is
+  uncertain1 the whole request goes to
+  ,gemini4
 #b4 ,quote a label that contains grammar
   words3 add a process called 8,check
   before payment,74
@@ -19,11 +20,21 @@
   or1 when the chart has only one of
   them1 by its kind3 8the decision,74
 
+,,combine ,,edits
+
+  `<command`> then `<command`>
+  ,runs a sequence as one local1
+    undoable change when every part
+    matches the local grammar4
+  ,also3 then2 and then2 and before a
+    clear command verb2 up to ten edits4
+  ,say3 add a start then add a process
+
 ,,,build the chart,'
 
   add a `<shape`>
   ,adds a shape with a default label4
-  ,also3 add2 create2 insert2 make2
+  ,also3 add2 create2 insert2 make2
     place2 put2 new2 shape3 start _/
     process _/ decision _/ end2 start
     also3 begin2 process also3 step1
@@ -37,7 +48,7 @@
   ,adds a shape with the label you say4
   ,also3 called2 named2 labelled2
     titled2 that says4
-  ,say3 add a process called ,check
+  ,say3 add a process called ,check
     payment
   ,say3 add a decision called ,approved8
   ,say3 add a process called 8,check
@@ -48,7 +59,7 @@
   ,adds a shape in a chosen position
     beside one already in the chart4
   ,also3 before2 after2 above "<over">2
-    below "<under">2 left of2 right of4
+    below "<under">2 left of2 right of4
   ,say3 add an end below ,check payment
   ,say3 add a process called ,refund to
     the right of ,check payment
@@ -62,7 +73,7 @@
     names the new node1 not the arrow4
     ,a new node without a shape type
     defaults to ,process4 ,undo removes
-    both changes4
+    both changes4
   ,also3 called2 named2 labeled2
     labelled4
   ,say3 connect ,start to a new process
@@ -73,7 +84,7 @@
 
   connect `<shape`> to `<shape`>
   ,draws an arrow from the first shape
-    to the second4
+    to the second4
   ,also3 connect2 link2 join2 draw an
     arrow from4
   ,say3 connect ,start to ,check payment
@@ -87,7 +98,7 @@
   ,also3 labelled2 called2 named2 with
     label4
   ,say3 connect ,approved to ,refund
-    labelled ,no
+    labelled ,no
 
 ,,,change what is there,'
 
@@ -98,7 +109,7 @@
     shape refer to the current
     selection4
   ,say3 rename ,check payment to ,take
-    payment
+    payment
   ,say3 change ,process #c into ,review
   ,say3 rename this to ,take payment
 
@@ -112,7 +123,7 @@
     asks for confirmation first4
   ,also3 delete2 remove2 erase4
   ,say3 delete ,refund
-  ,say3 remove the selected shape
+  ,say3 remove the selected shape
 
   `<any command`> the `<shape kind`>
   ,when the chart has only one shape of
@@ -123,7 +134,7 @@
   ,also3 the start2 the process "<step1
     action1 task">2 the decision
     "<choice1 question">2 the end
-    "<finish1 stop">4
+    "<finish1 stop">4
   ,say3 delete the decision
   ,say3 focus on the end
 
@@ -136,8 +147,7 @@
     ,start to ,check payment
 
 ,,,test the chart,'
-
-  test chart _/ start test
+  test chart _/ start test
   ,starts guided playback at a ,start
     shape without changing the chart4
   ,say3 test chart
@@ -148,7 +158,7 @@
     route again1 or closes guided
     playback4
   ,also3 repeat step4
-  ,say3 repeat
+  ,say3 repeat
   ,say3 restart test
   ,say3 stop test
 
@@ -161,8 +171,7 @@
   ,say3 take ,yes
 
 ,,,move the cursor,'
-
-  next _/ back
+  next _/ back
   ,walks one step along the arrows1 and
     says where you landed4
   ,also3 next "<go next1 forward">2 back
@@ -173,7 +182,7 @@
   take `<branch`>
   ,at a decision1 follows the arrow with
     that label4
-  ,also3 take2 follow4
+  ,also3 take2 follow4
   ,say3 take ,no
 
   go to start _/ go to end _/ where am
@@ -187,7 +196,7 @@
   focus on `<shape`> _/ clear selection
   ,selects a shape by name1 or drops the
     selection entirely4
-  ,also3 focus on2 focus2 select2
+  ,also3 focus on2 focus2 select2
     highlight2 clear selection2
     deselect4
   ,say3 focus on ,check payment
@@ -198,7 +207,7 @@
 
   describe the chart _/ describe this
   ,reads out the whole chart1 or just
-    the selected shape4
+    the selected shape4
   ,say3 describe the chart
   ,say3 describe this
 
@@ -212,7 +221,7 @@
     `<shape`>.>
   ,follows the route between two shapes1
     or onward from one4
-  ,say3 trace the path from ,start to
+  ,say3 trace the path from ,start to
     ,end
   ,say3 trace the path from ,start
 
@@ -223,7 +232,7 @@
   ,also3 check the chart4
   ,say3 check chart
   ,say3 validate the chart
-
+
   next issue _/ previous issue _/ repeat
     issue _/ close check
   ,moves through1 repeats1 or closes the
@@ -237,7 +246,7 @@
 
   undo _/ redo
   ,steps back or forward through your
-    edits4 ,walking the chart is not an
+    edits4 ,walking the chart is not an
     edit4
   ,say3 undo
   ,say3 redo
@@ -248,15 +257,9 @@
     word for word only1 never
     approximately4
   ,say3 confirm
-  ,say3 cancel
+  ,say3 cancel
 
 ,,,sent to be interpreted,'
-
-  ,say3 add a start node and connect it
-    to a new decision
-  ,contains multiple operations4 ,use
-    separate commands for local
-    processing4
 
   ,say3 add three steps for onboarding
   ,requires interpretation of the
@@ -267,13 +270,12 @@
   ,requests a bulk operation4
     ,destructive changes require
     confirmation4
-
-  ,say3 do not add a start node
+  ,say3 do not add a start node
   ,contains negation and is not treated
     as a local add command4
 
   ,say3 move ,start somewhere sensible
-  ,does not specify a destination or a
+  ,does not specify a destination or a
     position relative to another node4
 
   ,say3 label the arrow between ,start

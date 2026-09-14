@@ -32,7 +32,18 @@ describe("speech turn coordination",()=>{
   await h.turn(`add a ${type} node`,true);
   expect(h.getState().graph.nodes.at(-1)).toMatchObject({type,label:type[0].toUpperCase()+type.slice(1)});expect(h.interpret).not.toHaveBeenCalled();
  });
- it.each(["add three steps for onboarding","add a start node and connect it to a new decision","do not add a start node","move Start somewhere sensible"])("leaves richer requests to interpretation: %s",async text=>{
+ it("executes a recognised edit sequence locally as one undoable change",async()=>{
+  const h=harness();
+  await h.turn("add a start and connect it to a new decision labelled Approved?",true);
+  expect(h.interpret).not.toHaveBeenCalled();
+  expect(h.getState().graph.nodes.map(node=>[node.type,node.label])).toEqual([["start","Start"],["decision","Approved?"]]);
+  expect(h.getState().graph.edges).toHaveLength(1);
+  expect(h.getState().history.past).toHaveLength(1);
+  expect(h.presentations.at(-1)).toMatchObject({status:"committed",source:"local"});
+  await h.turn("undo",true,"2");
+  expect(h.getState().graph.nodes).toHaveLength(0);
+ });
+ it.each(["add three steps for onboarding","do not add a start node","move Start somewhere sensible"])("leaves richer requests to interpretation: %s",async text=>{
   const h=harness();await h.turn(text,true);expect(h.interpret).toHaveBeenCalledTimes(1);
  });
  // An author who sees a surprising result needs to know which half of the system produced it.

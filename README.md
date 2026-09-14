@@ -51,6 +51,7 @@ Every action—whether initiated via speech, keyboard hotkeys, visual drag-and-d
 
 ### 🎙️ Dual-Engine Voice Interaction
 - **Hybrid Execution**: Zero-latency local parsing for common workflow phrases (`add a start`, `connect A to B labelled Yes`), combined with server-side Google Gemini 3.1 Flash Lite structured output for natural, conversational multi-step commands.
+- **Local Command Sequences**: Join up to ten recognised edits with “then,” “and then,” or “and.” The sequence runs atomically on-device only when every clause is understood; otherwise the complete request is sent to Gemini.
 - **Real-Time Streaming**: Browser-based `AudioWorklet` capturing 16 kHz mono PCM audio streamed directly over WebSockets to AssemblyAI Streaming v3.
 - **Audio Duplex & Echo Protection**: Automated microphone silencing and a 400 ms safety guard while spoken replies play, preventing synthetic feedback loops.
 - **Live Voice Interruption**: Speak aloud or press **Ctrl+Alt+S** to cut short any spoken reply and immediately resume editing.
@@ -68,7 +69,7 @@ Every action—whether initiated via speech, keyboard hotkeys, visual drag-and-d
 - **Synchronized-View Walkthrough**: A shared decision-node demonstration shows how the same focus appears on the visual canvas, tactile display, and spoken outline.
 - **Custom Semantic Nodes**: Start (entry), Process (step), Decision (branch), and End (exit) shapes with accessible semantic color coding.
 - **Smart Connection Routing**: Interactive connection ports that automatically determine optimal orthogonal routing based on relative node positioning.
-- **Connect-and-Create Menu**: Drop a connection on empty canvas, keep its route visible while choosing the next shape, and create the positioned node and anchored arrow as one undoable edit.
+- **Connect-and-Create Menu**: Drop a connection on empty canvas, keep its route visible while choosing the next shape, and anchor the new shape edge at the original release point without shortening the drawn connection.
 - **Free Positioning & Auto-Layout**: Drag shapes freely, add palette shapes below the preceding node, or use the canvas auto-arrange control to restore a clear top-to-bottom flow, fit it to the viewport, and center the focused shape.
 - **Consistent Add Feedback**: Clicking or dropping a shape reports the same added-node confirmation while drag-and-drop positioning remains one undoable edit.
 - **Inline Editing**: Double-click any shape to rename in place with instant validation and canvas fit-to-view controls.

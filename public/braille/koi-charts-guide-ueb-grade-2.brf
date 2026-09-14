@@ -7,13 +7,23 @@
 
 ,,?ree ,,rules
 
-#a4 ,"o comm& p} utt}.e4 ,two jo9$ ) 8&0
-  >e r1d z a s+le reque/ & g to ! model4
+#a4 ,jo9 up to t5 exact local $its )
+  8!n0 or 8&04 ,if any "p is unc}ta91 !
+  :ole reque/ goes to ,gem9i4
 #b4 ,quote a label t 3ta9s gramm> ~ws3
   add a process call$ 8,*eck 2f pay;t04
 #c4 ,"n a %ape by xs {n label ",- or1 :5
   ! *>t has only "o ( !m1 by xs k9d3 8!
   deci.n04
+
+,,comb9e ,,$its
+
+  `<comm&`> !n `<comm&`>
+  ,runs a sequ;e z "o local1 undoable
+    *ange :5 e "p mat*es ! local gramm>4
+  ,al3 !n2 & !n2 & 2f a cle> comm& v}b2
+    up to t5 $its4
+  ,say3 add a />t !n add a process
 
 ,,,build ! *>t,'
 
@@ -23,7 +33,7 @@
     put2 new2 %ape3 />t _/ process _/
     deci.n _/ 5d2 />t al3 2g92 process
     al3 /ep1 ac;n1 task2 deci.n al3
-    *oice1 "q2 5d al3 f9i%1 /op1 t}m9al4
+    *oice1 "q2 5d al3 f9i%1 /op1 t}m9al4
   ,say3 add a />t
   ,say3 cr1te a deci.n node
 
@@ -38,7 +48,7 @@
 
   add a `<%ape`> .<call$ `<label`>.>
     `<rela;n`> `<exi/+ %ape`>
-  ,adds a %ape 9 a *os5 posi;n 2s "o alr
+  ,adds a %ape 9 a *os5 posi;n 2s "o alr
     9 ! *>t4
   ,al3 2f2 af2 abv "<ov}">2 2l "<"u">2
     left (2 "r (4
@@ -47,7 +57,8 @@
     "r ( ,*eck pay;t
 
 ,,3nect ,,%apes
-  3nect `<s|rce`> to a new `<%ape`>
+
+  3nect `<s|rce`> to a new `<%ape`>
     .<labell$ `<label`>.>
   ,cr1tes ! de/9a;n1 !n 3nects ! s|rce
     to x4 ,labell$ "ns ! new node1 n !
@@ -62,7 +73,7 @@
     ,review
 
   3nect `<%ape`> to `<%ape`>
-  ,draws an >r{ f ! f/ %ape to ! second4
+  ,draws an >r{ f ! f/ %ape to ! second4
   ,al3 3nect2 l9k2 jo92 draw an >r{ f4
   ,say3 3nect ,/>t to ,*eck pay;t
   ,say3 draw an >r{ f ,*eck pay;t to ,5d
@@ -72,7 +83,7 @@
   ,draws an >r{ & labels x ",- h{ a
     deci.n's bran*es >e "nd4
   ,al3 labell$2 call$2 "nd2 ) label4
-  ,say3 3nect ,approv$ to ,refund
+  ,say3 3nect ,approv$ to ,refund
     labell$ ,no
 
 ,,,*ange :at is "!,'
@@ -87,7 +98,7 @@
   ,say3 re"n ? to ,take pay;t
 
   move `<%ape`> `<rela;n`> `<%ape`>
-  ,reposi;ns a %ape 2s ano!r "o4
+  ,reposi;ns a %ape 2s ano!r "o4
   ,say3 move ,refund 2l ,approv$
 
   delete `<%ape`>
@@ -96,7 +107,8 @@
   ,al3 delete2 remove2 }ase4
   ,say3 delete ,refund
   ,say3 remove ! select$ %ape
-  `<any comm&`> ! `<%ape k9d`>
+
+  `<any comm&`> ! `<%ape k9d`>
   ,:5 ! *>t has only "o %ape ( a k9d1 xs
     k9d "ns x ",- use;l :5 ! label is a
     l;g "q4 ,) two ( !m y >e ask$ :4
@@ -111,7 +123,7 @@
     place4
   ,al3 3nec;n2 >r{2 l9k2 $ge4
   ,say3 delete ! 3nec;n f ,/>t to ,*eck
-    pay;t
+    pay;t
 
 ,,,te/ ! *>t,'
 
@@ -120,7 +132,8 @@
     )|t *ang+ ! *>t4
   ,say3 te/ *>t
   ,say3 />t te/
-  rep1t _/ re/>t te/ _/ /op te/
+
+  rep1t _/ re/>t te/ _/ /op te/
   ,rep1ts ! curr5t /ep1 />ts ! r|te ag1
     or closes guid$ playback4
   ,al3 rep1t /ep4
@@ -134,8 +147,7 @@
   ,say3 next
   ,say3 back
   ,say3 take ,yes
-
-,,,move ! cursor,'
+,,,move ! cursor,'
 
   next _/ back
   ,walks "o /ep al;g ! >r{s1 & says ": y
@@ -144,7 +156,8 @@
     back1 previ|s">4
   ,say3 next
   ,say3 g back
-  take `<bran*`>
+
+  take `<bran*`>
   ,at a deci.n1 foll{s ! >r{ ) t label4
   ,al3 take2 foll{4
   ,say3 take ,no
@@ -159,7 +172,7 @@
   focus on `<%ape`> _/ cle> selec;n
   ,selects a %ape by "n1 or drops !
     selec;n 5tirely4
-  ,al3 focus on2 focus2 select2 hi<li<t2
+  ,al3 focus on2 focus2 select2 hi<li<t2
     cle> selec;n2 deselect4
   ,say3 focus on ,*eck pay;t
   ,say3 select ! la/ %ape
@@ -169,7 +182,7 @@
 
   describe ! *>t _/ describe ?
   ,r1ds | ! :ole *>t1 or j ! select$
-    %ape4
+    %ape4
   ,say3 describe ! *>t
   ,say3 describe ?
 
@@ -183,8 +196,7 @@
     f "o4
   ,say3 trace ! pa? f ,/>t to ,5d
   ,say3 trace ! pa? f ,/>t
-
-  *eck *>t _/ validate ! *>t
+  *eck *>t _/ validate ! *>t
   ,op5s a /ructur$ local review (
     unf9i%$ or ambigu|s *>t /ructure4
   ,al3 *eck ! *>t4
@@ -194,7 +206,7 @@
   next issue _/ previ|s issue _/ rep1t
     issue _/ close *eck
   ,moves "?1 rep1ts1 or closes ! curr5t
-    *>t review4
+    *>t review4
   ,say3 next issue
   ,say3 previ|s issue
   ,say3 rep1t issue
@@ -209,18 +221,13 @@
   ,say3 r$o
 
   3firm _/ c.el
-  ,answ}s a p5d+ "q4 ,3firm+ a dele;n is
+  ,answ}s a p5d+ "q4 ,3firm+ a dele;n is
     recognis$ ~w = ~w only1 n"e
     approximately4
   ,say3 3firm
   ,say3 c.el
 
 ,,,s5t to 2 9t}pret$,'
-
-  ,say3 add a />t node & 3nect x to a
-    new deci.n
-  ,3ta9s multiple op}a;ns4 ,use sep>ate
-    comm&s = local process+4
 
   ,say3 add ?ree /eps = onbo>d+
   ,requires 9t}preta;n ( ! reque/$ numb}
@@ -239,7 +246,7 @@
     relative to ano!r node4
 
   ,say3 label ! >r{ 2t ,/>t & ,5d ,yes
-  ,! local gramm> does n support
+  ,! local gramm> does n support
     relabell+ an exi/+ >r{ by xs
     5dpo9ts4 ,select ! >r{ to $it xs
     label4

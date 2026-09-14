@@ -65,7 +65,7 @@ function cleanLabel(raw: string, keepQuestion = false): string | null {
   const trimmed = norm(raw);
   const quoted = /^"([^"]+)"[.!?]*$/.exec(trimmed);
   const value = quoted ? quoted[1].trim() : trimmed.replace(keepQuestion ? /[.!]+$/ : /[.!?]+$/, "").trim();
-  if (!value || value.includes('"') || CHAINED.test(value)) return null;
+  if (!value || value.includes('"') || (!quoted && CHAINED.test(value))) return null;
   const length = Array.from(value).length;
   return length >= 1 && length <= 200 ? value : null;
 }

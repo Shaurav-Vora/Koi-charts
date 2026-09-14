@@ -10,7 +10,7 @@ import type { GraphCommand } from "./schema";
  * and a form that is recognised can be shown to authors without anyone hand-copying it.
  *
  * Three rules make the syntax dependable:
- *   1. One command per utterance. Chains are read as a single request and go to the model.
+ *   1. Join exact local edits with "then" or "and"; uncertain chains go to the model whole.
  *   2. Quote a label that contains grammar words: `add a process called "Check before payment"`.
  *   3. Name a shape by its own label, or by its kind when the chart has only one of that kind.
  *      A description of a shape that does not exist yet — "a new decision" — names nothing.
@@ -18,7 +18,7 @@ import type { GraphCommand } from "./schema";
 
 /** The three rules above, as data, so the guide on the page states them in the author's words. */
 export const rules: string[] = [
-  "One command per utterance. Two joined with \"and\" are read as a single request and go to the model.",
+  "Join up to ten exact local edits with \"then\" or \"and\". If any part is uncertain, the whole request goes to Gemini.",
   "Quote a label that contains grammar words: add a process called \"Check before payment\".",
   "Name a shape by its own label — or, when the chart has only one of them, by its kind: \"the decision\".",
 ];
@@ -37,6 +37,22 @@ export type GrammarSection = { title: string; entries: GrammarEntry[] };
 const label = (value: string) => ({ kind: "label", value }) as const;
 
 export const grammar: GrammarSection[] = [
+  {
+    title: "Combine edits",
+    entries: [
+      {
+        form: "<command> then <command>",
+        purpose: "Runs a sequence as one local, undoable change when every part matches the local grammar.",
+        alternatives: ["then", "and then", "and before a clear command verb", "up to ten edits"],
+        examples: [
+          { say: "add a start then add a process", command: { kind: "compound", commands: [
+            { kind: "add_node", type: "start", label: "Start", placement: null },
+            { kind: "add_node", type: "process", label: "Process", placement: null },
+          ] } },
+        ],
+      },
+    ],
+  },
   {
     title: "Build the chart",
     entries: [
@@ -300,7 +316,6 @@ export const grammar: GrammarSection[] = [
  * boundary honest: an author who learns the syntax also learns where it stops.
  */
 export const modelOnly: { say: string; why: string }[] = [
-  { say: "add a start node and connect it to a new decision", why: "Contains multiple operations. Use separate commands for local processing." },
   { say: "add three steps for onboarding", why: "Requires interpretation of the requested number and labels of new nodes." },
   { say: "delete everything", why: "Requests a bulk operation. Destructive changes require confirmation." },
   { say: "do not add a start node", why: "Contains negation and is not treated as a local add command." },
