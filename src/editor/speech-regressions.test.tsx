@@ -53,6 +53,19 @@ it("speaks a short navigation reply but retains visible and requested details",(
  expect(speech.speak.mock.calls.at(-1)?.[0].text).not.toBe("Process");
 });
 
+it("names the connection when chart review opens its label editor",()=>{
+ const speech=browserSpeech(),coordinator=createEditorCoordinator();
+ coordinator.dispatch({type:"command",idSeed:"a",command:{kind:"add_node",type:"start",label:"Begin",placement:null}});
+ coordinator.dispatch({type:"command",idSeed:"b",command:{kind:"connect_new",source:{kind:"focus"},type:"decision",label:"Approved?"}});
+ coordinator.dispatch({type:"command",idSeed:"c",command:{kind:"connect_new",source:{kind:"focus"},type:"end",label:"Finish"}});
+ render(<Editor coordinator={coordinator}/>);speech.speak.mockClear();
+ fireEvent.click(screen.getByRole("button",{name:"Check chart"}));
+ fireEvent.click(screen.getByRole("button",{name:"Next issue"}));
+ fireEvent.click(screen.getByRole("button",{name:"Label connection"}));
+ expect(speech.speak.mock.calls.at(-1)?.[0].text).toBe("Editing connection from Approved? to Finish.");
+ expect(speech.speak.mock.calls.at(-1)?.[0].text).not.toBe("Selection cleared.");
+});
+
 it("stops a reply part-way and releases the microphone",()=>{
  vi.useFakeTimers();
  try {

@@ -55,6 +55,7 @@ export interface VisualCanvasProps {
   centerRequest?: { key: string; nodeId: string } | null;
   inspectEdgeRequest?: { key: string; edgeId: string } | null;
   onInspectEdgeRequestHandled?: () => void;
+  onInspectEdge?: (edgeId: string) => void;
 }
 
 function Canvas({
@@ -79,10 +80,18 @@ function Canvas({
   centerRequest = null,
   inspectEdgeRequest = null,
   onInspectEdgeRequestHandled,
+  onInspectEdge,
 }: VisualCanvasProps) {
   const { screenToFlowPosition, zoomIn, zoomOut, fitView, setCenter, getZoom } = useReactFlow();
   const [drag, setDrag] = useState<{ id: string; x: number; y: number } | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
+  const lastInspectedEdgeId = useRef<string | null>(null);
+  const inspectEdge = (edgeId: string) => {
+    setSelectedEdgeId(edgeId);
+    if (lastInspectedEdgeId.current === edgeId) return;
+    lastInspectedEdgeId.current = edgeId;
+    onInspectEdge?.(edgeId);
+  };
   const inspectedEdgeId = inspectEdgeRequest && graph.edges.some(edge => edge.id === inspectEdgeRequest.edgeId)
     ? inspectEdgeRequest.edgeId
     : selectedEdgeId;
@@ -129,7 +138,7 @@ function Canvas({
       style: { width: box.width, height: box.height }, data: { label: node.label, nodeType: node.type, focused: node.id === focusedNodeId,
         playbackState,
         onRename: (newLabel: string) => onCommand({ kind: "rename", node: { kind: "id", value: node.id }, newLabel }),
-        onFocus: () => { setSelectedEdgeId(null); onCommand({ kind: "focus", node: { kind: "id", value: node.id } }); } } };
+        onFocus: () => { lastInspectedEdgeId.current = null; setSelectedEdgeId(null); onCommand({ kind: "focus", node: { kind: "id", value: node.id } }); } } };
   }), [graph, layout, focusedNodeId, onCommand, currentRouteStep?.nodeId, visitedNodeIds]);
   const liveLayout = useMemo(() => drag ? routeEdges(graph, layout.nodes.map(node => node.id === drag.id ? { ...node, x: drag.x, y: drag.y } : node)) : layout.edges, [drag, graph, layout]);
   const edges: RoutedEdge[] = useMemo(() => graph.edges.map(edge => {
@@ -148,9 +157,9 @@ function Canvas({
     onCommand({ kind: "compound", commands: [{ kind: "add_node", type: type as typeof semanticTypes[number], label: type[0].toUpperCase() + type.slice(1), placement: null }, { kind: "move_to", node: { kind: "recent" }, position: { x: point.x - (type === "decision" ? 115 : 95), y: point.y - (type === "decision" ? 75 : 43) } }] });
   }}><ReactFlow<CanvasNode, RoutedEdge> nodes={nodes.map(node => drag?.id === node.id ? { ...node, position: { x: drag.x, y: drag.y } } : node)} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
     connectionMode={ConnectionMode.Loose} connectionRadius={32}
-    zoomOnDoubleClick={false} onPaneClick={() => { setSelectedEdgeId(null); onCommand({ kind: "clear_focus" }); }}
-    onEdgeClick={(_, edge) => { onInspectEdgeRequestHandled?.(); setSelectedEdgeId(edge.id); onCommand({ kind: "clear_focus" }); }}
-    onEdgesChange={changes => { for (const change of changes) if (change.type === "select") { if (change.selected) { setSelectedEdgeId(change.id); onCommand({kind:"clear_focus"}); } else setSelectedEdgeId(current => current === change.id ? null : current); } }}
+    zoomOnDoubleClick={false} onPaneClick={() => { lastInspectedEdgeId.current = null; setSelectedEdgeId(null); onCommand({ kind: "clear_focus" }); }}
+    onEdgeClick={(_, edge) => { onInspectEdgeRequestHandled?.(); inspectEdge(edge.id); }}
+    onEdgesChange={changes => { for (const change of changes) if (change.type === "select") { if (change.selected) inspectEdge(change.id); else { lastInspectedEdgeId.current = null; setSelectedEdgeId(current => current === change.id ? null : current); } } }}
     isValidConnection={connection => connection.source !== connection.target}
     nodesDraggable
     onNodesChange={changes => { for (const change of changes) { if (change.type === "position" && change.position && change.dragging) setDrag({ id: change.id, ...change.position }); } }}
@@ -186,7 +195,7 @@ function Canvas({
   )}
   {selectedEdge && <ArrowInspector key={`${selectedEdge.id}-${selectedEdge.label ?? ""}`} edge={selectedEdge}
     source={graph.nodes.find(node => node.id === selectedEdge.source)!} target={graph.nodes.find(node => node.id === selectedEdge.target)!}
-    onCommand={onCommand} onClose={() => { setSelectedEdgeId(null); onInspectEdgeRequestHandled?.(); }} />}</div>;
+    onCommand={onCommand} onClose={() => { lastInspectedEdgeId.current = null; setSelectedEdgeId(null); onInspectEdgeRequestHandled?.(); }} />}</div>;
 }
 
 export default function VisualCanvas(props: VisualCanvasProps) {

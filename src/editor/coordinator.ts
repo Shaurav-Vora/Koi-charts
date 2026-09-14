@@ -28,6 +28,20 @@ export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
   state={...state,editor,presentation:null,playback,audit};publish();
  };
  const result=():CommandResult=>({state:state.editor.engine,outcome:state.editor.outcome==="idle"?"error":state.editor.outcome,message:state.editor.message});
+ const openEditor=(target:{kind:"node";nodeId:string}|{kind:"edge";edgeId:string}):CommandResult=>{
+  if(target.kind==="node"){
+   const node=state.editor.engine.graph.nodes.find(candidate=>candidate.id===target.nodeId);
+   if(!node)return {state:state.editor.engine,outcome:"error",message:"That node is no longer available."};
+   dispatch({type:"interface_focus",focusedNodeId:node.id,message:`Editing ${node.label}.`});
+  }else{
+   const edge=state.editor.engine.graph.edges.find(candidate=>candidate.id===target.edgeId);
+   const source=edge&&state.editor.engine.graph.nodes.find(node=>node.id===edge.source);
+   const destination=edge&&state.editor.engine.graph.nodes.find(node=>node.id===edge.target);
+   if(!edge||!source||!destination)return {state:state.editor.engine,outcome:"error",message:"That connection is no longer available."};
+   dispatch({type:"interface_focus",focusedNodeId:null,message:`Editing connection from ${source.label} to ${destination.label}.`});
+  }
+  return result();
+ };
  const playbackResult=(action:PlaybackAction):CommandResult=>({
   state:state.editor.engine,
   outcome:state.playback.status==="blocked"||(state.playback.status==="idle"&&action.type!=="stop")?"error"
@@ -110,5 +124,5 @@ export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
  });
  // The connection layer reports through the same channel as turns, so one status line covers both.
  const present=(value:Presentation)=>{state={...state,presentation:value};publish();};
- return {turns,dispatch,playbackDispatch,auditDispatch,present,getSnapshot:()=>state,subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener);};}};
+ return {turns,dispatch,openEditor,playbackDispatch,auditDispatch,present,getSnapshot:()=>state,subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener);};}};
 }

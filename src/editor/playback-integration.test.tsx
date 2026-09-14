@@ -98,6 +98,8 @@ describe("editor playback integration", () => {
     expect(coordinator.getSnapshot().audit.status).toBe("closed");
     expect(screen.getByTestId("visual-canvas")).toHaveAttribute("data-inspect-edge", "c-2");
     expect(screen.queryByRole("form", { name: "Selected shape" })).not.toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Command feedback" })).toHaveTextContent("Editing connection from Approved? to Finish.");
+    expect(coordinator.getSnapshot().editor.message).not.toBe("Selection cleared.");
   });
 
   it("starts at the Start node, synchronizes focus, and preserves graph history", () => {

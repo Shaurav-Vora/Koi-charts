@@ -3,7 +3,7 @@ import { createEngineState, execute, resolveClarification } from "../commands/ex
 import type { GraphCommand } from "../commands/schema";
 import type { CommandResult, EngineState } from "../graph/types";
 export type EditorState = { displayIds: Record<string, string>; engine: EngineState; outcome: CommandResult["outcome"] | "idle"; message: string };
-export type EditorAction = { type: "example" } | { type: "clear" } | { type: "command"; command: GraphCommand; idSeed: string } | { type: "choose"; candidateId: string; idSeed: string };
+export type EditorAction = { type: "example" } | { type: "clear" } | { type: "command"; command: GraphCommand; idSeed: string } | { type: "choose"; candidateId: string; idSeed: string } | { type: "interface_focus"; focusedNodeId: string | null; message: string };
 export function createEditorState(): EditorState { return { displayIds: {}, engine: createEngineState(), outcome: "idle", message: "Add a node to begin your chart." }; }
 export function editorReducer(state: EditorState, action: EditorAction): EditorState {
   if (action.type === "clear") {
@@ -30,6 +30,9 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     const ids = { ...state.displayIds };
     for (const node of graph.nodes) if (!ids[node.id]) ids[node.id] = `N${Object.keys(ids).length + 1}`;
     return { displayIds: ids, engine: { ...state.engine, graph, focusedNodeId: graph.nodes[15].id, recentNodeId: graph.nodes.at(-1)!.id, version: state.engine.version + 1, history: { past: [...state.engine.history.past, {graph:previousGraph,focusedNodeId,recentNodeId}], future: [] } }, outcome: "committed", message: "Loaded a 32-node example. Undo restores the empty chart." };
+  }
+  if (action.type === "interface_focus") {
+    return { ...state, engine: { ...state.engine, focusedNodeId: action.focusedNodeId }, outcome: "focused", message: action.message };
   }
   // The event supplies a seed so React's repeated reducer calls produce the same IDs.
   let index = 0; const newId = () => `${action.idSeed}-${++index}`;

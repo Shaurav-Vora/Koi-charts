@@ -27,11 +27,12 @@ vi.mock("@xyflow/react", async () => {
       zoomIn: vi.fn(),
       zoomOut: vi.fn(),
     }),
-    ReactFlow: ({ nodes, edges, children, onEdgeClick }: {
+    ReactFlow: ({ nodes, edges, children, onEdgeClick, onEdgesChange }: {
       nodes: Array<{ id: string; data: { playbackState?: string } }>;
       edges: Array<{ id: string; ariaLabel?: string; data: { playbackState?: string } }>;
       children: ReactNode;
       onEdgeClick?: (event: unknown, edge: unknown) => void;
+      onEdgesChange?: (changes: Array<{ type: "select"; id: string; selected: boolean }>) => void;
     }) => React.createElement(
       "div",
       null,
@@ -46,7 +47,10 @@ vi.mock("@xyflow/react", async () => {
         "aria-label": edge.ariaLabel,
         "data-testid": "edge-" + edge.id,
         "data-playback-state": edge.data.playbackState,
-        onClick: event => onEdgeClick?.(event, edge),
+        onClick: event => {
+          onEdgeClick?.(event, edge);
+          onEdgesChange?.([{ type: "select", id: edge.id, selected: true }]);
+        },
       })),
       children,
     ),
@@ -115,6 +119,18 @@ describe("VisualCanvas playback route", () => {
     expect(screen.getByRole("img", { name: "Edit arrow from Begin to Review labelled next" })).toBeInTheDocument();
   });
 
+  it("opens an arrow with connection-specific feedback instead of clearing selection", () => {
+    const onCommand = vi.fn();
+    const onInspectEdge = vi.fn();
+    render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId="review" onCommand={onCommand} onInspectEdge={onInspectEdge} />);
+
+    fireEvent.click(screen.getByRole("img", { name: "Edit arrow from Review to Approved labelled yes" }));
+
+    expect(onInspectEdge).toHaveBeenCalledWith("review-approve");
+    expect(onInspectEdge).toHaveBeenCalledTimes(1);
+    expect(onCommand).not.toHaveBeenCalledWith({ kind: "clear_focus" });
+  });
+
   it("opens the existing arrow editor for an external inspection request", () => {
     render(<VisualCanvas
       graph={graph}
@@ -135,10 +151,10 @@ describe("VisualCanvas playback route", () => {
     const labelInput = screen.getByLabelText("Arrow label");
     expect(labelInput).not.toHaveFocus();
     fireEvent.keyDown(labelInput, { key: "Delete" });
-    expect(onCommand).toHaveBeenCalledTimes(1);
+    expect(onCommand).not.toHaveBeenCalled();
     fireEvent.keyDown(document, { key: "Delete" });
 
     expect(onCommand).toHaveBeenLastCalledWith({ kind: "delete", target: { kind: "edge_id", id: "start-review" } });
-    expect(onCommand).toHaveBeenCalledTimes(2);
+    expect(onCommand).toHaveBeenCalledTimes(1);
   });
 });
