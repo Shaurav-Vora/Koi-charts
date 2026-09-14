@@ -20,7 +20,8 @@ describe("AuditPanel", () => {
 
   it("shows one concise issue with severity, progress, and correction", () => {
     const state = auditTransition(empty, createAuditState(), { type: "open", graphVersion: 2 });
-    render(<AuditPanel graphVersion={2} state={state} onAction={vi.fn()} />);
+    const onFix = vi.fn();
+    render(<AuditPanel graphVersion={2} state={state} onAction={vi.fn()} onFix={onFix} />);
 
     expect(screen.getByRole("button", { name: "Check chart" })).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByRole("region", { name: "Check chart" })).toHaveClass("is-compact");
@@ -32,6 +33,8 @@ describe("AuditPanel", () => {
     expect(screen.getByText("No start node.")).toBeVisible();
     expect(screen.getByText("Add one Start node to show where the flow begins.")).toBeVisible();
     expect(screen.getByRole("progressbar", { name: "Audit progress" })).toHaveAttribute("value", "1");
+    fireEvent.click(screen.getByRole("button", { name: "Add Start" }));
+    expect(onFix).toHaveBeenCalledWith({ kind: "add_node", type: "start", label: "Start", placement: null });
   });
 
   it("dispatches issue navigation and closing with the current graph version", () => {

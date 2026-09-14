@@ -1,17 +1,21 @@
 import { currentAuditIssue } from "./state";
+import { assistedFixFor } from "./fixes";
+import type { GraphCommand } from "../commands/schema";
 import type { AuditAction, AuditState } from "./types";
 
 type AuditPanelProps = {
   graphVersion: number;
   state: AuditState;
   onAction: (action: AuditAction) => void;
+  onFix?: (command: GraphCommand) => void;
   announce?: boolean;
 };
 
-export default function AuditPanel({ graphVersion, state, onAction, announce = true }: AuditPanelProps) {
+export default function AuditPanel({ graphVersion, state, onAction, onFix, announce = true }: AuditPanelProps) {
   const active = state.status === "open";
   const current = currentAuditIssue(state);
   const index = current ? state.issues.findIndex(issue => issue.id === current.id) : -1;
+  const assistedFix = current ? assistedFixFor(current) : null;
   const dispatch = (type: AuditAction["type"]) => onAction({ type, graphVersion } as AuditAction);
 
   return <section className="audit-panel is-compact" data-result={current?.severity ?? (active ? "clear" : "closed")} role="region" aria-label="Check chart">
@@ -41,6 +45,7 @@ export default function AuditPanel({ graphVersion, state, onAction, announce = t
           </div>
         </div>
         <div className="audit-actions">
+          {assistedFix && onFix && <button className="audit-fix" type="button" onClick={() => onFix(assistedFix.command)}>{assistedFix.label}</button>}
           <button type="button" aria-label="Previous issue" disabled={index <= 0} onClick={() => dispatch("previous")}>Previous</button>
           <button type="button" aria-label="Repeat issue" onClick={() => dispatch("repeat")}>Repeat</button>
           <button className="audit-primary" type="button" aria-label="Next issue" disabled={index >= state.issues.length - 1} onClick={() => dispatch("next")}>Next</button>

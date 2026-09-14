@@ -61,6 +61,25 @@ describe("editor playback integration", () => {
     expect(screen.getByTestId("visual-canvas")).toHaveAttribute("data-center-node", "b-1");
   });
 
+  it("applies a safe audit fix through graph history and recalculates the open review", () => {
+    const coordinator = createEditorCoordinator();
+    render(<Editor coordinator={coordinator} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Check chart" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add Start" }));
+
+    const snapshot = coordinator.getSnapshot();
+    expect(snapshot.editor.engine.graph.nodes).toEqual([
+      expect.objectContaining({ type: "start", label: "Start" }),
+    ]);
+    expect(snapshot.editor.engine.history.past).toHaveLength(1);
+    expect(snapshot.audit.status).toBe("open");
+    expect(screen.getByRole("heading", { name: "Add an End node" })).toBeVisible();
+
+    coordinator.dispatch({ type: "command", idSeed: "undo", command: { kind: "undo" } });
+    expect(coordinator.getSnapshot().editor.engine.graph.nodes).toHaveLength(0);
+  });
+
   it("starts at the Start node, synchronizes focus, and preserves graph history", () => {
     const coordinator = createEditorCoordinator();
     coordinator.dispatch({

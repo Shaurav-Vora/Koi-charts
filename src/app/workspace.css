@@ -386,6 +386,8 @@
 #workspace .audit-actions button { min-height: 34px; padding: 6px 8px; border: 1px solid #cbd6e6; border-radius: 5px; background: #fff; color: var(--ink); font-size: 12px; font-weight: 650; cursor: pointer; }
 #workspace .audit-actions button:hover:not(:disabled) { border-color: #7893c7; background: #f2f6fc; color: #244ea9; }
 #workspace .audit-actions button:disabled { opacity: .42; cursor: not-allowed; }
+#workspace .audit-actions .audit-fix { grid-column: 1 / -1; border-color: #d85d22; background: #fff0e8; color: #8a3510; }
+#workspace .audit-actions .audit-fix:hover:not(:disabled) { border-color: #bc4b18; background: #ffe2d2; color: #702807; }
 #workspace .audit-actions .audit-primary { border-color: #d85d22; background: #d85d22; color: #fff; }
 #workspace .audit-actions .audit-primary:hover:not(:disabled) { border-color: #bc4b18; background: #bc4b18; color: #fff; }
 #workspace .audit-clear { display: flex; align-items: flex-start; gap: 11px; padding: 12px; border-left: 3px solid #16834b; background: #edf9f2; }
