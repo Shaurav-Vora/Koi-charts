@@ -112,6 +112,7 @@ function Canvas({
     sourceTop: number;
     targetLeft: number;
     targetTop: number;
+    targetSide: "top" | "right" | "bottom" | "left";
   } | null>(null);
   const [selectionActive, setSelectionActive] = useState(false);
   const latestSelectionIds = useRef<string[]>(selectedNodeIds);
@@ -203,9 +204,16 @@ function Canvas({
   const addConnectedNode = (type: typeof semanticTypes[number]) => {
     if (!connectionDrop) return;
     const { width, height } = nodeDimensions(type, compactNodes ? "compact" : "standard");
+    const position = connectionDrop.targetSide === "left"
+      ? { x: connectionDrop.flowX, y: connectionDrop.flowY - height / 2 }
+      : connectionDrop.targetSide === "right"
+        ? { x: connectionDrop.flowX - width, y: connectionDrop.flowY - height / 2 }
+        : connectionDrop.targetSide === "top"
+          ? { x: connectionDrop.flowX - width / 2, y: connectionDrop.flowY }
+          : { x: connectionDrop.flowX - width / 2, y: connectionDrop.flowY - height };
     onCommand({ kind: "compound", commands: [
       { kind: "add_node", type, label: type[0].toUpperCase() + type.slice(1), placement: null },
-      { kind: "move_to", node: { kind: "recent" }, position: { x: connectionDrop.flowX - width / 2, y: connectionDrop.flowY - height / 2 } },
+      { kind: "move_to", node: { kind: "recent" }, position },
       { kind: "connect", source: { kind: "id", value: connectionDrop.sourceId }, target: { kind: "recent" }, label: null },
     ] });
     setConnectionDrop(null);
@@ -252,9 +260,11 @@ function Canvas({
       const sourceCenter = { x: sourceBox.x + sourceBox.width / 2, y: sourceBox.y + sourceBox.height / 2 };
       const deltaX = flowPoint.x - sourceCenter.x;
       const deltaY = flowPoint.y - sourceCenter.y;
-      const sourceFlowPoint = Math.abs(deltaX) >= Math.abs(deltaY)
+      const horizontal = Math.abs(deltaX) >= Math.abs(deltaY);
+      const sourceFlowPoint = horizontal
         ? { x: deltaX >= 0 ? sourceBox.x + sourceBox.width : sourceBox.x, y: sourceCenter.y }
         : { x: sourceCenter.x, y: deltaY >= 0 ? sourceBox.y + sourceBox.height : sourceBox.y };
+      const targetSide = horizontal ? (deltaX >= 0 ? "left" : "right") : (deltaY >= 0 ? "top" : "bottom");
       const sourceScreenPoint = flowToScreenPosition(sourceFlowPoint);
       const left = rect?.width ? Math.min(Math.max(12, localX), Math.max(12, rect.width - 288)) : localX;
       const top = rect?.height ? Math.min(Math.max(12, localY), Math.max(12, rect.height - 220)) : localY;
@@ -268,6 +278,7 @@ function Canvas({
         sourceTop: sourceScreenPoint.y - (rect?.top ?? 0),
         targetLeft: localX,
         targetTop: localY,
+        targetSide,
       });
     }}
     ariaLabelConfig={{ "node.a11yDescription.default": "Select a node to focus it. Use the editing form for keyboard movement and deletion.", "edge.a11yDescription.default": "Connections are available in the chart outline." }}

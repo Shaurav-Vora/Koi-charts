@@ -191,7 +191,7 @@ describe("VisualCanvas playback route", () => {
     expect(screen.getByRole("form", { name: "Selected arrow" })).toBeVisible();
   });
 
-  it("offers shape choices when a connection is dropped on empty canvas", () => {
+  it("keeps the release point on the new shape edge when a connection is dropped on empty canvas", () => {
     const onCommand = vi.fn();
     render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId="review" onCommand={onCommand} />);
 
@@ -205,7 +205,7 @@ describe("VisualCanvas playback route", () => {
       kind: "compound",
       commands: [
         { kind: "add_node", type: "process", label: "Process", placement: null },
-        { kind: "move_to", node: { kind: "recent" }, position: { x: 325, y: 237 } },
+        { kind: "move_to", node: { kind: "recent" }, position: { x: 420, y: 237 } },
         { kind: "connect", source: { kind: "id", value: "review" }, target: { kind: "recent" }, label: null },
       ],
     });
@@ -277,7 +277,7 @@ describe("VisualCanvas playback route", () => {
     expect(onCommand).toHaveBeenCalledWith(expect.objectContaining({
       kind: "compound",
       commands: expect.arrayContaining([
-        { kind: "move_to", node: { kind: "recent" }, position: { x: 357, y: 253 } },
+        { kind: "move_to", node: { kind: "recent" }, position: { x: 420, y: 253 } },
       ]),
     }));
   });
