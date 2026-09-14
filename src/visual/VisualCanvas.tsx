@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState, useRef } from "react";
-import { Background, BaseEdge, ConnectionMode, EdgeText, MarkerType, ReactFlow, ReactFlowProvider, useNodesInitialized, useReactFlow, type Edge, type EdgeProps } from "@xyflow/react";
+import { Background, BaseEdge, ConnectionMode, EdgeText, MarkerType, ReactFlow, ReactFlowProvider, SelectionMode, useNodesInitialized, useReactFlow, type Edge, type EdgeProps } from "@xyflow/react";
 import { nodeTypes as semanticTypes } from "../graph/types";
 import { routeEdges } from "./layout";
 import type { FlowGraph } from "../graph/types";
@@ -56,6 +56,10 @@ export interface VisualCanvasProps {
   inspectEdgeRequest?: { key: string; edgeId: string } | null;
   onInspectEdgeRequestHandled?: () => void;
   onInspectEdge?: (edgeId: string) => void;
+  selectedNodeIds?: string[];
+  onSelectedNodeIdsChange?: (nodeIds: string[]) => void;
+  onSelectionComplete?: (nodeIds: string[]) => void;
+  onDeleteSelected?: (nodeIds: string[]) => void;
 }
 
 function Canvas({
@@ -81,12 +85,18 @@ function Canvas({
   inspectEdgeRequest = null,
   onInspectEdgeRequestHandled,
   onInspectEdge,
+  selectedNodeIds = [],
+  onSelectedNodeIdsChange,
+  onSelectionComplete,
+  onDeleteSelected,
 }: VisualCanvasProps) {
   const { screenToFlowPosition, zoomIn, zoomOut, fitView, setCenter, getZoom } = useReactFlow();
   const canvasAreaRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<{ id: string; x: number; y: number } | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [connectionDrop, setConnectionDrop] = useState<{ sourceId: string; flowX: number; flowY: number; left: number; top: number } | null>(null);
+  const [selectionActive, setSelectionActive] = useState(false);
+  const latestSelectionIds = useRef<string[]>(selectedNodeIds);
   const lastInspectedEdgeId = useRef<string | null>(null);
   const inspectEdge = (edgeId: string) => {
     setSelectedEdgeId(edgeId);
@@ -136,12 +146,12 @@ function Canvas({
   const nodes: CanvasNode[] = useMemo(() => graph.nodes.map(node => {
     const box = layout.nodes.find(item => item.id === node.id)!;
     const playbackState: PlaybackMark | undefined = node.id === currentRouteStep?.nodeId ? "current" : visitedNodeIds.has(node.id) ? "visited" : undefined;
-    return { id: node.id, type: "flowNode", selectable: false, position: { x: box.x, y: box.y }, width: box.width, height: box.height, measured: { width: box.width, height: box.height },
+    return { id: node.id, type: "flowNode", selectable: true, selected: selectedNodeIds.includes(node.id), position: { x: box.x, y: box.y }, width: box.width, height: box.height, measured: { width: box.width, height: box.height },
       style: { width: box.width, height: box.height }, data: { label: node.label, nodeType: node.type, focused: node.id === focusedNodeId,
         playbackState,
         onRename: (newLabel: string) => onCommand({ kind: "rename", node: { kind: "id", value: node.id }, newLabel }),
-        onFocus: () => { lastInspectedEdgeId.current = null; setSelectedEdgeId(null); onCommand({ kind: "focus", node: { kind: "id", value: node.id } }); } } };
-  }), [graph, layout, focusedNodeId, onCommand, currentRouteStep?.nodeId, visitedNodeIds]);
+        onFocus: () => { lastInspectedEdgeId.current = null; setSelectedEdgeId(null); onSelectedNodeIdsChange?.([node.id]); onCommand({ kind: "focus", node: { kind: "id", value: node.id } }); } } };
+  }), [graph, layout, focusedNodeId, onCommand, onSelectedNodeIdsChange, selectedNodeIds, currentRouteStep?.nodeId, visitedNodeIds]);
   const liveLayout = useMemo(() => drag ? routeEdges(graph, layout.nodes.map(node => node.id === drag.id ? { ...node, x: drag.x, y: drag.y } : node)) : layout.edges, [drag, graph, layout]);
   const edges: RoutedEdge[] = useMemo(() => graph.edges.map(edge => {
     const playbackState: PlaybackMark | undefined = edge.id === currentRouteStep?.viaEdgeId ? "current" : visitedEdgeIds.has(edge.id) ? "visited" : undefined;
@@ -171,8 +181,16 @@ function Canvas({
     onCommand({ kind: "compound", commands: [{ kind: "add_node", type: type as typeof semanticTypes[number], label: type[0].toUpperCase() + type.slice(1), placement: null }, { kind: "move_to", node: { kind: "recent" }, position: { x: point.x - (type === "decision" ? 115 : 95), y: point.y - (type === "decision" ? 75 : 43) } }] });
   }}><ReactFlow<CanvasNode, RoutedEdge> nodes={nodes.map(node => drag?.id === node.id ? { ...node, position: { x: drag.x, y: drag.y } } : node)} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
     connectionMode={ConnectionMode.Loose} connectionRadius={32}
-    zoomOnDoubleClick={false} onPaneClick={() => { setConnectionDrop(null); lastInspectedEdgeId.current = null; setSelectedEdgeId(null); onCommand({ kind: "clear_focus" }); }}
-    onEdgeClick={(_, edge) => { setConnectionDrop(null); onInspectEdgeRequestHandled?.(); inspectEdge(edge.id); }}
+    zoomOnDoubleClick={false} selectionOnDrag={selectionActive} selectionMode={SelectionMode.Partial} panOnDrag={!selectionActive} multiSelectionKeyCode={null}
+    onPaneClick={() => { setConnectionDrop(null); lastInspectedEdgeId.current = null; setSelectedEdgeId(null); onSelectedNodeIdsChange?.([]); onCommand({ kind: "clear_focus" }); }}
+    onSelectionChange={({ nodes: selectedNodes }) => {
+      const nodeIds = selectedNodes.map(node => node.id);
+      latestSelectionIds.current = nodeIds;
+      onSelectedNodeIdsChange?.(nodeIds);
+      if (nodeIds.length) { setConnectionDrop(null); lastInspectedEdgeId.current = null; setSelectedEdgeId(null); }
+    }}
+    onSelectionEnd={() => onSelectionComplete?.(latestSelectionIds.current)}
+    onEdgeClick={(_, edge) => { setConnectionDrop(null); onSelectedNodeIdsChange?.([]); onInspectEdgeRequestHandled?.(); inspectEdge(edge.id); }}
     onEdgesChange={changes => { for (const change of changes) if (change.type === "select") { if (change.selected) inspectEdge(change.id); else { lastInspectedEdgeId.current = null; setSelectedEdgeId(current => current === change.id ? null : current); } } }}
     isValidConnection={connection => connection.source !== connection.target}
     nodesDraggable
@@ -212,7 +230,8 @@ function Canvas({
     onZoomIn={() => void zoomIn({ duration: 160 })} onZoomOut={() => void zoomOut({ duration: 160 })}
     onFit={() => void fitView({ padding: 0.25, maxZoom: 1, duration: 220 })} onCenter={centerOnFocus}
     canUndo={canUndo} canRedo={canRedo} onUndo={onUndo} onRedo={onRedo}
-    canClear={canClear} onClear={onClear} />
+    canClear={canClear} onClear={onClear}
+    selectionActive={selectionActive} onToggleSelection={() => setSelectionActive(active => !active)} />
   {onWalk && onDescribe && onInspect && (
     <div className="canvas-dock nodrag nopan" role="toolbar" aria-label="Chart navigation and inspection">
       <div className="canvas-control-group walk-controls" role="group" aria-label="Walk the chart">
@@ -229,6 +248,16 @@ function Canvas({
       </div>
     </div>
   )}
+  {selectedNodeIds.length > 1 && <div className="multi-selection-inspector canvas-inspector nodrag nopan" role="group" aria-label={`${selectedNodeIds.length} shapes selected`}>
+    <div className="inspector-header">
+      <div className="multi-selection-heading"><span className="multi-selection-count">{selectedNodeIds.length}</span><h3>Shapes selected</h3></div>
+    </div>
+    <p>Remove all selected shapes together, or clear the highlight.</p>
+    <div className="inspector-actions">
+      <button type="button" className="inspector-delete" onClick={() => onDeleteSelected?.(selectedNodeIds)}>Delete selected</button>
+      <button type="button" className="inspector-secondary" onClick={() => { onSelectedNodeIdsChange?.([]); onSelectionComplete?.([]); }}>Deselect all</button>
+    </div>
+  </div>}
   {selectedEdge && <ArrowInspector key={`${selectedEdge.id}-${selectedEdge.label ?? ""}`} edge={selectedEdge}
     source={graph.nodes.find(node => node.id === selectedEdge.source)!} target={graph.nodes.find(node => node.id === selectedEdge.target)!}
     onCommand={onCommand} onClose={() => { lastInspectedEdgeId.current = null; setSelectedEdgeId(null); onInspectEdgeRequestHandled?.(); }} />}</div>;

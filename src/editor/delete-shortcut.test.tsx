@@ -3,7 +3,10 @@ import { expect, it, vi } from "vitest";
 import Editor from "./Editor";
 import { createEditorCoordinator } from "./coordinator";
 vi.mock("../visual/VisualCanvas",()=>({
- default:({onUndo}:{onUndo?:()=>void})=><button type="button" onClick={onUndo}>Undo</button>
+ default:({graph,onUndo,onSelectedNodeIdsChange,onSelectionComplete}:{graph:{nodes:{id:string}[]};onUndo?:()=>void;onSelectedNodeIdsChange?:(ids:string[])=>void;onSelectionComplete?:(ids:string[])=>void})=><>
+  <button type="button" onClick={onUndo}>Undo</button>
+  <button type="button" onClick={()=>{const ids=graph.nodes.map(node=>node.id);onSelectedNodeIdsChange?.(ids);onSelectionComplete?.(ids);}}>Select every shape</button>
+ </>
 }));
 it("deletes the selected unconnected node, with undo",()=>{
  const coordinator=createEditorCoordinator();
@@ -44,4 +47,16 @@ it("opens selected shape controls as a closable canvas overlay",()=>{
  fireEvent.click(screen.getByRole("button",{name:"Close shape editor"}));
  expect(screen.queryByRole("form",{name:"Selected shape"})).not.toBeInTheDocument();
  expect(coordinator.getSnapshot().editor.engine.focusedNodeId).toBeNull();
+});
+it("deletes a marquee selection as one undoable edit",()=>{
+ const coordinator=createEditorCoordinator();
+ render(<Editor coordinator={coordinator}/>);
+ fireEvent.click(screen.getByRole("button",{name:"Insert start"}));
+ fireEvent.click(screen.getByRole("button",{name:"Insert process"}));
+ fireEvent.click(screen.getByRole("button",{name:"Select every shape"}));
+ expect(screen.queryByRole("form",{name:"Selected shape"})).not.toBeInTheDocument();
+ fireEvent.keyDown(document,{key:"Delete"});
+ expect(coordinator.getSnapshot().editor.engine.graph.nodes).toHaveLength(0);
+ fireEvent.click(screen.getByRole("button",{name:"Undo"}));
+ expect(coordinator.getSnapshot().editor.engine.graph.nodes).toHaveLength(2);
 });

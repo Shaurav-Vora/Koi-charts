@@ -16,6 +16,7 @@ vi.mock("@xyflow/react", async () => {
     Handle: () => null,
     ConnectionMode: { Loose: "loose" },
     MarkerType: { ArrowClosed: "arrow-closed" },
+    SelectionMode: { Partial: "partial" },
     Position: { Top: "top", Right: "right", Bottom: "bottom", Left: "left" },
     ReactFlowProvider: ({ children }: { children: ReactNode }) => children,
     useNodesInitialized: () => false,
@@ -27,20 +28,26 @@ vi.mock("@xyflow/react", async () => {
       zoomIn: vi.fn(),
       zoomOut: vi.fn(),
     }),
-    ReactFlow: ({ nodes, edges, children, onEdgeClick, onEdgesChange, onConnectEnd }: {
-      nodes: Array<{ id: string; data: { playbackState?: string } }>;
+    ReactFlow: ({ nodes, edges, children, onEdgeClick, onEdgesChange, onConnectEnd, onSelectionChange, onSelectionEnd, selectionOnDrag, selectionMode, panOnDrag }: {
+      nodes: Array<{ id: string; selected?: boolean; data: { playbackState?: string } }>;
       edges: Array<{ id: string; ariaLabel?: string; data: { playbackState?: string } }>;
       children: ReactNode;
       onEdgeClick?: (event: unknown, edge: unknown) => void;
       onEdgesChange?: (changes: Array<{ type: "select"; id: string; selected: boolean }>) => void;
       onConnectEnd?: (event: MouseEvent, state: { isValid: boolean; fromNode: { id: string } | null; toNode: { id: string } | null }) => void;
+      onSelectionChange?: (selection: { nodes: Array<{id:string}>; edges: unknown[] }) => void;
+      onSelectionEnd?: (_event: unknown) => void;
+      selectionOnDrag?: boolean;
+      selectionMode?: string;
+      panOnDrag?: boolean | number[];
     }) => React.createElement(
       "div",
-      null,
+      { "data-testid": "react-flow", "data-selection-on-drag": selectionOnDrag, "data-selection-mode": selectionMode, "data-pan-on-drag": String(panOnDrag) },
       ...nodes.map(node => React.createElement("div", {
         key: node.id,
         "data-testid": "node-" + node.id,
         "data-playback-state": node.data.playbackState,
+        "data-selected": node.selected,
       })),
       ...edges.map(edge => React.createElement("div", {
         key: edge.id,
@@ -53,6 +60,15 @@ vi.mock("@xyflow/react", async () => {
           onEdgesChange?.([{ type: "select", id: edge.id, selected: true }]);
         },
       })),
+      React.createElement("button", {
+        key: "marquee-select",
+        type: "button",
+        onClick: () => {
+          const selection = { nodes: [{ id: "start" }, { id: "review" }], edges: [] };
+          onSelectionChange?.(selection);
+          onSelectionEnd?.({});
+        },
+      }, "Marquee select two shapes"),
       React.createElement("button", {
         key: "empty-drop",
         type: "button",
@@ -197,5 +213,34 @@ describe("VisualCanvas playback route", () => {
 
     expect(onCommand).toHaveBeenLastCalledWith({ kind: "delete", target: { kind: "edge_id", id: "start-review" } });
     expect(onCommand).toHaveBeenCalledTimes(1);
+  });
+
+  it("supports partial marquee selection and compact bulk actions", () => {
+    const onSelectedNodeIdsChange = vi.fn();
+    const onSelectionComplete = vi.fn();
+    const onDeleteSelected = vi.fn();
+    const { rerender } = render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId={null} onCommand={vi.fn()}
+      selectedNodeIds={[]} onSelectedNodeIdsChange={onSelectedNodeIdsChange} onSelectionComplete={onSelectionComplete} onDeleteSelected={onDeleteSelected} />);
+
+    expect(screen.getByRole("button", { name: "Select multiple shapes" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByTestId("react-flow")).toHaveAttribute("data-selection-on-drag", "false");
+    expect(screen.getByTestId("react-flow")).toHaveAttribute("data-selection-mode", "partial");
+    expect(screen.getByTestId("react-flow")).toHaveAttribute("data-pan-on-drag", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Select multiple shapes" }));
+    expect(screen.getByRole("button", { name: "Select multiple shapes" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("react-flow")).toHaveAttribute("data-selection-on-drag", "true");
+    expect(screen.getByTestId("react-flow")).toHaveAttribute("data-pan-on-drag", "false");
+    fireEvent.click(screen.getByRole("button", { name: "Marquee select two shapes" }));
+    expect(onSelectedNodeIdsChange).toHaveBeenCalledWith(["start", "review"]);
+    expect(onSelectionComplete).toHaveBeenCalledWith(["start", "review"]);
+
+    rerender(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId={null} onCommand={vi.fn()}
+      selectedNodeIds={["start", "review"]} onSelectedNodeIdsChange={onSelectedNodeIdsChange} onSelectionComplete={onSelectionComplete} onDeleteSelected={onDeleteSelected} />);
+    expect(screen.getByRole("group", { name: "2 shapes selected" })).toBeVisible();
+    expect(screen.getByTestId("node-start")).toHaveAttribute("data-selected", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Delete selected" }));
+    expect(onDeleteSelected).toHaveBeenCalledWith(["start", "review"]);
+    fireEvent.click(screen.getByRole("button", { name: "Deselect all" }));
+    expect(onSelectedNodeIdsChange).toHaveBeenLastCalledWith([]);
   });
 });

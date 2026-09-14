@@ -16,6 +16,8 @@ export default function CanvasControls({
   onRedo,
   canClear,
   onClear,
+  selectionActive,
+  onToggleSelection,
 }: {
   canFit: boolean;
   canCenter: boolean;
@@ -29,6 +31,8 @@ export default function CanvasControls({
   onRedo?: () => void;
   canClear?: boolean;
   onClear?: () => void;
+  selectionActive?: boolean;
+  onToggleSelection?: () => void;
 }) {
   return (
     <div className="canvas-controls nodrag nopan" role="toolbar" aria-label="Canvas editing and view">
@@ -48,6 +52,26 @@ export default function CanvasControls({
                 Clear chart
               </button>
             )}
+          </div>
+          <div className="canvas-control-divider" aria-hidden="true" />
+        </>
+      )}
+      {onToggleSelection && (
+        <>
+          <div className="canvas-control-group selection-controls" role="group" aria-label="Selection tools">
+            <button
+              type="button"
+              className="selection-toggle"
+              aria-label="Select multiple shapes"
+              aria-pressed={!!selectionActive}
+              title={selectionActive ? "Exit multi-select mode" : "Select multiple shapes"}
+              onClick={onToggleSelection}
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <rect x="3" y="3" width="11" height="10" rx="1.5" />
+                <path d="m11.5 10.5 5 2.1-2.1 1 1 2.2-1.5.7-1-2.2-1.8 1.5.4-5.3Z" />
+              </svg>
+            </button>
           </div>
           <div className="canvas-control-divider" aria-hidden="true" />
         </>

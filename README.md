@@ -73,6 +73,7 @@ Every action—whether initiated via speech, keyboard hotkeys, visual drag-and-d
 - **Consistent Add Feedback**: Clicking or dropping a shape reports the same added-node confirmation while drag-and-drop positioning remains one undoable edit.
 - **Inline Editing**: Double-click any shape to rename in place with instant validation and canvas fit-to-view controls.
 - **Consistent Selection Cards**: Clicking a shape or connection opens the same lower-right canvas overlay. Both can be edited, closed, or deleted by mouse; connection deletion is immediate and undoable.
+- **Marquee Multi-Selection**: Toggle the selection icon, drag across empty canvas to select several shapes, then delete them together with the canvas action or the **Delete** key. **Deselect all** clears only the highlight.
 
 ### 📋 Accessible Structure & Braille Reference
 - **Chart Outline**: A dedicated, keyboard-navigable list reflecting nodes, types, and directional edges in reading order.

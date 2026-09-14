@@ -4,7 +4,7 @@ import { createEmptyGraph } from "../graph/invariants";
 import { assertSnapshot, commit, restoreHistory } from "../graph/history";
 import type { CommandResult, EngineState, Snapshot } from "../graph/types";
 import { ClarificationRequired, prepareTransaction, replaceReference } from "../graph/transaction";
-import { commandSchema, type GraphCommand } from "./schema";
+import { commandSchema, editCommandSchema, type EditCommand, type GraphCommand } from "./schema";
 
 export function createEngineState(): EngineState {
   return { graph: createEmptyGraph(), focusedNodeId: null, recentNodeId: null, version: 0,
@@ -52,7 +52,11 @@ export function execute(state: EngineState, input: unknown, newId: () => string)
       if (state.pending?.kind !== "deletion") return failure(state, "No deletion to confirm.");
       if (state.pending.graphVersion !== state.version) return failure({ ...state, pending: null }, "The chart changed. Repeat the deletion command.");
       assertSnapshot(state);
-      commandSchema.parse(state.pending.command);
+      if (state.pending.command.kind === "compound" && state.pending.command.commands.length > 10) {
+        state.pending.command.commands.forEach(command => editCommandSchema.parse(command));
+      } else {
+        commandSchema.parse(state.pending.command);
+      }
       return { state: commit(state, state.pending.prepared), outcome: "committed", message: "Deletion confirmed. Change applied." };
     }
     if (command.kind === "undo" || command.kind === "redo") {
@@ -66,6 +70,20 @@ export function execute(state: EngineState, input: unknown, newId: () => string)
   } catch (error) {
     return failure(state, error instanceof Error ? error.message : "Command failed. Try again.");
   }
+}
+
+/** UI marquee selection can contain more nodes than the spoken-command compound limit. */
+export function executeNodeSelectionDeletion(state: EngineState, nodeIds: string[], newId: () => string): CommandResult {
+  const uniqueIds = [...new Set(nodeIds)];
+  if (!uniqueIds.length) return failure(state, "Select at least one shape to delete.");
+  if (uniqueIds.some(id => !state.graph.nodes.some(node => node.id === id))) {
+    return failure(state, "One or more selected shapes are no longer available.");
+  }
+  const commands: EditCommand[] = uniqueIds.map(id => ({
+    kind: "delete",
+    target: { kind: "node", node: { kind: "id", value: id } },
+  }));
+  return run(state, { kind: "compound", commands }, newId);
 }
 
 /** Candidate selection resumes a stored command; it is not an independent graph edit. */

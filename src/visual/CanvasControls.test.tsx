@@ -19,3 +19,14 @@ it("offers fitting and centring only when there is something to look at", () => 
  expect(screen.getByRole("button", { name: "Center selection" })).toBeDisabled();
  expect(screen.getByRole("button", { name: "Zoom in" })).toBeEnabled();
 });
+
+it("exposes multi-selection as a pressed-state toolbar toggle", () => {
+ const onToggleSelection = vi.fn();
+ const { rerender } = render(<CanvasControls canFit canCenter selectionActive={false} onToggleSelection={onToggleSelection} {...handlers()} />);
+ const toggle = screen.getByRole("button", { name: "Select multiple shapes" });
+ expect(toggle).toHaveAttribute("aria-pressed", "false");
+ fireEvent.click(toggle);
+ expect(onToggleSelection).toHaveBeenCalledTimes(1);
+ rerender(<CanvasControls canFit canCenter selectionActive onToggleSelection={onToggleSelection} {...handlers()} />);
+ expect(screen.getByRole("button", { name: "Select multiple shapes" })).toHaveAttribute("aria-pressed", "true");
+});

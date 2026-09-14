@@ -197,6 +197,7 @@ export function prepareTransaction(
       && command.commands[1].node.kind === "recent"
       && command.commands[2].kind === "connect"
       && command.commands[2].target.kind === "recent";
+    const deletesOnlyNodes = command.commands.every(edit => edit.kind === "delete" && edit.target.kind === "node");
     let additionMessage = "";
     command.commands.forEach((edit, index) => {
       apply(edit, `/commands/${index}`);
@@ -206,7 +207,9 @@ export function prepareTransaction(
       ? additionMessage
       : addsAndConnectsPositionedNode
         ? additionMessage.replace("Added ", "Added and connected ")
-        : `Applied ${command.commands.length} edits.`;
+        : deletesOnlyNodes
+          ? `Deleted ${command.commands.length} shapes.`
+          : `Applied ${command.commands.length} edits.`;
   } else if (editKinds.includes(command.kind)) apply(command as EditCommand, "");
   else throw new Error("This command does not edit or focus the graph.");
   assertSnapshot(working);
