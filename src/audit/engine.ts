@@ -62,10 +62,13 @@ export function auditGraph(graph: FlowGraph): AuditIssue[] {
     ));
   }
   if (starts.length > 1) {
-    issues.push(issue(
-      "chart:multiple-starts", "multiple-starts", "required", "Choose one Start node", "More than one start node.",
-      "Keep one Start node so the flow has a clear entry point.", chartTarget,
-    ));
+    for (const start of starts) {
+      issues.push(issue(
+        `node:${start.id}:multiple-starts`, "multiple-starts", "required", "Choose one Start node",
+        `${start.label} is one of ${starts.length} Start nodes.`,
+        "Keep one Start node so the flow has a clear entry point.", nodeTarget(start.id),
+      ));
+    }
   }
   if (!ends.length) {
     issues.push(issue(

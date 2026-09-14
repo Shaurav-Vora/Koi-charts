@@ -11,6 +11,7 @@ function diagnosticMessage(graph: FlowGraph, issue: AuditIssue): string {
     case "unreachable-node": return node ? `Unreachable from any start node: "${node.label}" (${node.id}).` : issue.message;
     case "dead-end": return node ? `Non-end node "${node.label}" (${node.id}) has no outgoing connection.` : issue.message;
     case "decision-branch-count": return node ? `Decision "${node.label}" (${node.id}) has fewer than two outgoing branches.` : issue.message;
+    case "multiple-starts": return "More than one start node.";
     case "unlabeled-decision-branch": return node && issue.target.kind === "edge"
       ? `Decision "${node.label}" (${node.id}) has an unlabeled outgoing connection (${issue.target.edgeId}).`
       : issue.message;
@@ -21,7 +22,12 @@ function diagnosticMessage(graph: FlowGraph, issue: AuditIssue): string {
 
 /** Authoring warnings are separate from graph-integrity errors. */
 export function validateGraph(graph: FlowGraph): string[] {
-  return auditGraph(graph).map(issue => diagnosticMessage(graph, issue));
+  const seenCodes = new Set<AuditIssue["code"]>();
+  return auditGraph(graph).flatMap(issue => {
+    if (issue.code === "multiple-starts" && seenCodes.has(issue.code)) return [];
+    seenCodes.add(issue.code);
+    return [diagnosticMessage(graph, issue)];
+  });
 }
 
 /** With a target, find one shortest directed route. Without one, never choose a branch. */

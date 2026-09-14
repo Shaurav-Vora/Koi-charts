@@ -69,4 +69,27 @@ describe("AuditPanel", () => {
     expect(screen.getByText("No issues found")).toBeVisible();
     expect(screen.queryByRole("button", { name: "Next issue" })).not.toBeInTheDocument();
   });
+
+  it("routes an issue that needs author input to the relevant editor", () => {
+    const onEdit = vi.fn();
+    const graph: FlowGraph = {
+      schemaVersion: 1,
+      nodes: [
+        { id: "start", type: "start", label: "Begin" },
+        { id: "choice", type: "decision", label: "Approved?" },
+        { id: "end", type: "end", label: "Finish" },
+      ],
+      edges: [
+        { id: "to-choice", source: "start", target: "choice" },
+        { id: "yes", source: "choice", target: "end" },
+        { id: "no", source: "choice", target: "end", label: "No" },
+      ],
+    };
+    const state = auditTransition(graph, createAuditState(), { type: "open", graphVersion: 3 });
+    render(<AuditPanel graphVersion={3} state={state} onAction={vi.fn()} onEdit={onEdit} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Label connection" }));
+
+    expect(onEdit).toHaveBeenCalledWith({ kind: "edge", edgeId: "yes" });
+  });
 });

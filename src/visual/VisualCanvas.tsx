@@ -53,6 +53,8 @@ export interface VisualCanvasProps {
   onInspect?: () => void;
   playbackRoute?: PlaybackRouteStep[];
   centerRequest?: { key: string; nodeId: string } | null;
+  inspectEdgeRequest?: { key: string; edgeId: string } | null;
+  onInspectEdgeRequestHandled?: () => void;
 }
 
 function Canvas({
@@ -75,23 +77,29 @@ function Canvas({
   onInspect,
   playbackRoute = [],
   centerRequest = null,
+  inspectEdgeRequest = null,
+  onInspectEdgeRequestHandled,
 }: VisualCanvasProps) {
   const { screenToFlowPosition, zoomIn, zoomOut, fitView, setCenter, getZoom } = useReactFlow();
   const [drag, setDrag] = useState<{ id: string; x: number; y: number } | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
-  const selectedEdge = graph.edges.find(edge => edge.id === selectedEdgeId);
+  const inspectedEdgeId = inspectEdgeRequest && graph.edges.some(edge => edge.id === inspectEdgeRequest.edgeId)
+    ? inspectEdgeRequest.edgeId
+    : selectedEdgeId;
+  const selectedEdge = graph.edges.find(edge => edge.id === inspectedEdgeId);
   useEffect(() => {
-    if (!selectedEdgeId) return;
+    if (!inspectedEdgeId) return;
     const removeSelectedEdge = (event: KeyboardEvent) => {
       const editable = event.target instanceof Element && !!event.target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]');
       if (event.key !== "Delete" || event.repeat || event.defaultPrevented || event.isComposing || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || editable) return;
       event.preventDefault();
-      onCommand({ kind: "delete", target: { kind: "edge_id", id: selectedEdgeId } });
+      onCommand({ kind: "delete", target: { kind: "edge_id", id: inspectedEdgeId } });
       setSelectedEdgeId(null);
+      if (inspectEdgeRequest) onInspectEdgeRequestHandled?.();
     };
     document.addEventListener("keydown", removeSelectedEdge);
     return () => document.removeEventListener("keydown", removeSelectedEdge);
-  }, [onCommand, selectedEdgeId]);
+  }, [inspectEdgeRequest, inspectedEdgeId, onCommand, onInspectEdgeRequestHandled]);
   const focusedBox = layout.nodes.find(box => box.id === focusedNodeId);
   const lastCenterRequest = useRef<string | null>(null);
   useEffect(() => {
@@ -129,9 +137,9 @@ function Canvas({
     const source = graph.nodes.find(node => node.id === edge.source)?.label;
     const target = graph.nodes.find(node => node.id === edge.target)?.label;
     const accessibleName = `Edit arrow from ${source} to ${target}${edge.label ? ` labelled ${edge.label}` : " unlabelled"}`;
-    const markerColor = edge.id === selectedEdgeId ? "#244ea9" : playbackState === "current" ? "#c25f0a" : playbackState === "visited" ? "#315ac8" : "#536b99";
-    return { ...edge, type: "routed", selected: edge.id === selectedEdgeId, ariaLabel: accessibleName, className: playbackState ? `playback-edge is-${playbackState}` : undefined, data: { points: liveLayout.find(item => item.id === edge.id)!.points, playbackState, accessibleName }, markerEnd: { type: MarkerType.ArrowClosed, color: markerColor } };
-  }), [graph, liveLayout, selectedEdgeId, currentRouteStep?.viaEdgeId, visitedEdgeIds]);
+    const markerColor = edge.id === inspectedEdgeId ? "#244ea9" : playbackState === "current" ? "#c25f0a" : playbackState === "visited" ? "#315ac8" : "#536b99";
+    return { ...edge, type: "routed", selected: edge.id === inspectedEdgeId, ariaLabel: accessibleName, className: playbackState ? `playback-edge is-${playbackState}` : undefined, data: { points: liveLayout.find(item => item.id === edge.id)!.points, playbackState, accessibleName }, markerEnd: { type: MarkerType.ArrowClosed, color: markerColor } };
+  }), [graph, liveLayout, inspectedEdgeId, currentRouteStep?.viaEdgeId, visitedEdgeIds]);
   return <div className="canvas-area" onDragOver={event => { event.preventDefault(); event.dataTransfer.dropEffect = "copy"; }} onDrop={event => {
     event.preventDefault();
     const type = event.dataTransfer.getData("application/koi-node");
@@ -141,7 +149,7 @@ function Canvas({
   }}><ReactFlow<CanvasNode, RoutedEdge> nodes={nodes.map(node => drag?.id === node.id ? { ...node, position: { x: drag.x, y: drag.y } } : node)} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
     connectionMode={ConnectionMode.Loose} connectionRadius={32}
     zoomOnDoubleClick={false} onPaneClick={() => { setSelectedEdgeId(null); onCommand({ kind: "clear_focus" }); }}
-    onEdgeClick={(_, edge) => { setSelectedEdgeId(edge.id); onCommand({ kind: "clear_focus" }); }}
+    onEdgeClick={(_, edge) => { onInspectEdgeRequestHandled?.(); setSelectedEdgeId(edge.id); onCommand({ kind: "clear_focus" }); }}
     onEdgesChange={changes => { for (const change of changes) if (change.type === "select") { if (change.selected) { setSelectedEdgeId(change.id); onCommand({kind:"clear_focus"}); } else setSelectedEdgeId(current => current === change.id ? null : current); } }}
     isValidConnection={connection => connection.source !== connection.target}
     nodesDraggable
@@ -178,7 +186,7 @@ function Canvas({
   )}
   {selectedEdge && <ArrowInspector key={`${selectedEdge.id}-${selectedEdge.label ?? ""}`} edge={selectedEdge}
     source={graph.nodes.find(node => node.id === selectedEdge.source)!} target={graph.nodes.find(node => node.id === selectedEdge.target)!}
-    onCommand={onCommand} onClose={() => setSelectedEdgeId(null)} />}</div>;
+    onCommand={onCommand} onClose={() => { setSelectedEdgeId(null); onInspectEdgeRequestHandled?.(); }} />}</div>;
 }
 
 export default function VisualCanvas(props: VisualCanvasProps) {

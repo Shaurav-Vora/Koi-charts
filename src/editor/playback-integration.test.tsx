@@ -4,11 +4,15 @@ import Editor from "./Editor";
 import { createEditorCoordinator } from "./coordinator";
 
 vi.mock("../visual/VisualCanvas", () => ({
-  default: ({ centerRequest }: { centerRequest?: { key: string; nodeId: string } | null }) => (
+  default: ({ centerRequest, inspectEdgeRequest }: {
+    centerRequest?: { key: string; nodeId: string } | null;
+    inspectEdgeRequest?: { key: string; edgeId: string } | null;
+  }) => (
     <div
       data-testid="visual-canvas"
       data-center-key={centerRequest?.key}
       data-center-node={centerRequest?.nodeId}
+      data-inspect-edge={inspectEdgeRequest?.edgeId}
     />
   ),
 }));
@@ -78,6 +82,22 @@ describe("editor playback integration", () => {
 
     coordinator.dispatch({ type: "command", idSeed: "undo", command: { kind: "undo" } });
     expect(coordinator.getSnapshot().editor.engine.graph.nodes).toHaveLength(0);
+  });
+
+  it("closes chart review and routes an unlabelled branch to the arrow editor", () => {
+    const coordinator = createEditorCoordinator();
+    coordinator.dispatch({ type: "command", idSeed: "a", command: { kind: "add_node", type: "start", label: "Begin", placement: null } });
+    coordinator.dispatch({ type: "command", idSeed: "b", command: { kind: "connect_new", source: { kind: "focus" }, type: "decision", label: "Approved?" } });
+    coordinator.dispatch({ type: "command", idSeed: "c", command: { kind: "connect_new", source: { kind: "focus" }, type: "end", label: "Finish" } });
+    render(<Editor coordinator={coordinator} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Check chart" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next issue" }));
+    fireEvent.click(screen.getByRole("button", { name: "Label connection" }));
+
+    expect(coordinator.getSnapshot().audit.status).toBe("closed");
+    expect(screen.getByTestId("visual-canvas")).toHaveAttribute("data-inspect-edge", "c-2");
+    expect(screen.queryByRole("form", { name: "Selected shape" })).not.toBeInTheDocument();
   });
 
   it("starts at the Start node, synchronizes focus, and preserves graph history", () => {

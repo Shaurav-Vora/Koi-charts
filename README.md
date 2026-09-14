@@ -222,14 +222,14 @@ Koi Charts features an on-device deterministic grammar parser (`src/commands/gra
 
 Use **Previous**, **Repeat**, and **Next** in the panel, or say `previous issue`, `repeat issue`, and `next issue`. The audit recalculates after every chart edit, keeps the current issue when it still exists, and advances when that issue is resolved. Say `close check` to close it. These commands do not call Gemini.
 
-Missing Start and End issues include an **Add Start** or **Add End** action. These safe fixes use the same edit history as manual changes, so they can be undone. Issues that require an author to choose a connection, label, or node remain guidance-only.
+Missing Start and End issues include an **Add Start** or **Add End** action. These safe fixes use the same edit history as manual changes, so they can be undone. Duplicate labels open the existing shape editor, unlabelled decision branches open the arrow editor, and charts with multiple Starts present each Start as a separate focused finding. The audit closes before an editor opens so the cards do not overlap. Connection choices remain guidance-only.
 
 Manual acceptance check:
 
 1. Create a Start, an unconnected Process, and a Decision with one unlabelled outgoing arrow.
 2. Select **Check chart**. Confirm its button remains visible, the review opens directly beneath the review controls, and no shape editor appears. Confirm the panel reports a count, severity, issue position, and suggested correction without displaying internal IDs.
 3. Move through the issues and confirm each related shape receives focus in the visual canvas, tactile display, and outline. Pan an issue target outside the viewport first and confirm navigation centres it without reducing the current zoom.
-4. On a missing Start or End issue, use the offered add action. Confirm the node appears, the audit advances, and **Undo** removes the new node. Correct another issue manually and confirm the open audit recalculates without resetting unnecessarily.
+4. On a missing Start or End issue, use the offered add action. Confirm the node appears, the audit advances, and **Undo** removes the new node. For a duplicate label or unlabelled decision branch, use the edit action and confirm the audit closes before the correct shape or arrow editor opens. Create two Starts and confirm each appears as a separate focused finding.
 5. Select **Test chart** while the audit is open and confirm the audit closes. Open **Check chart** during playback and confirm playback closes.
 6. Repeat the review using the local voice phrases and confirm the activity source says **Local command**.
 

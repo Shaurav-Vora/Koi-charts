@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AuditIssue } from "./types";
-import { assistedFixFor } from "./fixes";
+import { assistedFixFor, guidedEditFor } from "./fixes";
 
 const issue = (code: AuditIssue["code"]): AuditIssue => ({
   id: `chart:${code}`,
@@ -26,5 +26,16 @@ describe("audit assisted fixes", () => {
 
   it("does not offer automatic edits for issues that need an author decision", () => {
     expect(assistedFixFor(issue("multiple-starts"))).toBeNull();
+  });
+
+  it("routes ambiguous node and edge issues to their existing editors", () => {
+    expect(guidedEditFor({
+      ...issue("duplicate-label"),
+      target: { kind: "node", nodeId: "review", focusNodeId: "review" },
+    })).toEqual({ label: "Edit node label", target: { kind: "node", nodeId: "review" } });
+    expect(guidedEditFor({
+      ...issue("unlabeled-decision-branch"),
+      target: { kind: "edge", edgeId: "yes", focusNodeId: "decision" },
+    })).toEqual({ label: "Label connection", target: { kind: "edge", edgeId: "yes" } });
   });
 });

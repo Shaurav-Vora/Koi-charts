@@ -36,12 +36,15 @@ describe("chart audit", () => {
     ]);
   });
 
-  it("reports more than one Start node as one chart-level issue", () => {
+  it("reports each Start node as a target when the chart has more than one", () => {
     const graph = completeGraph();
     graph.nodes.push({ id: "other-start", type: "start", label: "Alternate" });
     graph.edges.push({ id: "other-finish", source: "other-start", target: "end" });
 
-    expect(auditGraph(graph).map(issue => issue.id)).toEqual(["chart:multiple-starts"]);
+    expect(auditGraph(graph).map(issue => ({ id: issue.id, target: issue.target }))).toEqual([
+      { id: "node:other-start:multiple-starts", target: { kind: "node", nodeId: "other-start", focusNodeId: "other-start" } },
+      { id: "node:start:multiple-starts", target: { kind: "node", nodeId: "start", focusNodeId: "start" } },
+    ]);
   });
 
   it("reports unreachable nodes without also reporting that they cannot reach an End", () => {

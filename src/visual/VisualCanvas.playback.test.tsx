@@ -115,6 +115,18 @@ describe("VisualCanvas playback route", () => {
     expect(screen.getByRole("img", { name: "Edit arrow from Begin to Review labelled next" })).toBeInTheDocument();
   });
 
+  it("opens the existing arrow editor for an external inspection request", () => {
+    render(<VisualCanvas
+      graph={graph}
+      layout={layoutGraph(graph)}
+      focusedNodeId={null}
+      onCommand={vi.fn()}
+      inspectEdgeRequest={{ key: "audit-edge-request", edgeId: "review-approve" }}
+    />);
+
+    expect(screen.getByRole("form", { name: "Selected arrow" })).toBeVisible();
+  });
+
   it("deletes the selected connection with Delete while leaving label typing safe", () => {
     const onCommand = vi.fn();
     render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId={null} onCommand={onCommand} />);
