@@ -25,7 +25,7 @@ export function ShapePalette({ lastNodeId, onCommand }: { lastNodeId?: string; o
               kind: "add_node",
               type,
               label: type[0].toUpperCase() + type.slice(1),
-              placement: lastNodeId ? { relation: "right_of", reference: { kind: "id", value: lastNodeId } } : null
+              placement: lastNodeId ? { relation: "below", reference: { kind: "id", value: lastNodeId } } : null
             })}
           >
             <div className="shape-icon-wrap" aria-hidden="true">

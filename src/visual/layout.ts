@@ -3,15 +3,21 @@ import { assertGraph } from "../graph/invariants";
 import type { FlowGraph } from "../graph/types";
 export type LayoutNode = { id: string; x: number; y: number; width: number; height: number };
 export type LayoutFrame = { nodes: LayoutNode[]; edges: { id: string; points: { x: number; y: number }[] }[] };
+export type NodeDensity = "standard" | "compact";
+export type LayoutArrangement = "preserve" | "topology";
 const compare = (a: { id: string }, b: { id: string }) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
-const gap = 64;
+export const nodeDimensions = (type: FlowGraph["nodes"][number]["type"], density: NodeDensity = "standard") =>
+  density === "compact"
+    ? { width: type === "decision" ? 150 : 126, height: type === "decision" ? 92 : 54 }
+    : { width: type === "decision" ? 230 : 190, height: type === "decision" ? 150 : 86 };
 
-export function layoutGraph(graph: FlowGraph): LayoutFrame {
+export function layoutGraph(graph: FlowGraph, density: NodeDensity = "standard", arrangement: LayoutArrangement = "preserve"): LayoutFrame {
   assertGraph(graph);
   if (!graph.nodes.length) return { nodes: [], edges: [] };
   const ordered = [...graph.nodes].sort(compare);
-  const dag = new graphlib.Graph({ multigraph: true }).setGraph({ rankdir: "TB", nodesep: 64, ranksep: 88 }).setDefaultEdgeLabel(() => ({}));
-  ordered.forEach(node => dag.setNode(node.id, { width: node.type === "decision" ? 230 : 190, height: node.type === "decision" ? 150 : 86 }));
+  const gap = density === "compact" ? 44 : 64;
+  const dag = new graphlib.Graph({ multigraph: true }).setGraph({ rankdir: "TB", nodesep: density === "compact" ? 44 : 64, ranksep: density === "compact" ? 64 : 88 }).setDefaultEdgeLabel(() => ({}));
+  ordered.forEach(node => dag.setNode(node.id, nodeDimensions(node.type, density)));
   [...graph.edges].sort(compare).forEach(edge => dag.setEdge(edge.source, edge.target, {}, edge.id));
   layout(dag);
   const positions = new Map<string, LayoutNode>(ordered.map(node => {
@@ -24,6 +30,7 @@ export function layoutGraph(graph: FlowGraph): LayoutFrame {
     visiting.add(id);
     const node = ordered.find(item => item.id === id)!;
     const box = positions.get(id)!;
+    if (arrangement === "topology") { visiting.delete(id); placed.add(id); return; }
     if (node.position) { box.x = node.position.x; box.y = node.position.y; visiting.delete(id); placed.add(id); return; }
     const relation = node.placement?.relation;
     if (node.placement) {
@@ -49,7 +56,7 @@ export function layoutGraph(graph: FlowGraph): LayoutFrame {
   ordered.forEach(node => place(node.id));
   const nodes = [...positions.values()];
   const dx = 32 - Math.min(...nodes.map(n => n.x)), dy = 32 - Math.min(...nodes.map(n => n.y));
-  if (!graph.nodes.some(node => node.position)) nodes.forEach(node => { node.x += dx; node.y += dy; });
+  if (arrangement === "topology" || !graph.nodes.some(node => node.position)) nodes.forEach(node => { node.x += dx; node.y += dy; });
   return { nodes, edges: routeEdges(graph, nodes) };
 }
 export function routeEdges(graph: FlowGraph, nodes: LayoutNode[]): LayoutFrame["edges"] {

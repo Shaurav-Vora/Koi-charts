@@ -475,13 +475,17 @@
   color: var(--ink);
   opacity: 0.35;
 }
-#workspace .canvas-controls button.selection-toggle {
+#workspace .canvas-controls button.selection-toggle,
+#workspace .canvas-controls button.compact-toggle,
+#workspace .canvas-controls button.arrange-button {
   display: grid;
   place-items: center;
   width: 30px;
   padding: 4px;
 }
-#workspace .canvas-controls button.selection-toggle svg {
+#workspace .canvas-controls button.selection-toggle svg,
+#workspace .canvas-controls button.compact-toggle svg,
+#workspace .canvas-controls button.arrange-button svg {
   width: 18px;
   height: 18px;
   fill: none;
@@ -490,7 +494,8 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-#workspace .canvas-controls button.selection-toggle[aria-pressed="true"] {
+#workspace .canvas-controls button.selection-toggle[aria-pressed="true"],
+#workspace .canvas-controls button.compact-toggle[aria-pressed="true"] {
   background: #fff0e8;
   color: var(--accent);
   box-shadow: inset 0 0 0 1px #f2b58f;

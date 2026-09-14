@@ -21,7 +21,8 @@ type Props = {
 };
 function Simulator({ graph, focus, version, displayIds, chartOutline, playbackContext }: Props) {
   const [requested, setRequested] = useState<TactileMode | "auto">("auto");
-  const layout = useMemo(() => layoutGraph(graph), [graph]);
+  // Tactile legibility follows graph structure, not arbitrary visual drag coordinates.
+  const layout = useMemo(() => layoutGraph(graph, "standard", "topology"), [graph]);
   const autoFocus = useMemo(() => needsFocus(graph, layout), [graph, layout]);
   const mode = requested === "auto" ? (autoFocus ? "focus" : "overview") : requested;
   const frame = useMemo(() => makeTactileFrame(graph, layout, focus, mode, version, playbackContext), [graph, layout, focus, mode, version, playbackContext]);

@@ -3,8 +3,9 @@ import { expect, it, vi } from "vitest";
 import Editor from "./Editor";
 import { createEditorCoordinator } from "./coordinator";
 vi.mock("../visual/VisualCanvas",()=>({
- default:({graph,onUndo,onSelectedNodeIdsChange,onSelectionComplete}:{graph:{nodes:{id:string}[]};onUndo?:()=>void;onSelectedNodeIdsChange?:(ids:string[])=>void;onSelectionComplete?:(ids:string[])=>void})=><>
+ default:({graph,onUndo,onArrange,onSelectedNodeIdsChange,onSelectionComplete}:{graph:{nodes:{id:string}[]};onUndo?:()=>void;onArrange?:()=>void;onSelectedNodeIdsChange?:(ids:string[])=>void;onSelectionComplete?:(ids:string[])=>void})=><>
   <button type="button" onClick={onUndo}>Undo</button>
+  <button type="button" onClick={onArrange}>Auto arrange chart</button>
   <button type="button" onClick={()=>{const ids=graph.nodes.map(node=>node.id);onSelectedNodeIdsChange?.(ids);onSelectionComplete?.(ids);}}>Select every shape</button>
  </>
 }));
@@ -59,4 +60,15 @@ it("deletes a marquee selection as one undoable edit",()=>{
  expect(coordinator.getSnapshot().editor.engine.graph.nodes).toHaveLength(0);
  fireEvent.click(screen.getByRole("button",{name:"Undo"}));
  expect(coordinator.getSnapshot().editor.engine.graph.nodes).toHaveLength(2);
+});
+it("auto-arranges the graph as one undoable edit",()=>{
+ const coordinator=createEditorCoordinator();
+ render(<Editor coordinator={coordinator}/>);
+ fireEvent.click(screen.getByRole("button",{name:"Insert start"}));
+ fireEvent.click(screen.getByRole("button",{name:"Insert process"}));
+ const before=structuredClone(coordinator.getSnapshot().editor.engine.graph);
+ fireEvent.click(screen.getByRole("button",{name:"Auto arrange chart"}));
+ expect(coordinator.getSnapshot().editor.message).toBe("Chart arranged.");
+ fireEvent.click(screen.getByRole("button",{name:"Undo"}));
+ expect(coordinator.getSnapshot().editor.engine.graph).toEqual(before);
 });

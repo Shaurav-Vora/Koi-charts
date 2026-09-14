@@ -68,12 +68,14 @@ Every action—whether initiated via speech, keyboard hotkeys, visual drag-and-d
 - **Synchronized-View Walkthrough**: A shared decision-node demonstration shows how the same focus appears on the visual canvas, tactile display, and spoken outline.
 - **Custom Semantic Nodes**: Start (entry), Process (step), Decision (branch), and End (exit) shapes with accessible semantic color coding.
 - **Smart Connection Routing**: Interactive connection ports that automatically determine optimal orthogonal routing based on relative node positioning.
-- **Connect-and-Create Menu**: Drop a connection on empty canvas, choose the next shape from a compact menu, and create the positioned node and arrow as one undoable edit.
-- **Free Positioning & Auto-Layout**: Drag shapes freely across the canvas or use structured relative placements (`move Process below Start`).
+- **Connect-and-Create Menu**: Drop a connection on empty canvas, keep its route visible while choosing the next shape, and create the positioned node and anchored arrow as one undoable edit.
+- **Free Positioning & Auto-Layout**: Drag shapes freely, add palette shapes below the preceding node, or use the canvas auto-arrange control to restore a clear top-to-bottom flow, fit it to the viewport, and center the focused shape.
 - **Consistent Add Feedback**: Clicking or dropping a shape reports the same added-node confirmation while drag-and-drop positioning remains one undoable edit.
 - **Inline Editing**: Double-click any shape to rename in place with instant validation and canvas fit-to-view controls.
 - **Consistent Selection Cards**: Clicking a shape or connection opens the same lower-right canvas overlay. Both can be edited, closed, or deleted by mouse; connection deletion is immediate and undoable.
 - **Marquee Multi-Selection**: Toggle the selection icon, drag across empty canvas to select several shapes, then delete them together with the canvas action or the **Delete** key. **Deselect all** clears only the highlight.
+- **Compact Node View**: Use the canvas density icon to switch between full-size shapes and a tighter labeled view while preserving standard flowchart silhouettes and export-safe routing.
+- **Topology-Stable Tactile Layout**: The tactile simulator derives its arrangement from graph connections, so visual dragging cannot make the Braille rendering overlap or lose its reading order.
 
 ### 📋 Accessible Structure & Braille Reference
 - **Chart Outline**: A dedicated, keyboard-navigable list reflecting nodes, types, and directional edges in reading order.

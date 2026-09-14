@@ -13,6 +13,13 @@ describe("deterministic canvas layout", () => {
     expect(frame.edges.every(e => e.points.length >= 2 && e.points.every(p => Number.isFinite(p.x) && Number.isFinite(p.y)))).toBe(true);
     expect(graph).toEqual(before);
   });
+  it("uses smaller bounds and tighter spacing in compact mode", () => {
+    const graph = graphFixture();
+    const standard = layoutGraph(graph);
+    const compact = layoutGraph(graph, "compact");
+    expect(compact.nodes.every((node, index) => node.width < standard.nodes[index].width && node.height < standard.nodes[index].height)).toBe(true);
+    expect(Math.max(...compact.nodes.map(node => node.y + node.height))).toBeLessThan(Math.max(...standard.nodes.map(node => node.y + node.height)));
+  });
   it("is independent of input array order", () => {
     const graph = graphFixture(); graph.nodes.reverse(); graph.edges.reverse();
     expect(layoutGraph(graph)).toEqual(layoutGraph(graphFixture()));
@@ -39,6 +46,14 @@ describe("deterministic canvas layout", () => {
     graph.nodes[1].placement = { relation: "below", referenceNodeId: "n1" };
     graph.edges.push({ id: "loop", source: "n3", target: "n1" });
     expect(layoutGraph(graph)).toEqual(layoutGraph(graph));
+  });
+  it("can derive a topology layout without inheriting visual drag coordinates", () => {
+    const graph = graphFixture() as FlowGraph;
+    graph.nodes = graph.nodes.map((node, index) => ({ ...node, position: { x: index * 900, y: index % 2 ? -700 : 800 } }));
+    const arranged = layoutGraph(graph, "standard", "topology");
+    expect(Math.max(...arranged.nodes.map(node => node.x)) - Math.min(...arranged.nodes.map(node => node.x))).toBeLessThan(900);
+    expect(arranged.nodes.every(node => node.y >= 32)).toBe(true);
+    expect(graph.nodes[1].position).toEqual({ x: 900, y: -700 });
   });
   it("rejects self placement", () => {
     const graph = graphFixture() as FlowGraph; graph.nodes[0].placement = { relation: "above", referenceNodeId: "n1" };

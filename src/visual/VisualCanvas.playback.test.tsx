@@ -1,11 +1,11 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
 import VisualCanvas from "./VisualCanvas";
 import { layoutGraph } from "./layout";
 import type { FlowGraph } from "../graph/types";
 
-const { setCenter } = vi.hoisted(() => ({ setCenter: vi.fn() }));
+const { fitView, setCenter } = vi.hoisted(() => ({ fitView: vi.fn(), setCenter: vi.fn() }));
 
 vi.mock("@xyflow/react", async () => {
   const React = await import("react");
@@ -21,7 +21,8 @@ vi.mock("@xyflow/react", async () => {
     ReactFlowProvider: ({ children }: { children: ReactNode }) => children,
     useNodesInitialized: () => false,
     useReactFlow: () => ({
-      fitView: vi.fn(),
+      fitView,
+      flowToScreenPosition: ({ x, y }: { x: number; y: number }) => ({ x, y }),
       getZoom: () => 1,
       screenToFlowPosition: ({ x, y }: { x: number; y: number }) => ({ x, y }),
       setCenter,
@@ -29,7 +30,7 @@ vi.mock("@xyflow/react", async () => {
       zoomOut: vi.fn(),
     }),
     ReactFlow: ({ nodes, edges, children, onEdgeClick, onEdgesChange, onConnectEnd, onSelectionChange, onSelectionEnd, selectionOnDrag, selectionMode, panOnDrag }: {
-      nodes: Array<{ id: string; selected?: boolean; data: { playbackState?: string } }>;
+      nodes: Array<{ id: string; selected?: boolean; data: { playbackState?: string; compact?: boolean } }>;
       edges: Array<{ id: string; ariaLabel?: string; data: { playbackState?: string } }>;
       children: ReactNode;
       onEdgeClick?: (event: unknown, edge: unknown) => void;
@@ -48,6 +49,7 @@ vi.mock("@xyflow/react", async () => {
         "data-testid": "node-" + node.id,
         "data-playback-state": node.data.playbackState,
         "data-selected": node.selected,
+        "data-compact": node.data.compact,
       })),
       ...edges.map(edge => React.createElement("div", {
         key: edge.id,
@@ -100,6 +102,25 @@ const graph: FlowGraph = {
 };
 
 describe("VisualCanvas playback route", () => {
+  it("fits the arranged chart and then centres its focused shape", async () => {
+    fitView.mockResolvedValue(undefined);
+    const onArrange = vi.fn();
+    const arrangedLayout = layoutGraph(graph, "standard", "topology");
+    const { rerender } = render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId="review" onCommand={vi.fn()} onArrange={onArrange} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Auto arrange chart" }));
+    expect(onArrange).toHaveBeenCalledOnce();
+    rerender(<VisualCanvas graph={graph} layout={arrangedLayout} focusedNodeId="review" onCommand={vi.fn()} onArrange={onArrange} />);
+
+    const target = arrangedLayout.nodes.find(node => node.id === "review")!;
+    await waitFor(() => expect(fitView).toHaveBeenCalledWith({ padding: 0.25, maxZoom: 1, duration: 220 }));
+    await waitFor(() => expect(setCenter).toHaveBeenCalledWith(
+      target.x + target.width / 2,
+      target.y + target.height / 2,
+      { zoom: 1, duration: 220 },
+    ));
+  });
+
   it("centres a requested audit target while preserving the current zoom", () => {
     const layout = layoutGraph(graph);
     const target = layout.nodes.find(node => node.id === "review")!;
@@ -177,6 +198,7 @@ describe("VisualCanvas playback route", () => {
     fireEvent.click(screen.getByRole("button", { name: "Drop connection on empty canvas" }));
 
     expect(screen.getByRole("dialog", { name: "Add connected shape" })).toBeVisible();
+    expect(screen.getByTestId("pending-connection-line")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Add connected start" })).toHaveFocus();
     fireEvent.click(screen.getByRole("button", { name: "Add connected process" }));
     expect(onCommand).toHaveBeenCalledWith({
@@ -188,6 +210,7 @@ describe("VisualCanvas playback route", () => {
       ],
     });
     expect(screen.queryByRole("dialog", { name: "Add connected shape" })).not.toBeInTheDocument();
+    expect(screen.queryByTestId("pending-connection-line")).not.toBeInTheDocument();
   });
 
   it("does not open the chooser after a valid connection and closes it with Escape", () => {
@@ -242,5 +265,20 @@ describe("VisualCanvas playback route", () => {
     expect(onDeleteSelected).toHaveBeenCalledWith(["start", "review"]);
     fireEvent.click(screen.getByRole("button", { name: "Deselect all" }));
     expect(onSelectedNodeIdsChange).toHaveBeenLastCalledWith([]);
+  });
+
+  it("passes compact presentation state to every node", () => {
+    const onCommand = vi.fn();
+    render(<VisualCanvas graph={graph} layout={layoutGraph(graph, "compact")} focusedNodeId={null} onCommand={onCommand} compactNodes onToggleCompactNodes={vi.fn()} />);
+    expect(screen.getByTestId("node-start")).toHaveAttribute("data-compact", "true");
+    expect(screen.getByRole("button", { name: "Use compact nodes" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Drop connection on empty canvas" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add connected process" }));
+    expect(onCommand).toHaveBeenCalledWith(expect.objectContaining({
+      kind: "compound",
+      commands: expect.arrayContaining([
+        { kind: "move_to", node: { kind: "recent" }, position: { x: 357, y: 253 } },
+      ]),
+    }));
   });
 });

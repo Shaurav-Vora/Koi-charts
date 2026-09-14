@@ -30,6 +30,19 @@ describe("manual editor", () => {
     fireEvent.click(screen.getByRole("button", { name: "Confirm deletion" }));
     expect(screen.getByRole("region", { name: "Chart structure" })).not.toHaveTextContent("Check");
   });
+  it("keeps the real canvas mounted when a selected connected node enters deletion confirmation", () => {
+    render(<Editor />); fireEvent.click(screen.getByText("Keyboard editing & advanced commands")); add("Begin"); add("Check"); action("connect");
+    fireEvent.click(screen.getByRole("button", { name: "Connect nodes" }));
+    fireEvent.click(within(screen.getByRole("region", { name: "Visual flowchart" })).getByRole("button", { name: "Focus Begin" }));
+
+    fireEvent.keyDown(document, { key: "Delete" });
+
+    expect(screen.getByRole("button", { name: "Confirm deletion" })).toBeVisible();
+    expect(screen.queryByText("Visual canvas unavailable. Your chart is preserved in the outline below.")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Confirm deletion" }));
+    expect(screen.queryByText("Visual canvas unavailable. Your chart is preserved in the outline below.")).not.toBeInTheDocument();
+    expect(within(screen.getByRole("region", { name: "Chart structure" })).queryByRole("button", { name: "Focus Begin" })).not.toBeInTheDocument();
+  });
   it("renames and inspects through canonical commands", () => {
     render(<Editor />); fireEvent.click(screen.getByText("Keyboard editing & advanced commands")); add("Begin"); action("rename");
     fireEvent.change(screen.getByLabelText("New label"), { target: { value: "Start here" } });
@@ -64,16 +77,16 @@ it("inserts shapes directly and edits their labels without dropdowns", () => {
   expect(screen.getByRole("region", { name: "Chart structure" })).toHaveTextContent("Decision");
 });
 
-it("palette insertion follows the last added node, not the selected node", () => {
+it("palette insertion continues below the last added node, not the selected node", () => {
   render(<Editor />);
   fireEvent.click(screen.getByRole("button", { name: "Insert start" }));
   fireEvent.click(screen.getByRole("button", { name: "Insert process" }));
   fireEvent.click(within(screen.getByRole("region", { name: "Chart structure" })).getByRole("button", { name: "Focus Start" }));
   fireEvent.click(screen.getByRole("button", { name: "Insert decision" }));
   const nodes = Array.from(document.querySelectorAll('.react-flow__node'));
-  const x = (label: string) => Number(nodes.find(n => n.textContent?.includes(label))?.getAttribute('style')?.match(/translate\(([-\d.]+)px/)?.[1]);
-  expect(x("Process")).toBeGreaterThan(x("Start"));
-  expect(x("Decision")).toBeGreaterThan(x("Process"));
+  const y = (label: string) => Number(nodes.find(n => n.textContent?.includes(label))?.getAttribute('style')?.match(/translate\([^,]+,\s*([-\d.]+)px/)?.[1]);
+  expect(y("Process")).toBeGreaterThan(y("Start"));
+  expect(y("Decision")).toBeGreaterThan(y("Process"));
 });
 
 it("renames a shape inline on double click and allows cancelling",()=>{

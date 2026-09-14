@@ -30,3 +30,19 @@ it("exposes multi-selection as a pressed-state toolbar toggle", () => {
  rerender(<CanvasControls canFit canCenter selectionActive onToggleSelection={onToggleSelection} {...handlers()} />);
  expect(screen.getByRole("button", { name: "Select multiple shapes" })).toHaveAttribute("aria-pressed", "true");
 });
+
+it("exposes compact nodes as a separate icon toggle", () => {
+ const onToggleCompact = vi.fn();
+ render(<CanvasControls canFit canCenter compactActive={false} onToggleCompact={onToggleCompact} {...handlers()} />);
+ const toggle = screen.getByRole("button", { name: "Use compact nodes" });
+ expect(toggle).toHaveAttribute("aria-pressed", "false");
+ fireEvent.click(toggle);
+ expect(onToggleCompact).toHaveBeenCalledTimes(1);
+});
+
+it("offers one-click automatic arrangement", () => {
+ const onArrange = vi.fn();
+ render(<CanvasControls canFit canCenter canArrange onArrange={onArrange} {...handlers()} />);
+ fireEvent.click(screen.getByRole("button", { name: "Auto arrange chart" }));
+ expect(onArrange).toHaveBeenCalledTimes(1);
+});

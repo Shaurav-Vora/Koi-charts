@@ -18,6 +18,10 @@ export default function CanvasControls({
   onClear,
   selectionActive,
   onToggleSelection,
+  compactActive,
+  onToggleCompact,
+  canArrange,
+  onArrange,
 }: {
   canFit: boolean;
   canCenter: boolean;
@@ -33,6 +37,10 @@ export default function CanvasControls({
   onClear?: () => void;
   selectionActive?: boolean;
   onToggleSelection?: () => void;
+  compactActive?: boolean;
+  onToggleCompact?: () => void;
+  canArrange?: boolean;
+  onArrange?: () => void;
 }) {
   return (
     <div className="canvas-controls nodrag nopan" role="toolbar" aria-label="Canvas editing and view">
@@ -70,6 +78,49 @@ export default function CanvasControls({
               <svg viewBox="0 0 20 20" aria-hidden="true">
                 <rect x="3" y="3" width="11" height="10" rx="1.5" />
                 <path d="m11.5 10.5 5 2.1-2.1 1 1 2.2-1.5.7-1-2.2-1.8 1.5.4-5.3Z" />
+              </svg>
+            </button>
+          </div>
+          <div className="canvas-control-divider" aria-hidden="true" />
+        </>
+      )}
+      {onToggleCompact && (
+        <>
+          <div className="canvas-control-group compact-controls" role="group" aria-label="Node view">
+            <button
+              type="button"
+              className="compact-toggle"
+              aria-label="Use compact nodes"
+              aria-pressed={!!compactActive}
+              title={compactActive ? "Use standard nodes" : "Use compact nodes"}
+              onClick={onToggleCompact}
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <rect x="3" y="4" width="6" height="5" rx="1" />
+                <rect x="11" y="4" width="6" height="5" rx="1" />
+                <rect x="7" y="12" width="6" height="4" rx="1" />
+                <path d="M6 9v1.5h8V9M10 10.5V12" />
+              </svg>
+            </button>
+          </div>
+          <div className="canvas-control-divider" aria-hidden="true" />
+        </>
+      )}
+      {onArrange && (
+        <>
+          <div className="canvas-control-group arrange-controls" role="group" aria-label="Layout tools">
+            <button
+              type="button"
+              className="arrange-button"
+              aria-label="Auto arrange chart"
+              disabled={!canArrange}
+              title="Arrange shapes from top to bottom"
+              onClick={onArrange}
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <rect x="6" y="2.5" width="8" height="4" rx="1" />
+                <rect x="6" y="13.5" width="8" height="4" rx="1" />
+                <path d="M10 6.5v7m-2-2 2 2 2-2" />
               </svg>
             </button>
           </div>

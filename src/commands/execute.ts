@@ -5,6 +5,7 @@ import { assertSnapshot, commit, restoreHistory } from "../graph/history";
 import type { CommandResult, EngineState, Snapshot } from "../graph/types";
 import { ClarificationRequired, prepareTransaction, replaceReference } from "../graph/transaction";
 import { commandSchema, editCommandSchema, type EditCommand, type GraphCommand } from "./schema";
+import { layoutGraph, type NodeDensity } from "../visual/layout";
 
 export function createEngineState(): EngineState {
   return { graph: createEmptyGraph(), focusedNodeId: null, recentNodeId: null, version: 0,
@@ -84,6 +85,24 @@ export function executeNodeSelectionDeletion(state: EngineState, nodeIds: string
     target: { kind: "node", node: { kind: "id", value: id } },
   }));
   return run(state, { kind: "compound", commands }, newId);
+}
+
+export function arrangeNodes(state: EngineState, density: NodeDensity): CommandResult {
+  if (!state.graph.nodes.length) return failure(state, "Add a shape before arranging the chart.");
+  assertSnapshot(state);
+  const arranged = new Map(layoutGraph(state.graph, density, "topology").nodes.map(node => [node.id, node]));
+  const graph = {
+    ...state.graph,
+    nodes: state.graph.nodes.map(node => {
+      const rest = { ...node };
+      delete rest.placement;
+      const box = arranged.get(node.id)!;
+      return { ...rest, position: { x: box.x, y: box.y } };
+    }),
+  };
+  const prepared = { graph, focusedNodeId: state.focusedNodeId, recentNodeId: state.recentNodeId };
+  assertSnapshot(prepared);
+  return { state: commit(state, prepared), outcome: "committed", message: "Chart arranged." };
 }
 
 /** Candidate selection resumes a stored command; it is not an independent graph edit. */
