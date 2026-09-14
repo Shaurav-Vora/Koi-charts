@@ -191,12 +191,22 @@ export function prepareTransaction(
       && command.commands[0].kind === "add_node"
       && command.commands[1].kind === "move_to"
       && command.commands[1].node.kind === "recent";
+    const addsAndConnectsPositionedNode = command.commands.length === 3
+      && command.commands[0].kind === "add_node"
+      && command.commands[1].kind === "move_to"
+      && command.commands[1].node.kind === "recent"
+      && command.commands[2].kind === "connect"
+      && command.commands[2].target.kind === "recent";
     let additionMessage = "";
     command.commands.forEach((edit, index) => {
       apply(edit, `/commands/${index}`);
       if (index === 0) additionMessage = message;
     });
-    message = positionsNewNode ? additionMessage : `Applied ${command.commands.length} edits.`;
+    message = positionsNewNode
+      ? additionMessage
+      : addsAndConnectsPositionedNode
+        ? additionMessage.replace("Added ", "Added and connected ")
+        : `Applied ${command.commands.length} edits.`;
   } else if (editKinds.includes(command.kind)) apply(command as EditCommand, "");
   else throw new Error("This command does not edit or focus the graph.");
   assertSnapshot(working);

@@ -231,6 +231,19 @@ describe("clarification and atomic commands", () => {
     expect(result.state.graph.nodes[0].position).toEqual({ x: 240, y: 120 });
     expect(result.state.history.past).toHaveLength(1);
   });
+  it("describes an empty-canvas connection drop as one added and connected node", () => {
+    const before = state();
+    const result = execute(before, { kind: "compound", commands: [
+      { kind: "add_node", type: "process", label: "Process", placement: null },
+      { kind: "move_to", node: { kind: "recent" }, position: { x: 240, y: 120 } },
+      { kind: "connect", source: { kind: "id", value: "n4" }, target: { kind: "recent" }, label: null },
+    ] }, ids());
+
+    expect(result.outcome).toBe("committed");
+    expect(result.message).toBe("Added and connected Process node.");
+    expect(result.state.graph.edges.at(-1)?.target).toBe("generated-1");
+    expect(result.state.history.past).toHaveLength(1);
+  });
   it("connected deletion inside a compound confirms the entire transaction", () => {
     const before = state(); const pending = execute(before, { kind: "compound", commands: [add("New"), del("n2")] }, ids());
     expect(pending.outcome).toBe("confirmation"); expect(pending.state.graph).toEqual(before.graph);

@@ -68,6 +68,7 @@ Every action—whether initiated via speech, keyboard hotkeys, visual drag-and-d
 - **Synchronized-View Walkthrough**: A shared decision-node demonstration shows how the same focus appears on the visual canvas, tactile display, and spoken outline.
 - **Custom Semantic Nodes**: Start (entry), Process (step), Decision (branch), and End (exit) shapes with accessible semantic color coding.
 - **Smart Connection Routing**: Interactive connection ports that automatically determine optimal orthogonal routing based on relative node positioning.
+- **Connect-and-Create Menu**: Drop a connection on empty canvas, choose the next shape from a compact menu, and create the positioned node and arrow as one undoable edit.
 - **Free Positioning & Auto-Layout**: Drag shapes freely across the canvas or use structured relative placements (`move Process below Start`).
 - **Consistent Add Feedback**: Clicking or dropping a shape reports the same added-node confirmation while drag-and-drop positioning remains one undoable edit.
 - **Inline Editing**: Double-click any shape to rename in place with instant validation and canvas fit-to-view controls.

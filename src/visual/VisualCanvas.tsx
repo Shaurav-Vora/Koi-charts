@@ -83,8 +83,10 @@ function Canvas({
   onInspectEdge,
 }: VisualCanvasProps) {
   const { screenToFlowPosition, zoomIn, zoomOut, fitView, setCenter, getZoom } = useReactFlow();
+  const canvasAreaRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<{ id: string; x: number; y: number } | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
+  const [connectionDrop, setConnectionDrop] = useState<{ sourceId: string; flowX: number; flowY: number; left: number; top: number } | null>(null);
   const lastInspectedEdgeId = useRef<string | null>(null);
   const inspectEdge = (edgeId: string) => {
     setSelectedEdgeId(edgeId);
@@ -149,16 +151,28 @@ function Canvas({
     const markerColor = edge.id === inspectedEdgeId ? "#244ea9" : playbackState === "current" ? "#c25f0a" : playbackState === "visited" ? "#315ac8" : "#536b99";
     return { ...edge, type: "routed", selected: edge.id === inspectedEdgeId, ariaLabel: accessibleName, className: playbackState ? `playback-edge is-${playbackState}` : undefined, data: { points: liveLayout.find(item => item.id === edge.id)!.points, playbackState, accessibleName }, markerEnd: { type: MarkerType.ArrowClosed, color: markerColor } };
   }), [graph, liveLayout, inspectedEdgeId, currentRouteStep?.viaEdgeId, visitedEdgeIds]);
-  return <div className="canvas-area" onDragOver={event => { event.preventDefault(); event.dataTransfer.dropEffect = "copy"; }} onDrop={event => {
+  const addConnectedNode = (type: typeof semanticTypes[number]) => {
+    if (!connectionDrop) return;
+    const width = type === "decision" ? 230 : 190;
+    const height = type === "decision" ? 150 : 86;
+    onCommand({ kind: "compound", commands: [
+      { kind: "add_node", type, label: type[0].toUpperCase() + type.slice(1), placement: null },
+      { kind: "move_to", node: { kind: "recent" }, position: { x: connectionDrop.flowX - width / 2, y: connectionDrop.flowY - height / 2 } },
+      { kind: "connect", source: { kind: "id", value: connectionDrop.sourceId }, target: { kind: "recent" }, label: null },
+    ] });
+    setConnectionDrop(null);
+  };
+  return <div ref={canvasAreaRef} className="canvas-area" onDragOver={event => { event.preventDefault(); event.dataTransfer.dropEffect = "copy"; }} onDrop={event => {
     event.preventDefault();
+    setConnectionDrop(null);
     const type = event.dataTransfer.getData("application/koi-node");
     if (!semanticTypes.includes(type as typeof semanticTypes[number])) return;
     const point = screenToFlowPosition({ x: event.clientX, y: event.clientY });
     onCommand({ kind: "compound", commands: [{ kind: "add_node", type: type as typeof semanticTypes[number], label: type[0].toUpperCase() + type.slice(1), placement: null }, { kind: "move_to", node: { kind: "recent" }, position: { x: point.x - (type === "decision" ? 115 : 95), y: point.y - (type === "decision" ? 75 : 43) } }] });
   }}><ReactFlow<CanvasNode, RoutedEdge> nodes={nodes.map(node => drag?.id === node.id ? { ...node, position: { x: drag.x, y: drag.y } } : node)} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
     connectionMode={ConnectionMode.Loose} connectionRadius={32}
-    zoomOnDoubleClick={false} onPaneClick={() => { lastInspectedEdgeId.current = null; setSelectedEdgeId(null); onCommand({ kind: "clear_focus" }); }}
-    onEdgeClick={(_, edge) => { onInspectEdgeRequestHandled?.(); inspectEdge(edge.id); }}
+    zoomOnDoubleClick={false} onPaneClick={() => { setConnectionDrop(null); lastInspectedEdgeId.current = null; setSelectedEdgeId(null); onCommand({ kind: "clear_focus" }); }}
+    onEdgeClick={(_, edge) => { setConnectionDrop(null); onInspectEdgeRequestHandled?.(); inspectEdge(edge.id); }}
     onEdgesChange={changes => { for (const change of changes) if (change.type === "select") { if (change.selected) inspectEdge(change.id); else { lastInspectedEdgeId.current = null; setSelectedEdgeId(current => current === change.id ? null : current); } } }}
     isValidConnection={connection => connection.source !== connection.target}
     nodesDraggable
@@ -167,11 +181,33 @@ function Canvas({
       onCommand({ kind: "move_to", node: { kind: "id", value: node.id }, position: node.position });
       setDrag(null);
     }} nodesFocusable={false} edgesFocusable elementsSelectable edgesReconnectable={false} deleteKeyCode={null}
-    onConnect={({ source, target }) => onCommand({ kind: "connect", source: { kind: "id", value: source }, target: { kind: "id", value: target }, label: null })}
+    onConnect={({ source, target }) => { setConnectionDrop(null); onCommand({ kind: "connect", source: { kind: "id", value: source }, target: { kind: "id", value: target }, label: null }); }}
+    onConnectEnd={(event, connection) => {
+      if (connection.isValid || connection.toNode || !connection.fromNode) return;
+      const pointer = "changedTouches" in event ? event.changedTouches[0] : event;
+      if (!pointer) return;
+      const flowPoint = screenToFlowPosition({ x: pointer.clientX, y: pointer.clientY });
+      const rect = canvasAreaRef.current?.getBoundingClientRect();
+      const localX = pointer.clientX - (rect?.left ?? 0);
+      const localY = pointer.clientY - (rect?.top ?? 0);
+      const left = rect?.width ? Math.min(Math.max(12, localX), Math.max(12, rect.width - 288)) : localX;
+      const top = rect?.height ? Math.min(Math.max(12, localY), Math.max(12, rect.height - 220)) : localY;
+      setConnectionDrop({ sourceId: connection.fromNode.id, flowX: flowPoint.x, flowY: flowPoint.y, left, top });
+    }}
     ariaLabelConfig={{ "node.a11yDescription.default": "Select a node to focus it. Use the editing form for keyboard movement and deletion.", "edge.a11yDescription.default": "Connections are available in the chart outline." }}
     fitView fitViewOptions={{ maxZoom: 1, padding: 0.25 }} minZoom={0.1} maxZoom={2}>
     <Background gap={20} color="#d4ddea" /><FitChart layout={layout} />
   </ReactFlow>
+  {connectionDrop && <div className="connection-drop-chooser nodrag nopan nowheel" role="dialog" aria-modal="false" aria-label="Add connected shape" style={{ left: connectionDrop.left, top: connectionDrop.top }} onKeyDown={event => { if (event.key === "Escape") { event.stopPropagation(); setConnectionDrop(null); } }}>
+    <div className="connection-drop-heading"><h3>Add connected shape</h3><button type="button" aria-label="Close shape choices" onClick={() => setConnectionDrop(null)}>×</button></div>
+    <p>Choose what comes next.</p>
+    <div className="connection-drop-options">
+      {semanticTypes.map((type, index) => <button key={type} type="button" autoFocus={index === 0} aria-label={`Add connected ${type}`} onClick={() => addConnectedNode(type)}>
+        <svg viewBox="0 0 76 48" aria-hidden="true">{type === "decision" ? <polygon points="38,3 72,24 38,45 4,24" /> : <rect x="5" y="7" width="66" height="34" rx={type === "process" ? 4 : 17} />}</svg>
+        <span>{type[0].toUpperCase() + type.slice(1)}</span>
+      </button>)}
+    </div>
+  </div>}
   <CanvasControls canFit={layout.nodes.length > 0} canCenter={!!focusedBox}
     onZoomIn={() => void zoomIn({ duration: 160 })} onZoomOut={() => void zoomOut({ duration: 160 })}
     onFit={() => void fitView({ padding: 0.25, maxZoom: 1, duration: 220 })} onCenter={centerOnFocus}

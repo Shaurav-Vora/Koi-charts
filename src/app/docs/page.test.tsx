@@ -81,3 +81,11 @@ it("documents local voice control and synchronized accessible feedback", () => {
  expect(text).toMatch(/screen reader/i);
  expect(text).toMatch(/Enter[\s\S]*Space/);
 });
+
+it("documents creating a connected shape from an empty canvas drop", () => {
+ const { container } = render(<Documentation />);
+ const text = container.querySelector("#getting-started")?.textContent ?? "";
+
+ expect(text).toMatch(/drop (?:the )?connection on empty canvas/i);
+ expect(text).toMatch(/choose (?:a|the) shape/i);
+});

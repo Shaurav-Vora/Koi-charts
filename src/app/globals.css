@@ -215,6 +215,17 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .branch-shortcuts button[aria-pressed="true"] { background: var(--accent-tint); border-color: var(--accent); color: var(--accent); font-weight: 700; }
 .arrow-inspector button[type="submit"] { background: var(--accent); color: white; border-color: var(--accent); }
 .arrow-editor-hint { margin-top: 12px; font-size: 12px; color: var(--muted); }
+.connection-drop-chooser { position: absolute; z-index: 8; width: 276px; padding: 14px; border: 1px solid #e5b083; border-top: 3px solid var(--accent); border-radius: 9px; background: white; box-shadow: 0 12px 30px #1c2c4926; }
+.connection-drop-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.connection-drop-heading h3 { font-size: 15px; }
+.connection-drop-heading > button { width: 32px; height: 32px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); font-size: 22px; cursor: pointer; }
+.connection-drop-heading > button:hover { background: var(--accent-tint); color: var(--accent); }
+.connection-drop-chooser > p { margin: 2px 0 12px; color: var(--muted); font-size: 12px; }
+.connection-drop-options { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.connection-drop-options button { display: grid; grid-template-columns: 42px 1fr; align-items: center; gap: 7px; min-height: 48px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: #fffdfa; color: var(--ink); text-align: left; cursor: pointer; }
+.connection-drop-options button:hover { border-color: var(--accent); background: var(--accent-tint); }
+.connection-drop-options svg { width: 42px; height: 30px; fill: white; stroke: #536b99; stroke-width: 2; }
+.connection-drop-options span { font-size: 12px; font-weight: 650; }
 .node-content { position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; width: 100%; height: 100%; padding: 12px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
 .node-content > span { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
 .node-content strong { max-width: 160px; font-size: 15px; line-height: 1.2; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

@@ -112,7 +112,7 @@ export default function Documentation() {
               <li>
                 <div>
                   <h3>Connect the next step</h3>
-                  <p>Drag between shape ports, or say <code>connect Begin to a new process called Sign in</code>. Select an arrow to add a branch label such as <code>Yes</code> or <code>No</code>.</p>
+                  <p>Drag between shape ports, or drop the connection on empty canvas and choose a shape to create there. You can also say <code>connect Begin to a new process called Sign in</code>. Select an arrow to add a branch label such as <code>Yes</code> or <code>No</code>.</p>
                 </div>
               </li>
               <li>

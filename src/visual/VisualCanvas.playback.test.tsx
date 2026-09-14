@@ -27,12 +27,13 @@ vi.mock("@xyflow/react", async () => {
       zoomIn: vi.fn(),
       zoomOut: vi.fn(),
     }),
-    ReactFlow: ({ nodes, edges, children, onEdgeClick, onEdgesChange }: {
+    ReactFlow: ({ nodes, edges, children, onEdgeClick, onEdgesChange, onConnectEnd }: {
       nodes: Array<{ id: string; data: { playbackState?: string } }>;
       edges: Array<{ id: string; ariaLabel?: string; data: { playbackState?: string } }>;
       children: ReactNode;
       onEdgeClick?: (event: unknown, edge: unknown) => void;
       onEdgesChange?: (changes: Array<{ type: "select"; id: string; selected: boolean }>) => void;
+      onConnectEnd?: (event: MouseEvent, state: { isValid: boolean; fromNode: { id: string } | null; toNode: { id: string } | null }) => void;
     }) => React.createElement(
       "div",
       null,
@@ -52,6 +53,16 @@ vi.mock("@xyflow/react", async () => {
           onEdgesChange?.([{ type: "select", id: edge.id, selected: true }]);
         },
       })),
+      React.createElement("button", {
+        key: "empty-drop",
+        type: "button",
+        onClick: () => onConnectEnd?.(new MouseEvent("mouseup", { clientX: 420, clientY: 280 }), { isValid: false, fromNode: { id: "review" }, toNode: null }),
+      }, "Drop connection on empty canvas"),
+      React.createElement("button", {
+        key: "valid-drop",
+        type: "button",
+        onClick: () => onConnectEnd?.(new MouseEvent("mouseup", { clientX: 420, clientY: 280 }), { isValid: true, fromNode: { id: "review" }, toNode: { id: "approve" } }),
+      }, "Complete valid connection"),
       children,
     ),
   };
@@ -141,6 +152,36 @@ describe("VisualCanvas playback route", () => {
     />);
 
     expect(screen.getByRole("form", { name: "Selected arrow" })).toBeVisible();
+  });
+
+  it("offers shape choices when a connection is dropped on empty canvas", () => {
+    const onCommand = vi.fn();
+    render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId="review" onCommand={onCommand} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Drop connection on empty canvas" }));
+
+    expect(screen.getByRole("dialog", { name: "Add connected shape" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Add connected start" })).toHaveFocus();
+    fireEvent.click(screen.getByRole("button", { name: "Add connected process" }));
+    expect(onCommand).toHaveBeenCalledWith({
+      kind: "compound",
+      commands: [
+        { kind: "add_node", type: "process", label: "Process", placement: null },
+        { kind: "move_to", node: { kind: "recent" }, position: { x: 325, y: 237 } },
+        { kind: "connect", source: { kind: "id", value: "review" }, target: { kind: "recent" }, label: null },
+      ],
+    });
+    expect(screen.queryByRole("dialog", { name: "Add connected shape" })).not.toBeInTheDocument();
+  });
+
+  it("does not open the chooser after a valid connection and closes it with Escape", () => {
+    render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId="review" onCommand={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Complete valid connection" }));
+    expect(screen.queryByRole("dialog", { name: "Add connected shape" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Drop connection on empty canvas" }));
+    fireEvent.keyDown(screen.getByRole("dialog", { name: "Add connected shape" }), { key: "Escape" });
+    expect(screen.queryByRole("dialog", { name: "Add connected shape" })).not.toBeInTheDocument();
   });
 
   it("deletes the selected connection with Delete while leaving label typing safe", () => {
