@@ -12,52 +12,9 @@ export function createPlaybackState(): PlaybackState {
     currentNodeId: null,
     route: [],
     choices: [],
-    warnings: [],
     visitCounts: {},
     message: "No chart test is running.",
   };
-}
-
-function reachableNodeIds(graph: FlowGraph, starts: FlowNode[]): Set<string> {
-  const reached = new Set(starts.map(node => node.id));
-  const queue = [...reached];
-  for (let index = 0; index < queue.length; index++) {
-    for (const edge of graph.edges.filter(item => item.source === queue[index]).sort(byId)) {
-      if (reached.has(edge.target)) continue;
-      reached.add(edge.target);
-      queue.push(edge.target);
-    }
-  }
-  return reached;
-}
-
-function playbackWarnings(graph: FlowGraph, starts: FlowNode[]): string[] {
-  const warnings: string[] = [];
-  if (!graph.nodes.some(node => node.type === "end")) warnings.push("No End node.");
-  if (starts.length) {
-    const reached = reachableNodeIds(graph, starts);
-    const unreachable = graph.nodes.filter(node => !reached.has(node.id)).sort(byId).map(node => node.label);
-    if (unreachable.length) warnings.push("Unreachable nodes: " + unreachable.join(", ") + ".");
-  }
-  for (const decision of graph.nodes.filter(node => node.type === "decision").sort(byId)) {
-    const outgoing = graph.edges.filter(edge => edge.source === decision.id).sort(byId);
-    if (outgoing.length < 2) warnings.push("Decision " + decision.label + " has fewer than two outgoing branches.");
-    for (const edge of outgoing.filter(item => !item.label?.trim())) {
-      const target = graph.nodes.find(node => node.id === edge.target);
-      if (target) warnings.push("Decision " + decision.label + " has an unlabelled branch to " + target.label + ".");
-    }
-    const labels = new Map<string, string[]>();
-    for (const edge of outgoing) {
-      const label = edge.label?.trim();
-      if (!label) continue;
-      const key = label.toLocaleLowerCase();
-      labels.set(key, [...(labels.get(key) ?? []), label]);
-    }
-    for (const repeated of labels.values()) {
-      if (repeated.length > 1) warnings.push("Decision " + decision.label + " repeats the branch label " + repeated[0] + ".");
-    }
-  }
-  return warnings;
 }
 
 function startChoice(node: FlowNode): PlaybackChoice {
@@ -115,7 +72,6 @@ function begin(graph: FlowGraph, graphVersion: number): PlaybackState {
   const base = {
     ...createPlaybackState(),
     graphVersion,
-    warnings: playbackWarnings(graph, starts),
   };
   if (!starts.length) return { ...base, status: "blocked", message: "Add a Start node before testing." };
   if (starts.length > 1) {

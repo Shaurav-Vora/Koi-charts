@@ -49,6 +49,14 @@ describe("PlaybackPanel", () => {
     expect(onAction).toHaveBeenCalledWith({ type: "next", graphVersion: 3 });
   });
 
+  it("leaves structural issue notes to Check chart", () => {
+    const state = playbackTransition(graph, createPlaybackState(), { type: "start", graphVersion: 3 });
+    render(<PlaybackPanel graph={graph} graphVersion={3} state={state} onAction={vi.fn()} />);
+
+    expect(screen.queryByText("Chart notes")).not.toBeInTheDocument();
+    expect(screen.queryByText("No End node.")).not.toBeInTheDocument();
+  });
+
   it("renders explicit branch choices without choosing one automatically", () => {
     const onAction = vi.fn();
     let state = playbackTransition(graph, createPlaybackState(), { type: "start", graphVersion: 3 });

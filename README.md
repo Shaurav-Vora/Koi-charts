@@ -257,6 +257,8 @@ npm run braille
 
 The compact **Test chart** control sits inside the visual canvas instead of taking a permanent workspace row. Its in-canvas panel opens directly beneath the control while testing, and the control remains visible. This is a verification and walkthrough mode for an existing chart: it follows the graph one node at a time without creating content or changing undo history. Starting a test focuses the Start node across the visual canvas, tactile display, and chart outline without opening the shape editor. **Next step** follows a single outgoing connection, while charts with multiple outgoing connections require an explicit branch choice.
 
+Test chart reports conditions encountered on the selected route, including missing Starts, dead ends, loops, branch choices, and chart changes. Structural review notes belong to **Check chart**, so the playback panel does not duplicate missing-End, unreachable-shape, or decision-quality issues.
+
 - **Back one step** returns through the route actually taken.
 - **Repeat step** repeats the current node guidance.
 - **Restart test** begins again after completion, a dead end, or a chart change.

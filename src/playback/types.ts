@@ -14,7 +14,6 @@ export type PlaybackState = {
   currentNodeId: string | null;
   route: PlaybackRouteStep[];
   choices: PlaybackChoice[];
-  warnings: string[];
   visitCounts: Record<string, number>;
   message: string;
 };

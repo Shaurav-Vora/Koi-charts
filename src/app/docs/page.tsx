@@ -261,8 +261,8 @@ export default function Documentation() {
             <h3>When a route needs attention</h3>
             <dl className="docs-check-grid">
               <div>
-                <dt>Missing or unreachable shapes</dt>
-                <dd>A chart without a Start cannot begin. Shapes unreachable from the chosen Start are reported before playback.</dd>
+                <dt>Missing Start</dt>
+                <dd>A chart without a Start cannot begin. Use Check chart for structural issues such as unreachable shapes, missing Ends, and incomplete decisions.</dd>
               </div>
               <div>
                 <dt>Missing branch labels</dt>

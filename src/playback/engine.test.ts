@@ -117,8 +117,7 @@ describe("playback engine", () => {
       "Yes to Reject",
       "Yes to Review",
     ]);
-    expect(state.warnings).toContain("Decision Choose route has an unlabelled branch to Approve.");
-    expect(state.warnings).toContain("Decision Choose route repeats the branch label Yes.");
+    expect(state).not.toHaveProperty("warnings");
   });
 
   it("goes Back through the route actually taken and repairs visit counts", () => {
@@ -179,7 +178,7 @@ describe("playback engine", () => {
     expect(state.route.map(step => step.nodeId)).toEqual(["s", "p", "s"]);
   });
 
-  it("reports missing End and unreachable nodes using labels only", () => {
+  it("leaves missing End and unreachable-node review to the chart audit", () => {
     const graph: FlowGraph = {
       schemaVersion: 1,
       nodes: [
@@ -190,8 +189,8 @@ describe("playback engine", () => {
       edges: [{ id: "opaque-edge-id", source: "opaque-start-id", target: "opaque-work-id" }],
     };
     const state = playbackTransition(graph, createPlaybackState(), { type: "start", graphVersion: 8 });
-    expect(state.warnings).toEqual(["No End node.", "Unreachable nodes: Island."]);
-    expect(state.warnings.join(" ")).not.toContain("opaque");
+    expect(state).not.toHaveProperty("warnings");
+    expect(state.message).not.toContain("opaque");
   });
 
   it("invalidates stale playback before following graph IDs", () => {

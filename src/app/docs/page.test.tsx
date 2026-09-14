@@ -80,6 +80,7 @@ it("documents local voice control and synchronized accessible feedback", () => {
  expect(text).toMatch(/Test route/i);
  expect(text).toMatch(/screen reader/i);
  expect(text).toMatch(/Enter[\s\S]*Space/);
+ expect(text).toMatch(/use Check chart for structural issues/i);
 });
 
 it("documents creating a connected shape from an empty canvas drop", () => {

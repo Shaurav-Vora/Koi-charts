@@ -37,11 +37,6 @@ export default function PlaybackPanel({ graph, graphVersion, state, onAction, an
       {current && <p className="playback-progress"><strong>Step {state.route.length} · {current.label}</strong><span>{current.type}</span></p>}
       {routeLabels.length > 1 && <p className="playback-route"><span>Route</span>{routeLabels.join(" → ")}</p>}
 
-      {!!state.warnings.length && <div className="playback-warnings">
-        <strong>Chart notes</strong>
-        <ul>{state.warnings.map(warning => <li key={warning}>{warning}</li>)}</ul>
-      </div>}
-
       {state.status === "choosing_start" && <div className="playback-choices" aria-label="Start choices">
         {state.choices.map(choice => <button type="button" key={choice.id} onClick={() => dispatch({ type: "choose_start", nodeId: choice.id, graphVersion })}>Start at {choice.label}</button>)}
       </div>}
