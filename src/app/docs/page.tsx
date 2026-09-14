@@ -112,7 +112,7 @@ export default function Documentation() {
               <li>
                 <div>
                   <h3>Connect the next step</h3>
-                  <p>Drag between shape ports, or drop the connection on empty canvas and choose a shape to create there. You can also say <code>connect Begin to a new process called Sign in</code>. Select an arrow to add a branch label such as <code>Yes</code> or <code>No</code>.</p>
+                  <p>Drag between shape ports, or drop the connection on empty canvas and choose a shape to create there. The pending route stays anchored to the original release point while you choose. You can also say <code>connect Begin to a new process called Sign in</code>. Select an arrow to add a branch label such as <code>Yes</code> or <code>No</code>.</p>
                 </div>
               </li>
               <li>
@@ -126,7 +126,7 @@ export default function Documentation() {
             <div className="docs-note">
               <div>
                 <h3>Editing essentials</h3>
-                <p>Select a shape or connection and press <kbd>Delete</kbd>. The lower-right selection card also provides a delete button. Press <kbd>Escape</kbd> to clear the selection.</p>
+                <p>Select a shape or connection and press <kbd>Delete</kbd>. The lower-right selection card also provides a delete button. Press <kbd>Escape</kbd> to clear the selection. Use <strong>Compact nodes</strong> when space is limited. Use <strong>Auto arrange chart</strong> to restore a readable top-to-bottom layout, fit the chart to the canvas, and centre the focused shape.</p>
               </div>
               <p>Press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>S</kbd> to interrupt a spoken reply.</p>
             </div>
@@ -137,7 +137,8 @@ export default function Documentation() {
                 <li>Replace angle-bracket terms such as <code>&lt;shape&gt;</code> and <code>&lt;label&gt;</code> with your own values.</li>
                 <li>Square brackets mark optional wording.</li>
                 <li>Quote labels containing command words: <code>add a process called &ldquo;Sign in with Google&rdquo;</code>.</li>
-                <li><strong>Fast local commands</strong> handles common phrases without a network request. <strong>Speak replies</strong> controls spoken feedback.</li>
+                <li><strong>Fast local commands</strong> handles common phrases without a network request. Join recognised commands with <code>then</code>, <code>and then</code>, or <code>and</code> to apply them together. If any clause is not recognised, Koi Charts sends the complete request to Gemini.</li>
+                <li><strong>Speak replies</strong> controls spoken feedback.</li>
               </ul>
             </div>
           </section>

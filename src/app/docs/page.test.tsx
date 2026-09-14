@@ -89,4 +89,16 @@ it("documents creating a connected shape from an empty canvas drop", () => {
 
  expect(text).toMatch(/drop (?:the )?connection on empty canvas/i);
  expect(text).toMatch(/choose (?:a|the) shape/i);
+ expect(text).toMatch(/release point/i);
+ expect(text).toMatch(/compact/i);
+ expect(text).toMatch(/auto arrange/i);
+ expect(text).toMatch(/fit/i);
+});
+
+it("documents recognized local command sequences", () => {
+ const { container } = render(<Documentation />);
+ const text = container.querySelector("#getting-started")?.textContent ?? "";
+
+ expect(text).toMatch(/then[\s\S]*and then/i);
+ expect(text).toMatch(/complete request[\s\S]*Gemini/i);
 });
