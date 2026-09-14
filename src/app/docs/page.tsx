@@ -212,7 +212,7 @@ export default function Documentation() {
             <div className="docs-access-note">
               <h3>Private, concise feedback</h3>
               <p>
-                Chart checking runs locally without calling Gemini or using Gemini quota. Spoken and visible issue copy uses chart labels and never exposes internal identifiers. Opening <strong>Test chart</strong> closes the audit so the two review modes do not overlap.
+                Chart checking runs locally without calling Gemini or using Gemini quota. Spoken and visible issue copy uses chart labels and never exposes internal identifiers. When a suggested action opens an editor, the reply names the shape or connection being edited. Opening <strong>Test chart</strong> closes the audit so the two review modes do not overlap.
               </p>
             </div>
           </section>

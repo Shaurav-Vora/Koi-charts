@@ -13,6 +13,7 @@ type AuditPanelProps = {
 };
 
 export default function AuditPanel({ graphVersion, state, onAction, onFix, onEdit, announce = true }: AuditPanelProps) {
+  const popoverId = "chart-audit-popover";
   const active = state.status === "open";
   const current = currentAuditIssue(state);
   const index = current ? state.issues.findIndex(issue => issue.id === current.id) : -1;
@@ -21,8 +22,8 @@ export default function AuditPanel({ graphVersion, state, onAction, onFix, onEdi
   const dispatch = (type: AuditAction["type"]) => onAction({ type, graphVersion } as AuditAction);
 
   return <section className="audit-panel is-compact" data-result={current?.severity ?? (active ? "clear" : "closed")} role="region" aria-label="Check chart">
-    <button className={`audit-launch${active ? " is-active" : ""}`} type="button" aria-expanded={active} onClick={() => dispatch(active ? "close" : "open")}>Check chart</button>
-    {active && <div className="audit-popover">
+    <button className={`audit-launch${active ? " is-active" : ""}`} type="button" aria-expanded={active} aria-controls={popoverId} onClick={() => dispatch(active ? "close" : "open")}>Check chart</button>
+    {active && <div id={popoverId} className="audit-popover">
       <div className="audit-heading">
         <div>
           <span className="audit-eyebrow">Chart review</span>

@@ -63,6 +63,7 @@ it("documents structured chart checking as a local accessible workflow", () => {
  expect(text).toMatch(/without calling Gemini/i);
  expect(text).toMatch(/recalculates as you edit/i);
  expect(text).toMatch(/internal identifiers/i);
+ expect(text).toMatch(/names the shape or connection being edited/i);
 });
 
 it("documents local voice control and synchronized accessible feedback", () => {

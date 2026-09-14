@@ -33,8 +33,18 @@ describe("AuditPanel", () => {
     expect(screen.getByText("No start node.")).toBeVisible();
     expect(screen.getByText("Add one Start node to show where the flow begins.")).toBeVisible();
     expect(screen.getByRole("progressbar", { name: "Audit progress" })).toHaveAttribute("value", "1");
+    const launch = screen.getByRole("button", { name: "Check chart" });
+    expect(launch).toHaveAttribute("aria-controls");
+    expect(document.getElementById(launch.getAttribute("aria-controls")!)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Add Start" }));
     expect(onFix).toHaveBeenCalledWith({ kind: "add_node", type: "start", label: "Start", placement: null });
+  });
+
+  it("disables live-region announcements when speech output owns the reply", () => {
+    const state = auditTransition(empty, createAuditState(), { type: "open", graphVersion: 2 });
+    render(<AuditPanel graphVersion={2} state={state} onAction={vi.fn()} announce={false} />);
+
+    expect(screen.getByRole("status")).toHaveAttribute("aria-live", "off");
   });
 
   it("dispatches issue navigation and closing with the current graph version", () => {

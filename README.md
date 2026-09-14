@@ -222,6 +222,8 @@ Koi Charts features an on-device deterministic grammar parser (`src/commands/gra
 
 Use **Previous**, **Repeat**, and **Next** in the panel, or say `previous issue`, `repeat issue`, and `next issue`. The audit recalculates after every chart edit, keeps the current issue when it still exists, and advances when that issue is resolved. Say `close check` to close it. These commands do not call Gemini.
 
+The **Check chart** control reports whether its panel is expanded and identifies the panel it controls. Issue changes use the screen-reader live region when browser speech is unavailable; when spoken replies are enabled, that duplicate live announcement is disabled.
+
 Missing Start and End issues include an **Add Start** or **Add End** action. These safe fixes use the same edit history as manual changes, so they can be undone. Duplicate labels open the existing shape editor, unlabelled decision branches open the arrow editor, and charts with multiple Starts present each Start as a separate focused finding. The audit closes before an editor opens so the cards do not overlap. Spoken feedback identifies the shape or the two endpoints of the connection being edited. Connection choices remain guidance-only.
 
 Manual acceptance check:
