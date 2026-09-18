@@ -143,6 +143,23 @@ function Canvas({
     document.addEventListener("keydown", removeSelectedEdge);
     return () => document.removeEventListener("keydown", removeSelectedEdge);
   }, [inspectEdgeRequest, inspectedEdgeId, onCommand, onInspectEdgeRequestHandled]);
+  useEffect(() => {
+    const clearCanvasSelection = (event: KeyboardEvent) => {
+      const editable = event.target instanceof Element && !!event.target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]');
+      const hasSelection = !!focusedNodeId || !!inspectedEdgeId || selectedNodeIds.length > 0 || !!connectionDrop;
+      if (event.key !== "Escape" || event.repeat || event.defaultPrevented || event.isComposing || editable || !hasSelection) return;
+      event.preventDefault();
+      setConnectionDrop(null);
+      lastInspectedEdgeId.current = null;
+      setSelectedEdgeId(null);
+      onInspectEdgeRequestHandled?.();
+      onSelectedNodeIdsChange?.([]);
+      if (onSelectionComplete) onSelectionComplete([]);
+      else onCommand({ kind: "clear_focus" });
+    };
+    document.addEventListener("keydown", clearCanvasSelection);
+    return () => document.removeEventListener("keydown", clearCanvasSelection);
+  }, [connectionDrop, focusedNodeId, inspectedEdgeId, onCommand, onInspectEdgeRequestHandled, onSelectedNodeIdsChange, onSelectionComplete, selectedNodeIds.length]);
   const focusedBox = layout.nodes.find(box => box.id === focusedNodeId);
   const lastCenterRequest = useRef<string | null>(null);
   useEffect(() => {

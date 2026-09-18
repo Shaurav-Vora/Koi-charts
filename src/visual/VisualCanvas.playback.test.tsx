@@ -289,6 +289,37 @@ describe("VisualCanvas playback route", () => {
     expect(onSelectedNodeIdsChange).toHaveBeenLastCalledWith([]);
   });
 
+  it("clears an arrow selection with Escape outside its editor", () => {
+    const onCommand = vi.fn();
+    const onInspectEdgeRequestHandled = vi.fn();
+    const onSelectionComplete = vi.fn();
+    render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId={null} onCommand={onCommand}
+      onInspectEdgeRequestHandled={onInspectEdgeRequestHandled} onSelectionComplete={onSelectionComplete} />);
+
+    fireEvent.click(screen.getByRole("img", { name: "Edit arrow from Begin to Review labelled next" }));
+    expect(screen.getByRole("form", { name: "Selected arrow" })).toBeVisible();
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(screen.queryByRole("form", { name: "Selected arrow" })).not.toBeInTheDocument();
+    expect(onInspectEdgeRequestHandled).toHaveBeenCalled();
+    expect(onSelectionComplete).toHaveBeenCalledWith([]);
+    expect(onCommand).not.toHaveBeenCalled();
+  });
+
+  it("clears a multi-selection with Escape outside editable fields", () => {
+    const onCommand = vi.fn();
+    const onSelectedNodeIdsChange = vi.fn();
+    const onSelectionComplete = vi.fn();
+    render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId="review" onCommand={onCommand}
+      selectedNodeIds={["start", "review"]} onSelectedNodeIdsChange={onSelectedNodeIdsChange} onSelectionComplete={onSelectionComplete} />);
+
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(onSelectedNodeIdsChange).toHaveBeenCalledWith([]);
+    expect(onSelectionComplete).toHaveBeenCalledWith([]);
+    expect(onCommand).not.toHaveBeenCalled();
+  });
+
   it("passes compact presentation state to every node", () => {
     const onCommand = vi.fn();
     render(<VisualCanvas graph={graph} layout={layoutGraph(graph, "compact")} focusedNodeId={null} onCommand={onCommand} compactNodes onToggleCompactNodes={vi.fn()} />);
