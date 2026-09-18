@@ -4,4 +4,46 @@
     letter-spacing: -1.6px;
     text-wrap: balance;
   }
+
+  .home-canvas-node small {
+    font-size: 10px;
+    letter-spacing: .55px;
+  }
+
+  .home-canvas-node strong {
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  .home-command-note small,
+  .home-tactile-note small {
+    font-size: 10px;
+  }
+
+  .home-command-note strong,
+  .home-tactile-note strong {
+    font-size: 12px;
+  }
+
+  .home-tactile-note span {
+    font-size: 13px;
+  }
+
+  .home-output-visual > div {
+    width: 76px;
+    height: 76px;
+  }
+
+  .home-output-visual > div span {
+    font-size: 10px;
+  }
+
+  .home-output-visual > div strong {
+    font-size: 12px;
+  }
+
+  .output-line {
+    width: calc(50% - 72px);
+    font-size: 11px;
+  }
 }
