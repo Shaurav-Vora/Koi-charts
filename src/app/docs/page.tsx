@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import AppHeader from "../AppHeader";
 import CommandGuide from "../../editor/CommandGuide";
 import { grammar } from "../../commands/grammar";
+import "./documentation.css";
 
 export const metadata: Metadata = {
   title: "Documentation | Koi charts",
@@ -9,6 +10,37 @@ export const metadata: Metadata = {
 };
 
 const guideHref = (title: string) => `#guide-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+
+function DocumentationSections() {
+  return (
+    <>
+      <div className="docs-nav-heading">
+        <p>Documentation</p>
+        <span>Workspace guide</span>
+      </div>
+
+      <div className="docs-nav-group">
+        <p>Learn</p>
+        <a href="#getting-started">Getting started</a>
+        <a href="#checking-chart">Checking a chart</a>
+        <a href="#testing-chart">Testing a chart</a>
+      </div>
+
+      <div className="docs-nav-group">
+        <p>Voice commands</p>
+        {grammar.map(section => (
+          <a key={section.title} href={guideHref(section.title)}>{section.title}</a>
+        ))}
+        <a href="#guide-model">Gemini requests</a>
+      </div>
+
+      <div className="docs-nav-group">
+        <p>Reference</p>
+        <a href="#exports">Exporting charts</a>
+      </div>
+    </>
+  );
+}
 
 export default function Documentation() {
   return (
@@ -18,30 +50,7 @@ export default function Documentation() {
       <main className="docs-layout" id="documentation">
         <aside className="docs-sidebar">
           <nav className="docs-nav" aria-label="Documentation sections">
-            <div className="docs-nav-heading">
-              <p>Documentation</p>
-              <span>Workspace guide</span>
-            </div>
-
-            <div className="docs-nav-group">
-              <p>Learn</p>
-              <a href="#getting-started">Getting started</a>
-              <a href="#checking-chart">Checking a chart</a>
-              <a href="#testing-chart">Testing a chart</a>
-            </div>
-
-            <div className="docs-nav-group">
-              <p>Voice commands</p>
-              {grammar.map(section => (
-                <a key={section.title} href={guideHref(section.title)}>{section.title}</a>
-              ))}
-              <a href="#guide-model">Gemini requests</a>
-            </div>
-
-            <div className="docs-nav-group">
-              <p>Reference</p>
-              <a href="#exports">Exporting charts</a>
-            </div>
+            <DocumentationSections />
           </nav>
         </aside>
 
@@ -75,6 +84,16 @@ export default function Documentation() {
               </div>
             </div>
           </header>
+
+          <details className="docs-mobile-navigation">
+            <summary>
+              <span>Browse documentation</span>
+              <small>Jump to a section</small>
+            </summary>
+            <nav className="docs-nav" aria-label="Mobile documentation sections">
+              <DocumentationSections />
+            </nav>
+          </details>
 
           <section id="getting-started" className="docs-section" aria-labelledby="getting-started-title">
             <div className="docs-section-heading">

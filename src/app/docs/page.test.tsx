@@ -14,10 +14,28 @@ it("presents the documentation as a structured flowchart field guide", () => {
  const { container } = render(<Documentation />);
 
  expect(container.querySelector(".docs-hero-route")).not.toBeNull();
- expect(container.querySelectorAll(".docs-nav-group")).toHaveLength(3);
+ const desktopNav = screen.getByRole("navigation", { name: "Documentation sections" });
+ expect(desktopNav.querySelectorAll(".docs-nav-group")).toHaveLength(3);
  expect(screen.getByRole("link", { name: "Start building" })).toHaveAttribute("href", "#getting-started");
  expect(screen.getByRole("link", { name: "Test a route" })).toHaveAttribute("href", "#testing-chart");
  expect(screen.getByRole("heading", { name: "Choose how you work" })).toBeVisible();
+});
+
+it("places a collapsed mobile section browser after the introduction", () => {
+ const { container } = render(<Documentation />);
+ const hero = container.querySelector(".docs-hero");
+ const disclosure = container.querySelector(".docs-mobile-navigation");
+
+ expect(hero).not.toBeNull();
+ expect(disclosure).not.toBeNull();
+ if (!hero || !disclosure) throw new Error("Documentation navigation structure is missing");
+ expect(hero.compareDocumentPosition(disclosure) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+ expect(disclosure).not.toHaveAttribute("open");
+ expect(within(disclosure as HTMLElement).getByText("Browse documentation")).toBeVisible();
+ expect(within(disclosure as HTMLElement).getByRole("navigation", {
+  name: "Mobile documentation sections",
+  hidden: true,
+ })).toBeInTheDocument();
 });
 
 it("documents guided chart testing as a verification workflow", () => {
@@ -52,7 +70,8 @@ it("documents structured chart checking as a local accessible workflow", () => {
  const section = container.querySelector("#checking-chart");
 
  expect(section).not.toBeNull();
- expect(screen.getByRole("link", { name: "Checking a chart" })).toHaveAttribute("href", "#checking-chart");
+ const desktopNav = screen.getByRole("navigation", { name: "Documentation sections" });
+ expect(within(desktopNav).getByRole("link", { name: "Checking a chart" })).toHaveAttribute("href", "#checking-chart");
  const checking = within(section as HTMLElement);
  expect(checking.getByRole("heading", { name: "Checking a chart" })).toBeVisible();
 

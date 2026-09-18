@@ -1,0 +1,103 @@
+.docs-mobile-navigation {
+  display: none;
+}
+
+@media (max-width: 680px) {
+  .docs-sidebar {
+    display: none;
+  }
+
+  .docs-mobile-navigation {
+    display: block;
+    margin-top: 18px;
+    border: 1px solid #cad7ea;
+    border-top: 3px solid var(--docs-orange);
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  .docs-mobile-navigation summary {
+    min-height: 52px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 4px 16px;
+    padding: 10px 14px;
+    color: var(--docs-navy);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .docs-mobile-navigation summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .docs-mobile-navigation summary span {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .docs-mobile-navigation summary small {
+    grid-column: 1;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .docs-mobile-navigation summary::after {
+    content: "+";
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    color: var(--docs-orange);
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1;
+  }
+
+  .docs-mobile-navigation[open] summary::after {
+    content: "\2212";
+  }
+
+  .docs-mobile-navigation summary:focus-visible {
+    outline: 2px solid var(--docs-blue);
+    outline-offset: 3px;
+  }
+
+  .docs-mobile-navigation .docs-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 20px;
+    padding: 18px 14px 20px;
+    border-top: 1px solid #d7e0ed;
+  }
+
+  .docs-mobile-navigation .docs-nav-heading {
+    display: none;
+  }
+
+  .docs-mobile-navigation .docs-nav-group:nth-child(3) {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .docs-mobile-navigation .docs-nav-group:nth-child(3) > p {
+    grid-column: 1 / -1;
+  }
+
+  .docs-mobile-navigation + .docs-section {
+    margin-top: 34px;
+  }
+}
+
+@media (max-width: 430px) {
+  .docs-mobile-navigation .docs-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .docs-mobile-navigation .docs-nav-group:nth-child(3) {
+    grid-column: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .docs-mobile-navigation .docs-nav-group:nth-child(3) > p {
+    grid-column: auto;
+  }
+}
