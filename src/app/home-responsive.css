@@ -47,3 +47,21 @@
     font-size: 11px;
   }
 }
+
+@media (max-width: 540px) {
+  .home-canvas-body {
+    min-height: 480px;
+  }
+
+  .home-command-note {
+    top: 4%;
+    right: 3%;
+    width: 42%;
+  }
+
+  .home-tactile-note {
+    right: 3%;
+    bottom: 3%;
+    width: 44%;
+  }
+}
