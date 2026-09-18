@@ -64,6 +64,7 @@ export interface VisualCanvasProps {
   compactNodes?: boolean;
   onToggleCompactNodes?: () => void;
   onArrange?: () => void;
+  hideNavigationDock?: boolean;
 }
 
 function Canvas({
@@ -96,6 +97,7 @@ function Canvas({
   compactNodes = false,
   onToggleCompactNodes,
   onArrange,
+  hideNavigationDock = false,
 }: VisualCanvasProps) {
   const { screenToFlowPosition, flowToScreenPosition, zoomIn, zoomOut, fitView, setCenter, getZoom } = useReactFlow();
   const canvasAreaRef = useRef<HTMLDivElement>(null);
@@ -310,7 +312,7 @@ function Canvas({
     selectionActive={selectionActive} onToggleSelection={() => setSelectionActive(active => !active)}
     compactActive={compactNodes} onToggleCompact={onToggleCompactNodes}
     canArrange={layout.nodes.length > 1} onArrange={onArrange ? () => { frameAfterArrange.current = true; onArrange(); } : undefined} />
-  {onWalk && onDescribe && onInspect && (
+  {!hideNavigationDock && !selectedEdge && selectedNodeIds.length < 2 && !connectionDrop && onWalk && onDescribe && onInspect && (
     <div className="canvas-dock nodrag nopan" role="toolbar" aria-label="Chart navigation and inspection">
       <div className="canvas-control-group walk-controls" role="group" aria-label="Walk the chart">
         <button type="button" disabled={!canWalk} onClick={() => onWalk("first")} title="Go to start">Go to start</button>

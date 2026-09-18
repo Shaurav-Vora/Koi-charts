@@ -4,15 +4,17 @@ import Editor from "./Editor";
 import { createEditorCoordinator } from "./coordinator";
 
 vi.mock("../visual/VisualCanvas", () => ({
-  default: ({ centerRequest, inspectEdgeRequest }: {
+  default: ({ centerRequest, inspectEdgeRequest, hideNavigationDock }: {
     centerRequest?: { key: string; nodeId: string } | null;
     inspectEdgeRequest?: { key: string; edgeId: string } | null;
+    hideNavigationDock?: boolean;
   }) => (
     <div
       data-testid="visual-canvas"
       data-center-key={centerRequest?.key}
       data-center-node={centerRequest?.nodeId}
       data-inspect-edge={inspectEdgeRequest?.edgeId}
+      data-navigation-dock-hidden={hideNavigationDock}
     />
   ),
 }));
@@ -34,6 +36,7 @@ describe("editor playback integration", () => {
 
     expect(screen.getByRole("region", { name: "Check chart" })).toHaveClass("is-compact");
     expect(screen.getByRole("button", { name: "Check chart" })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByTestId("visual-canvas")).toHaveAttribute("data-navigation-dock-hidden", "true");
     expect(screen.getByText("2 issues")).toBeVisible();
     expect(screen.getByRole("region", { name: "Test chart" })).toHaveClass("is-compact");
   });

@@ -5,9 +5,9 @@ import { afterEach, expect, it, vi } from "vitest";
 import Editor from "./Editor";
 import { createEditorCoordinator } from "./coordinator";
 vi.mock("../visual/VisualCanvas",()=>({
- default:({onWalk,onInspect}:{onWalk?:(direction:"stay")=>void;onInspect?:()=>void})=><>
-  <button type="button" onClick={()=>onWalk?.("stay")}>Where am I</button>
-  <button type="button" onClick={onInspect}>Inspect focus</button>
+ default:({onWalk,onInspect,hideNavigationDock}:{onWalk?:(direction:"stay")=>void;onInspect?:()=>void;hideNavigationDock?:boolean})=><>
+  {!hideNavigationDock && <button type="button" onClick={()=>onWalk?.("stay")}>Where am I</button>}
+  {!hideNavigationDock && <button type="button" onClick={onInspect}>Inspect focus</button>}
  </>
 }));
 class Utterance { constructor(public text:string){} }

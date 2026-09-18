@@ -647,7 +647,9 @@
   margin-bottom: 8px;
 }
 #workspace .inspector-heading-actions { display: flex; align-items: center; gap: 8px; }
-#workspace .canvas-inspector .inspector-close {
+#workspace .canvas-inspector .inspector-close,
+#workspace .canvas-inspector .inspector-inspect,
+#workspace .canvas-inspector .inspector-locate {
   width: 30px;
   min-height: 30px;
   margin: 0;
@@ -660,7 +662,11 @@
   line-height: 1;
   cursor: pointer;
 }
-#workspace .canvas-inspector .inspector-close:hover { border-color: #cbd6e6; background: #f2f6fc; color: var(--ink); }
+#workspace .canvas-inspector .inspector-close:hover,
+#workspace .canvas-inspector .inspector-inspect:hover,
+#workspace .canvas-inspector .inspector-locate:hover { border-color: #cbd6e6; background: #f2f6fc; color: var(--ink); }
+#workspace .canvas-inspector .inspector-inspect svg,
+#workspace .canvas-inspector .inspector-locate svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
 #workspace .canvas-inspector h3 {
   font-size: 15px;
   font-weight: 700;
@@ -1059,7 +1065,7 @@ kbd { font-family: inherit; font-size: .9em; border: 1px solid #c7d3e5; border-b
  #workspace .editor-toolbar { gap: 10px; }
  #workspace .canvas-controls { max-width: calc(100% - 24px); left: 12px; top: 12px; gap: 3px; }
  #workspace .canvas-controls button { padding: 6px 8px; }
- #workspace .canvas-review-tools { top: 64px; right: 12px; width: calc(100% - 24px); }
+ #workspace .canvas-review-tools { top: 88px; right: 12px; width: calc(100% - 24px); }
  #workspace .playback-popover,
  #workspace .audit-popover { max-height: 420px; }
  #workspace .canvas-area { height: 580px; }

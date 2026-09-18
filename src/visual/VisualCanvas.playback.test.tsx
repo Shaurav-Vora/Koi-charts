@@ -102,6 +102,19 @@ const graph: FlowGraph = {
 };
 
 describe("VisualCanvas playback route", () => {
+  it("hides the navigation dock while another canvas overlay is open", () => {
+    const navigationProps = {
+      onWalk: vi.fn(),
+      onDescribe: vi.fn(),
+      onInspect: vi.fn(),
+    };
+    const { rerender } = render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId={null} onCommand={vi.fn()} {...navigationProps} />);
+
+    expect(screen.getByRole("toolbar", { name: "Chart navigation and inspection" })).toBeVisible();
+    rerender(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId={null} onCommand={vi.fn()} {...navigationProps} hideNavigationDock />);
+    expect(screen.queryByRole("toolbar", { name: "Chart navigation and inspection" })).not.toBeInTheDocument();
+  });
+
   it("fits the arranged chart and then centres its focused shape", async () => {
     fitView.mockResolvedValue(undefined);
     const onArrange = vi.fn();

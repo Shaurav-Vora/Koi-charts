@@ -77,6 +77,12 @@ export function NodeInspector({ node, onCommand, onClose }: { node: FlowNode; on
         <h3>Selected shape</h3>
         <div className="inspector-heading-actions">
           <span className={`inspector-tag tag-${node.type}`}>{node.type}</span>
+          <button type="button" className="inspector-locate" aria-label="Where am I" title="Report selected shape" onClick={() => onCommand({ kind: "walk", direction: "stay", branch: null })}>
+            <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5" /><circle cx="10" cy="10" r="2" /><path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3" /></svg>
+          </button>
+          <button type="button" className="inspector-inspect" aria-label="Inspect focus" title="Describe selected shape" onClick={() => onCommand({ kind: "inspect", node: null })}>
+            <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7" /><path d="M10 9v5M10 6.5h.01" /></svg>
+          </button>
           <button type="button" className="inspector-close" aria-label="Close shape editor" onClick={onClose}>×</button>
         </div>
       </div>
