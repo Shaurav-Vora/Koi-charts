@@ -130,7 +130,7 @@ export default function CanvasControls({
       <div className="canvas-control-group zoom-controls" role="group" aria-label="Zoom controls">
         <button type="button" onClick={onZoomIn} title="Zoom in">Zoom in</button>
         <button type="button" onClick={onZoomOut} title="Zoom out">Zoom out</button>
-        <button type="button" disabled={!canFit} onClick={onFit} title="Fit chart into view">Fit chart</button>
+        <button type="button" disabled={!canFit} onClick={onFit} title="Frame chart at a readable scale">Fit chart</button>
         <button type="button" disabled={!canCenter} onClick={onCenter} title="Center selection">Center selection</button>
       </div>
     </div>

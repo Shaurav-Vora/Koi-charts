@@ -28,10 +28,11 @@ function FlowEdge({ id, data, label, markerEnd, selected }: EdgeProps<RoutedEdge
 }
 const nodeTypes = { flowNode: FlowNode }, edgeTypes = { routed: FlowEdge };
 const noControlledNodeSelection: string[] = [];
+const readableFitMinZoom = 0.8;
 function FitChart({ layout }: { layout: LayoutFrame }) {
   const { fitView } = useReactFlow(); const initialized = useNodesInitialized();
   const fitted = useRef(false);
-  useEffect(() => { if (initialized && layout.nodes.length > 0 && !fitted.current) { fitted.current = true; void fitView({ padding: 0.25, maxZoom: 1, duration: 0 }); } }, [fitView, initialized, layout.nodes.length]);
+  useEffect(() => { if (initialized && layout.nodes.length > 0 && !fitted.current) { fitted.current = true; void fitView({ padding: 0.25, minZoom: readableFitMinZoom, maxZoom: 1, duration: 0 }); } }, [fitView, initialized, layout.nodes.length]);
   return null;
 }
 export interface VisualCanvasProps {
@@ -164,7 +165,7 @@ function Canvas({
     frameAfterArrange.current = false;
     let cancelled = false;
     const frameArrangedChart = async () => {
-      await fitView({ padding: 0.25, maxZoom: 1, duration: 220 });
+      await fitView({ padding: 0.25, minZoom: readableFitMinZoom, maxZoom: 1, duration: 220 });
       if (cancelled || !focusedNodeId) return;
       const arrangedFocus = layout.nodes.find(node => node.id === focusedNodeId);
       if (!arrangedFocus) return;
@@ -284,7 +285,7 @@ function Canvas({
       });
     }}
     ariaLabelConfig={{ "node.a11yDescription.default": "Select a node to focus it. Use the editing form for keyboard movement and deletion.", "edge.a11yDescription.default": "Connections are available in the chart outline." }}
-    fitView fitViewOptions={{ maxZoom: 1, padding: 0.25 }} minZoom={0.1} maxZoom={2}>
+    fitView fitViewOptions={{ minZoom: readableFitMinZoom, maxZoom: 1, padding: 0.25 }} minZoom={0.1} maxZoom={2}>
     <Background gap={20} color="#d4ddea" /><FitChart layout={layout} />
   </ReactFlow>
   {connectionDrop && <svg className="connection-drop-preview" data-testid="pending-connection-line" aria-hidden="true">
@@ -306,7 +307,7 @@ function Canvas({
   </div>}
   <CanvasControls canFit={layout.nodes.length > 0} canCenter={!!focusedBox}
     onZoomIn={() => void zoomIn({ duration: 160 })} onZoomOut={() => void zoomOut({ duration: 160 })}
-    onFit={() => void fitView({ padding: 0.25, maxZoom: 1, duration: 220 })} onCenter={centerOnFocus}
+    onFit={() => void fitView({ padding: 0.25, minZoom: readableFitMinZoom, maxZoom: 1, duration: 220 })} onCenter={centerOnFocus}
     canUndo={canUndo} canRedo={canRedo} onUndo={onUndo} onRedo={onRedo}
     canClear={canClear} onClear={onClear}
     selectionActive={selectionActive} onToggleSelection={() => setSelectionActive(active => !active)}

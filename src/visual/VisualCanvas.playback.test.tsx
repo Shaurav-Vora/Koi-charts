@@ -115,6 +115,15 @@ describe("VisualCanvas playback route", () => {
     expect(screen.queryByRole("toolbar", { name: "Chart navigation and inspection" })).not.toBeInTheDocument();
   });
 
+  it("keeps the Fit chart action at a readable zoom floor", () => {
+    fitView.mockClear();
+    render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId={null} onCommand={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Fit chart" }));
+
+    expect(fitView).toHaveBeenCalledWith({ padding: 0.25, minZoom: 0.8, maxZoom: 1, duration: 220 });
+  });
+
   it("fits the arranged chart and then centres its focused shape", async () => {
     fitView.mockResolvedValue(undefined);
     const onArrange = vi.fn();
@@ -126,7 +135,7 @@ describe("VisualCanvas playback route", () => {
     rerender(<VisualCanvas graph={graph} layout={arrangedLayout} focusedNodeId="review" onCommand={vi.fn()} onArrange={onArrange} />);
 
     const target = arrangedLayout.nodes.find(node => node.id === "review")!;
-    await waitFor(() => expect(fitView).toHaveBeenCalledWith({ padding: 0.25, maxZoom: 1, duration: 220 }));
+    await waitFor(() => expect(fitView).toHaveBeenCalledWith({ padding: 0.25, minZoom: 0.8, maxZoom: 1, duration: 220 }));
     await waitFor(() => expect(setCenter).toHaveBeenCalledWith(
       target.x + target.width / 2,
       target.y + target.height / 2,
