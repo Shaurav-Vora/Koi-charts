@@ -22,7 +22,7 @@ export default function HomeHowItWorks() {
           </div>
         </li>
         <li>
-          <span className="home-process-marker" aria-hidden="true">3</span>
+          <span className="home-process-marker" aria-hidden="true"><span>3</span></span>
           <div>
             <h3>Test the route</h3>
             <p>Walk from Start to End, choose each branch, and find dead ends, loops, or missing labels before sharing.</p>

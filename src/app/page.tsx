@@ -40,7 +40,8 @@ export default function Home() {
                   </marker>
                 </defs>
                 <path d="M35 20 H54 V38" />
-                <path d="M54 53 V61 H18 V65" />
+                <path className="home-route-to-decision" d="M54.5 53 V77.5 H29.5" markerEnd="url(#home-route-arrow)" />
+                <path className="home-route-to-decision-mobile" d="M67 53 V82 H42" markerEnd="url(#home-route-arrow)" />
               </svg>
               <div className="home-canvas-node node-start"><small>Start</small><strong>Request received</strong></div>
               <div className="home-canvas-node node-process"><small>Process</small><strong>Review request</strong></div>
@@ -69,7 +70,7 @@ export default function Home() {
           <div className="home-translation">
             <div className="home-shared-node" aria-hidden="true">
               <p>Shared focus</p>
-              <div><span>Decision</span><strong>Approved?</strong></div>
+              <div><div className="home-decision-copy"><span>Decision</span><strong>Approved?</strong></div></div>
               <small>One semantic node</small>
             </div>
 
@@ -81,7 +82,7 @@ export default function Home() {
                 </div>
                 <div className="home-output-visual" aria-hidden="true">
                   <span className="output-line line-left">Yes</span>
-                  <div><span>Decision</span><strong>Approved?</strong></div>
+                  <div><div className="home-decision-copy"><span>Decision</span><strong>Approved?</strong></div></div>
                   <span className="output-line line-right">No</span>
                 </div>
               </article>

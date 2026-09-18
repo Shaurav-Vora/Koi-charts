@@ -32,6 +32,26 @@ describe("public homepage", () => {
     expect(within(workflow).getByRole("heading", { name: "Test the route" })).toBeVisible();
   });
 
+  it("anchors the review route to the decision's right point with an arrowhead", () => {
+    const { container } = render(<Home />);
+
+    const desktopRoute = container.querySelector(".home-route-to-decision");
+    const mobileRoute = container.querySelector(".home-route-to-decision-mobile");
+
+    expect(desktopRoute).toHaveAttribute("d", "M54.5 53 V77.5 H29.5");
+    expect(desktopRoute).toHaveAttribute("marker-end", "url(#home-route-arrow)");
+    expect(mobileRoute).toHaveAttribute("d", "M67 53 V82 H42");
+    expect(mobileRoute).toHaveAttribute("marker-end", "url(#home-route-arrow)");
+  });
+
+  it("centres each decision label as one counter-rotated block", () => {
+    const { container } = render(<Home />);
+    const labels = Array.from(container.querySelectorAll(".home-decision-copy"));
+
+    expect(labels).toHaveLength(2);
+    for (const label of labels) expect(label).toHaveTextContent("DecisionApproved?");
+  });
+
   it("ends with a clear workspace action", () => {
     render(<Home />);
 
