@@ -81,5 +81,32 @@ function PinSurface({frame:incoming}:{frame:TactileFrame}) {
   const adapter=useMemo(()=>createSimulatorAdapter(setFrame),[]);
   useEffect(()=>{let active=true; void adapter.render(incoming).catch(error=>{if(active)setError(error instanceof Error?error:new Error("Tactile rendering failed"));});return()=>{active=false;};},[adapter,incoming]);
   if(error) throw error;
-  return <svg className={`tactile-pins${frame.raisedPins.length ? "" : " is-empty"}`} viewBox="0 0 120 80" role="img" aria-label={`${frame.mode} tactile view: ${frame.nodeIds.length} nodes, ${frame.edgeIds.length} connections. Raised cross marks focus.`}><defs><pattern id="tactile-pin-grid" width="1" height="1" patternUnits="userSpaceOnUse"><circle cx="0.5" cy="0.5" r="0.13" fill="#c4d0e2" opacity="0.6"/></pattern></defs><rect width="120" height="80" fill="#edf1f8"/><rect width="120" height="80" fill="url(#tactile-pin-grid)"/>{frame.raisedPins.map(pin=><circle key={pin.y*120+pin.x} cx={pin.x+.5} cy={pin.y+.5} r="0.42" fill="#17243a"/>)}</svg>;
+  const isEmpty = frame.raisedPins.length === 0;
+  return (
+    <svg
+      className={"tactile-pins" + (isEmpty ? " is-empty" : "")}
+      viewBox="0 0 120 80"
+      role="img"
+      aria-label={frame.mode + " tactile view: " + frame.nodeIds.length + " nodes, " + frame.edgeIds.length + " connections. Raised cross marks focus."}
+    >
+      <defs>
+        <pattern id="tactile-pin-grid" width="1" height="1" patternUnits="userSpaceOnUse">
+          <circle cx="0.5" cy="0.5" r="0.13" fill="#c4d0e2" opacity="0.6"/>
+        </pattern>
+      </defs>
+      <rect width="120" height="80" fill="#edf1f8"/>
+      <rect width="120" height="80" fill="url(#tactile-pin-grid)"/>
+      {isEmpty && (
+        <g className="tactile-empty-cue" aria-hidden="true">
+          <rect x="39" y="30" width="42" height="20" rx="2" fill="#f8fafc" stroke="#9aaac0" strokeWidth="0.6" strokeDasharray="2 1.5"/>
+          <circle cx="60" cy="36" r="2.2" fill="#dfe7f2" stroke="#6d7f99" strokeWidth="0.6"/>
+          <path d="M58.8 36h2.4M60 34.8v2.4" stroke="#53627a" strokeWidth="0.6" strokeLinecap="round"/>
+          <text x="60" y="44.5" textAnchor="middle" fill="#53627a" fontSize="4" fontWeight="650">No pins raised</text>
+        </g>
+      )}
+      {frame.raisedPins.map(pin => (
+        <circle key={pin.y * 120 + pin.x} cx={pin.x + .5} cy={pin.y + .5} r="0.42" fill="#17243a"/>
+      ))}
+    </svg>
+  );
 }
