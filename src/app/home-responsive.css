@@ -46,6 +46,13 @@
     width: calc(50% - 72px);
     font-size: 11px;
   }
+
+  .home-footer a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 2px;
+  }
 }
 
 @media (max-width: 540px) {

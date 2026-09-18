@@ -73,6 +73,13 @@
     display: none;
   }
 
+  .docs-mobile-navigation .docs-nav a {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 10px 8px;
+  }
+
   .docs-mobile-navigation .docs-nav-group:nth-child(3) {
     grid-column: 1 / -1;
     grid-template-columns: repeat(2, minmax(0, 1fr));
