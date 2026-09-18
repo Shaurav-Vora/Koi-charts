@@ -47,8 +47,8 @@ export default function CanvasControls({
       {onUndo && onRedo && (
         <>
           <div className="canvas-control-group history-controls" role="group" aria-label="History and chart actions">
-            <button type="button" disabled={!canUndo} onClick={onUndo} title="Undo last action (Ctrl+Z)">Undo</button>
-            <button type="button" disabled={!canRedo} onClick={onRedo} title="Redo action (Ctrl+Y)">Redo</button>
+            <button type="button" disabled={!canUndo} onClick={onUndo} aria-keyshortcuts="Control+Z Meta+Z" title="Undo last action (Ctrl+Z)">Undo</button>
+            <button type="button" disabled={!canRedo} onClick={onRedo} aria-keyshortcuts="Control+Y Control+Shift+Z Meta+Shift+Z" title="Redo action (Ctrl+Y or Ctrl+Shift+Z)">Redo</button>
             {onClear && (
               <button
                 type="button"

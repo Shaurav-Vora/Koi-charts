@@ -91,6 +91,24 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
     document.addEventListener("keydown", removeSelected);
     return () => document.removeEventListener("keydown", removeSelected);
   }, [activeSelectedNodeIds, deleteSelectedNodes, focusedNodeId, pending, onCommand]);
+  useEffect(() => {
+    const handleHistoryShortcut = (event: KeyboardEvent) => {
+      if (event.repeat || event.defaultPrevented || event.isComposing || event.altKey || editableTarget(event.target)) return;
+      if (!(event.ctrlKey || event.metaKey)) return;
+      const key = event.key.toLowerCase();
+      const undo = key === "z" && !event.shiftKey;
+      const redo = key === "y" && !event.shiftKey || key === "z" && event.shiftKey;
+      if (undo && history.past.length) {
+        event.preventDefault();
+        onCommand({ kind: "undo" });
+      } else if (redo && history.future.length) {
+        event.preventDefault();
+        onCommand({ kind: "redo" });
+      }
+    };
+    document.addEventListener("keydown", handleHistoryShortcut);
+    return () => document.removeEventListener("keydown", handleHistoryShortcut);
+  }, [history.future.length, history.past.length, onCommand]);
   const message = presentation?.error ?? presentation?.text ?? state.message;
   const spokenMessage = audit.status === "open" ? audit.message : playback.status === "idle" ? briefReply(state, message) : playback.message;
   const supported = useSyncExternalStore(speaker.subscribe, () => speaker.supported, () => false);

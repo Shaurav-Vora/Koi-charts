@@ -46,3 +46,10 @@ it("offers one-click automatic arrangement", () => {
  fireEvent.click(screen.getByRole("button", { name: "Auto arrange chart" }));
  expect(onArrange).toHaveBeenCalledTimes(1);
 });
+
+it("exposes standard history shortcuts on the toolbar controls", () => {
+ const onUndo = vi.fn(), onRedo = vi.fn();
+ render(<CanvasControls canFit canCenter canUndo canRedo onUndo={onUndo} onRedo={onRedo} {...handlers()} />);
+ expect(screen.getByRole("button", { name: "Undo" })).toHaveAttribute("aria-keyshortcuts", "Control+Z Meta+Z");
+ expect(screen.getByRole("button", { name: "Redo" })).toHaveAttribute("aria-keyshortcuts", "Control+Y Control+Shift+Z Meta+Shift+Z");
+});

@@ -293,6 +293,8 @@ Manual acceptance check:
 | :--- | :--- | :--- |
 | <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>V</kbd> | Global | Start or stop live voice streaming |
 | <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>S</kbd> | Global | Stop currently playing speech reply and release mic |
+| <kbd>Ctrl</kbd> + <kbd>Z</kbd> | Workspace | Undo the most recent chart edit |
+| <kbd>Ctrl</kbd> + <kbd>Y</kbd> or <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd> | Workspace | Redo the most recently undone chart edit |
 | <kbd>Delete</kbd> | Canvas | Delete the selected node or connection. Connected-node deletion keeps its confirmation guard. |
 | <kbd>Escape</kbd> | Canvas / Forms | Clear active selection or cancel inline editing |
 | <kbd>Enter</kbd> | Inline Rename | Save updated label |
