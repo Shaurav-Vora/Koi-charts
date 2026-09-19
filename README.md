@@ -190,6 +190,14 @@ Open [http://localhost:3000](http://localhost:3000) to view the homepage. The ed
 
 The current workspace stores its chart only in page memory. Reloading or closing the workspace clears the editable chart, so export any work you need to keep. Persistent workflow saving is planned for a future release.
 
+### Editable Koi project format
+
+Koi Charts now defines a versioned editable project format for the upcoming Save project and Open project controls. A `.koi` file is readable UTF-8 JSON containing a strict project envelope, its save timestamp, and the complete editable graph, including labels, connections, manual positions, and placement hints.
+
+The format is processed locally in the browser. Imports are limited to 2 MiB and must pass both envelope validation and the existing graph-integrity checks before they can be accepted. Project files exclude API keys, environment variables, browser preferences, transcripts, speech data, provider responses, temporary selections, playback state, audit state, and undo history.
+
+This checkpoint establishes and tests the file boundary only. The workspace does not expose Save project or Open project controls yet; those arrive in a later implementation checkpoint.
+
 ---
 
 ## Voice Command Grammar

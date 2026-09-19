@@ -30,6 +30,8 @@
 
 ### Task 1: Versioned project format
 
+**Completed September 19, 2026.** The strict envelope, UTF-8 parser, serializer, filename formatter, public errors, tests, and README foundation are verified and committed in this checkpoint.
+
 **Files:**
 - Create: `src/projects/types.ts`
 - Create: `src/projects/koi-file.ts`
@@ -45,7 +47,7 @@
 - `parseKoiProject(bytes: ArrayBuffer): FlowGraph`
 - `koiProjectFilename(now?: Date): string`
 
-- [ ] **Step 1: Write failing round-trip and boundary tests**
+- [x] **Step 1: Write failing round-trip and boundary tests**
 
 Use a graph containing position, placement, and a labelled edge:
 
@@ -67,7 +69,7 @@ it("round-trips the editable graph in a strict envelope", () => {
 
 Add explicit cases for oversized bytes, invalid UTF-8, malformed JSON, extra envelope fields, wrong format, unsupported version, invalid timestamp, duplicate IDs, missing endpoints, self-edges, and mutation isolation.
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 ```powershell
 node .tools/npm/package/bin/npm-cli.js test -- src/projects/koi-file.test.ts
@@ -75,22 +77,22 @@ node .tools/npm/package/bin/npm-cli.js test -- src/projects/koi-file.test.ts
 
 Expected: missing project modules.
 
-- [ ] **Step 3: Implement types and public errors**
+- [x] **Step 3: Implement types and public errors**
 
 Map codes to exact messages: too large, unreadable file, non-Koi file, unsupported version, and invalid chart. Define a `KoiFileError` with readonly `code`.
 
-- [ ] **Step 4: Implement parsing and serialization**
+- [x] **Step 4: Implement parsing and serialization**
 
 Check byte size first. Decode with `TextDecoder("utf-8", { fatal: true })`. Parse a strict Zod envelope with `graph: z.unknown()`. Distinguish wrong format and version before graph validation. Require `savedAt === new Date(savedAt).toISOString()`. Call `assertGraph`, clone the graph, serialize with two-space indentation plus one trailing newline, and generate `koi-chart-YYYY-MM-DD-HHMMSS.koi`.
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 ```powershell
 node .tools/npm/package/bin/npm-cli.js test -- src/projects/koi-file.test.ts src/graph/invariants.test.ts
 node .tools/npm/package/bin/npm-cli.js run typecheck
 ```
 
-- [ ] **Step 6: Document and commit**
+- [x] **Step 6: Document and commit**
 
 README describes the envelope, local processing, 2 MiB limit, exclusions, and that UI arrives later.
 
