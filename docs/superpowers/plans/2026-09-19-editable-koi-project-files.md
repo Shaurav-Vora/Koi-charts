@@ -323,29 +323,31 @@ README lists phrases and explains the Enter requirement.
 
 ### Task 5: Documentation and acceptance
 
+**Completed September 19, 2026.** The documentation now separates editable projects from fixed exports, the web and Braille references cover local project and deletion phrases, complete automated verification passes, and the owner acceptance sequence is recorded.
+
 **Files:**
 - Modify: `src/app/docs/page.tsx`
 - Modify: `src/app/docs/page.test.tsx`
 - Modify: `src/app/docs/documentation.css` only if the current export section needs responsive adjustment
 - Modify: `README.md`
-- Modify: `public/braille/koi-commands-grade1.brf`
-- Modify: `public/braille/koi-commands-grade2.brf`
+- Modify: `public/braille/koi-charts-guide-ueb-grade-1.brf`
+- Modify: `public/braille/koi-charts-guide-ueb-grade-2.brf`
 
-- [ ] **Step 1: Write failing documentation contracts**
+- [x] **Step 1: Write failing documentation contracts**
 
 Require the Exporting charts section to mention Save project, Open project, editable `.koi` JSON, Undo, browser-local processing, credential exclusion, image/PDF distinction, voice save, voice-assisted open with Enter, and Confirm delete.
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 ```powershell
 node .tools/npm/package/bin/npm-cli.js test -- src/app/docs/page.test.tsx
 ```
 
-- [ ] **Step 3: Rewrite the existing export section**
+- [x] **Step 3: Rewrite the existing export section**
 
 Use three task-based subsections: Continue editing later, Open a saved project, and Share a non-editable copy. Include the 2 MiB limit, replacement/Undo behavior, privacy boundary, and voice/Enter constraint. Add no new page or navigation group.
 
-- [ ] **Step 4: Regenerate Braille references**
+- [x] **Step 4: Regenerate Braille references**
 
 ```powershell
 node .tools/npm/package/bin/npm-cli.js run braille
@@ -353,7 +355,7 @@ node .tools/npm/package/bin/npm-cli.js run braille
 
 Inspect both grades for Save project, Open project, and Confirm delete.
 
-- [ ] **Step 5: Run complete verification**
+- [x] **Step 5: Run complete verification**
 
 ```powershell
 node .tools/npm/package/bin/npm-cli.js test
@@ -363,11 +365,11 @@ node .tools/npm/package/bin/npm-cli.js run build
 git diff --check
 ```
 
-- [ ] **Step 6: Owner acceptance**
+- [x] **Step 6: Owner acceptance**
 
 Verify valid, empty, malformed, wrong-format, and unsupported-version files; Undo/Redo; Tab/Enter operation; all new voice phrases; one spoken result; and unchanged SVG/PNG/JPEG/PDF export. Record only observed manual checks in README.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```powershell
 git add src/app/docs/page.tsx src/app/docs/page.test.tsx src/app/docs/documentation.css README.md public/braille/koi-commands-grade1.brf public/braille/koi-commands-grade2.brf

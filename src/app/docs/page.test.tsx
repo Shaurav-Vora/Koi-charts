@@ -121,3 +121,31 @@ it("documents recognized local command sequences", () => {
  expect(text).toMatch(/then[\s\S]*and then/i);
  expect(text).toMatch(/complete request[\s\S]*Gemini/i);
 });
+it("documents editable project files as a local, undoable workflow", () => {
+ const { container } = render(<Documentation />);
+ const section = container.querySelector("#exports");
+ expect(section).not.toBeNull();
+ const exporting = within(section as HTMLElement);
+ for (const heading of ["Continue editing later", "Open a saved project", "Share a non-editable copy"]) {
+  expect(exporting.getByRole("heading", { name: heading })).toBeVisible();
+ }
+ const text = section?.textContent ?? "";
+ for (const phrase of [
+  "Save project",
+  "Open project",
+  ".koi",
+  "JSON",
+  "Undo",
+  "2 MiB",
+  "processed locally",
+  "API keys",
+  "SVG",
+  "PNG",
+  "JPEG",
+  "PDF",
+  "Confirm delete",
+ ]) expect(text).toContain(phrase);
+ expect(text).toMatch(/voice[\s\S]*Save project/i);
+ expect(text).toMatch(/Open project[\s\S]*Enter/i);
+ expect(text).toMatch(/replaces[\s\S]*current chart/i);
+});

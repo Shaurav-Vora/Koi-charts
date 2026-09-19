@@ -321,19 +321,45 @@ export default function Documentation() {
 
           <section id="exports" className="docs-section" aria-labelledby="exports-title">
             <div className="docs-section-heading">
-              <p>Export</p>
+              <p>Projects and exports</p>
               <h2 id="exports-title">Exporting charts</h2>
-              <span>Exports capture the full diagram with balanced padding, independent of viewport zoom.</span>
+              <span>Keep an editable project for later, or create a fixed copy for sharing.</span>
             </div>
+
+            <ol className="docs-workflow">
+              <li>
+                <div>
+                  <h3>Continue editing later</h3>
+                  <p><strong>Save project</strong> downloads the complete chart as a versioned <code>.koi</code> file. It is readable UTF-8 JSON and preserves shape types, labels, positions, connections, and connection labels. Project files are processed locally in your browser and are never uploaded.</p>
+                  <p>By voice, say <code>Save project</code>, <code>Export project</code>, or <code>Download project</code> to save by voice without calling Gemini. The file excludes credentials such as API keys, environment variables, browser preferences, transcripts, speech data, provider responses, temporary selections, and undo history.</p>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <h3>Open a saved project</h3>
+                  <p>Select <strong>Open project</strong> and choose a <code>.koi</code> file no larger than <strong>2 MiB</strong>. Koi Charts validates the whole file before it replaces the current chart. A successful import is one history entry: <strong>Undo</strong> restores the previous chart and <strong>Redo</strong> reapplies the imported project. An invalid or unsupported file leaves the workspace unchanged.</p>
+                  <p>For keyboard access, use <kbd>Tab</kbd> to reach <strong>Open project</strong> and press <kbd>Enter</kbd>. By voice, say <code>Open project</code>, <code>Import project</code>, or <code>Load project</code>. The command focuses the button and asks you to press <kbd>Enter</kbd>, which gives the browser permission to show its file picker.</p>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <h3>Share a non-editable copy</h3>
+                  <p>Choose an image or document format when the recipient only needs to view or publish the chart. These exports capture the complete diagram with balanced padding, independent of canvas zoom, but cannot be reopened as editable Koi Charts projects.</p>
+                </div>
+              </li>
+            </ol>
+
             <div className="docs-export-grid">
-              <article><strong>SVG</strong><p>Scalable vector output for the web and detailed editing.</p></article>
+              <article><strong>SVG</strong><p>Scalable vector output for the web and design tools.</p></article>
               <article><strong>PNG</strong><p>High-resolution lossless image with a transparent background.</p></article>
               <article><strong>JPEG</strong><p>Compressed image with a white background for sharing.</p></article>
               <article><strong>PDF</strong><p>Single-page vector document with paths and text preserved.</p></article>
             </div>
-            <p className="docs-hint">
-              Exported pictures are visual captures, not project save files. Keep the browser tab open while working.
-            </p>
+
+            <div className="docs-access-note">
+              <h3>Safe deletion confirmation</h3>
+              <p>When deleting a connected shape by voice, wait for the confirmation request, then say <code>Confirm delete</code>, <code>Confirm deletion</code>, or <code>Yes, delete it</code>. These exact local phrases confirm only the prepared deletion and do not call Gemini.</p>
+            </div>
           </section>
         </article>
       </main>

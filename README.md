@@ -204,6 +204,15 @@ The editor now also has an atomic import transaction behind the file boundary. A
 A `.koi` project is the option for continuing to edit later. SVG, PNG, JPEG, and PDF are sharing formats and cannot be reopened as editable Koi charts. After opening a project, use **Undo** to restore the chart that was in the workspace and **Redo** to apply the imported project again.
 
 The exact voice phrases **Save project**, **Export project**, and **Download project** download the editable file locally without calling Gemini. **Open project**, **Import project**, and **Load project** focus the visible Open project button and say what to do next; press **Enter** to open the system file picker because browsers require a direct keyboard or pointer action. For a pending connected-node deletion, say **Confirm delete**, **Confirm deletion**, or **Yes, delete it**. These safety phrases are exact local controls and never use approximate matching.
+### Manual acceptance sequence before release
+
+**Owner acceptance completed September 19, 2026.**
+
+1. Save and reopen both a populated project and an empty project.
+2. Change the current chart, open a saved project, then confirm **Undo** restores the earlier chart and **Redo** reapplies the imported chart.
+3. Try malformed JSON, a file with the wrong format marker, and an unsupported project version; each must leave the current workspace unchanged.
+4. Reach **Save project** and **Open project** with <kbd>Tab</kbd>, activate them with <kbd>Enter</kbd>, and repeat Save, Open, and deletion confirmation by voice. Each action should produce one spoken result.
+5. Export SVG, PNG, JPEG, and PDF again and confirm each still captures the complete chart.
 
 ---
 
