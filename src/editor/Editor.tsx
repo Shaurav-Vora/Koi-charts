@@ -44,9 +44,9 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const { editor: state, presentation, playback, audit, projectImportKey } = useSyncExternalStore(coordinator.subscribe, coordinator.getSnapshot, coordinator.getSnapshot);
   const dispatch = coordinator.dispatch;
   const speaker = useMemo(() => createSpeaker(), []);
-  // Talking over a reply stops it: the microphone is muted while one plays, so without this
-  // the author's next command is discarded and they are left repeating themselves.
-  const voice = useVoice(coordinator, speaker.getSnapshot, speaker.interrupt);
+  // Keep synthesized replies out of transcription. Authors can release input immediately with
+  // Stop speaking or Ctrl+Alt+S before saying the next command.
+  const voice = useVoice(coordinator, speaker.getSnapshot);
   const { active: voiceActive, level: voiceLevel, connectionStatus: voiceConnectionStatus, start: startVoice, stop: stopVoice } = voice;
   const onCommand = useCallback((command: GraphCommand) => dispatch({ type: "command", command, idSeed: crypto.randomUUID() }), [dispatch]);
   const reportProjectResult = useCallback((result: ProjectActionResult) => {

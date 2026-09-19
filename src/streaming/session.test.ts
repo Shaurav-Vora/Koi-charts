@@ -29,7 +29,7 @@ class FakeMicrophone implements MicrophoneLike {
  async stop(){this.stopped=true;}
 }
 
-function harness(overrides:{token?:()=>Promise<{token:string;expiresAt:string}>;suppressed?:()=>boolean;onBargeIn?:()=>void}={}) {
+function harness(overrides:{token?:()=>Promise<{token:string;expiresAt:string}>;suppressed?:()=>boolean}={}) {
  const sockets:FakeSocket[]=[];const microphones:FakeMicrophone[]=[];
  const turns:Turn[]=[];const statuses:VoiceStatus[]=[];const errors:string[]=[];
  let tokenCalls=0;
@@ -42,7 +42,6 @@ function harness(overrides:{token?:()=>Promise<{token:string;expiresAt:string}>;
   onLevel:()=>{},
   onError:message=>errors.push(message),
   isInputSuppressed:overrides.suppressed,
-  onBargeIn:overrides.onBargeIn,
  });
  return {session,sockets,microphones,turns,statuses,errors,tokenCount:()=>tokenCalls};
 }
@@ -54,22 +53,10 @@ describe("streaming session",()=>{
   expect(h.sockets[0].audio.map(buffer=>[...new Uint8Array(buffer)])).toEqual([[7,0],[0,0],[11,0]]);
   await h.session.stop();
  });
- it("lets the author talk over a reply, and keeps the words they said",async()=>{
-  let suppressed=true;const barged=vi.fn(()=>{suppressed=false;});
-  const h=harness({suppressed:()=>suppressed,onBargeIn:barged});await h.session.start();h.sockets[0].begin();
-  // Quiet frames while the reply plays stay silent, and one loud frame is not someone speaking.
-  h.microphones[0].emit(1,0.01);h.microphones[0].emit(2,0.5);h.microphones[0].emit(3,0.01);
-  expect(barged).not.toHaveBeenCalled();
-  h.microphones[0].emit(4,0.5);h.microphones[0].emit(5,0.5);h.microphones[0].emit(6,0.5);
-  expect(barged).toHaveBeenCalledTimes(1);
-  // The frame that triggered it is the author speaking, so it is sent rather than discarded.
-  expect(h.sockets[0].audio.map(buffer=>[...new Uint8Array(buffer)])).toEqual([[0,0],[0,0],[0,0],[0,0],[0,0],[6,0]]);
-  await h.session.stop();
- });
- it("never barges in on audio the microphone hears while nothing is speaking",async()=>{
-  const barged=vi.fn();const h=harness({suppressed:()=>false,onBargeIn:barged});await h.session.start();h.sockets[0].begin();
-  for (const byte of [1,2,3,4]) h.microphones[0].emit(byte,0.9);
-  expect(barged).not.toHaveBeenCalled();
+ it("keeps sustained speaker echo muted for the entire spoken reply",async()=>{
+  const h=harness({suppressed:()=>true});await h.session.start();h.sockets[0].begin();
+  for (const byte of [1,2,3,4,5,6]) h.microphones[0].emit(byte,0.5);
+  expect(h.sockets[0].audio.map(buffer=>[...new Uint8Array(buffer)])).toEqual([[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]);
   await h.session.stop();
  });
  it("connects with a temporary token and 16 kHz sample rate in the query string",async()=>{

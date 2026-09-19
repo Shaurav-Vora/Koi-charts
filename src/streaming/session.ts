@@ -7,14 +7,6 @@ const SAMPLE_RATE = 16000;
 const SPEECH_MODEL = "universal-3-5-pro";
 /** Matches max_session_duration_seconds requested when the server mints the token. */
 export const MAX_SESSION_MS = 30 * 60 * 1000;
-/**
- * How loud, and for how long, the microphone must hear something before it counts as the author
- * talking over a reply. Frames are 100 ms of 16 kHz audio, so three of them is a third of a
- * second — long enough that a cough or a door does not cut a reply short, short enough that the
- * author's first word survives.
- */
-export const BARGE_IN_LEVEL = 0.14;
-export const BARGE_IN_FRAMES = 3;
 
 export interface SocketLike {
   send(data: string | ArrayBuffer): void;
@@ -39,8 +31,6 @@ export interface SessionOptions {
   onSessionStart?: (sessionId: string) => void;
   onSessionEnd?: () => void;
   isInputSuppressed?: () => boolean;
-  /** Called when the author talks over a spoken reply, so the reply can be cut short. */
-  onBargeIn?: () => void;
 }
 
 /**
@@ -49,7 +39,6 @@ export interface SessionOptions {
  */
 export class StreamingSession {
   private generation = 0;
-  private loudFrames = 0;
   private socket: SocketLike | null = null;
   private microphone: MicrophoneLike | null = null;
   private sessionId: string | null = null;
@@ -109,18 +98,7 @@ export class StreamingSession {
 
     microphone.onFrame((buffer, level) => {
       if (generation !== this.generation) return;
-      let suppressed = this.options.isInputSuppressed?.() ?? false;
-      // Talking over a reply must work: a spoken reply can run for several seconds, and until
-      // now every word said during one was replaced with silence and lost. Sustained energy is
-      // required rather than a single loud frame, so that echo of the reply itself, already
-      // attenuated by echo cancellation, cannot cut it off.
-      if (!suppressed) this.loudFrames = 0;
-      else if (level < BARGE_IN_LEVEL) this.loudFrames = 0;
-      else if (++this.loudFrames >= BARGE_IN_FRAMES) {
-        this.loudFrames = 0;
-        suppressed = false;
-        this.options.onBargeIn?.();
-      }
+      const suppressed = this.options.isInputSuppressed?.() ?? false;
       this.options.onLevel(suppressed ? 0 : level);
       // Frames sent before Begin are rejected by the provider, so hold them until the session is ready.
       if (!this.ready || this.stopping) return;
