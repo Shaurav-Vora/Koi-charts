@@ -122,6 +122,17 @@ describe("VisualCanvas playback route", () => {
     expect(screen.queryByRole("toolbar", { name: "Chart navigation and inspection" })).not.toBeInTheDocument();
   });
 
+  it("fits and centres after an external arrange request", async () => {
+    fitView.mockResolvedValue(undefined);
+    const arrangedLayout = layoutGraph(graph, "standard", "topology");
+    const { rerender } = render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId="review" onCommand={vi.fn()} arrangeRequestKey={0} />);
+    fitView.mockClear(); setCenter.mockClear();
+
+    rerender(<VisualCanvas graph={graph} layout={arrangedLayout} focusedNodeId="review" onCommand={vi.fn()} arrangeRequestKey={1} />);
+
+    await waitFor(() => expect(fitView).toHaveBeenCalledWith({ padding: 0.25, minZoom: 0.8, maxZoom: 1, duration: 220 }));
+    await waitFor(() => expect(setCenter).toHaveBeenCalled());
+  });
   it("keeps the Fit chart action at a readable zoom floor", () => {
     fitView.mockClear();
     render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId={null} onCommand={vi.fn()} />);

@@ -267,16 +267,37 @@
   ,say3 repeat issue
   ,say3 close check
 
+,,,arrange the canvas,'
+
+  arrange chart
+  ,repositions the whole chart1 fits it
+    into view1 and centres the selected
+    shape4
+  ,also3 arrange the chart2 auto arrange
+    chart2 auto arrange the chart4
+  ,say3 arrange chart
+  ,say3 auto arrange the chart
+
+  use compact nodes _/ use standard
+    nodes
+  ,switches between smaller compact
+    shapes and the standard readable
+    shape size4
+  ,also3 compact nodes2 turn compact
+    mode on2 turn compact mode off4
+  ,say3 use compact nodes
+  ,say3 use standard nodes
+
 ,,,keep an editable project,'
 
   save project
   ,downloads the current chart as an
     editable ,koi project file without
-    using ,gemini4
+    using ,gemini4
   ,also3 export project2 download
     project4
   ,say3 save project
-  ,say3 export project
+  ,say3 export project
   ,say3 download project
 
   open project
@@ -297,11 +318,11 @@
     edit4
   ,say3 undo
   ,say3 redo
-
+
   confirm delete _/ cancel
   ,confirms or cancels a pending
     deletion4 ,confirmation is
-    recognised word for word only1 never
+    recognised word for word only1 never
     approximately4
   ,also3 confirm2 confirm deletion2 yes1
     delete it4
@@ -322,11 +343,11 @@
   ,requests a bulk operation4
     ,destructive changes require
     confirmation4
-
+
   ,say3 do not add a start node
   ,contains negation and is not treated
     as a local add command4
-
+
   ,say3 move ,start somewhere sensible
   ,does not specify a destination or a
     position relative to another node4

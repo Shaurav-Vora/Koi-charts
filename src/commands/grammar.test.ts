@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { grammar, grammarExamples, modelOnly } from "./grammar";
 import { parseLocal } from "./local";
 import { parseProjectControl } from "./fast-path";
+import { parseViewControl } from "./view-control";
 import { commandSchema } from "./schema";
 
 /**
@@ -12,6 +13,7 @@ import { commandSchema } from "./schema";
 describe("spoken grammar", () => {
   it.each(grammarExamples.map(example => [example.say, example] as const))("recognises %s locally", (_say, example) => {
     if (example.projectAction) expect(parseProjectControl(example.say)).toBe(example.projectAction);
+    else if (example.viewAction) expect(parseViewControl(example.say)).toBe(example.viewAction);
     else expect(parseLocal(example.say)).toEqual(example.command);
   });
 
@@ -21,12 +23,14 @@ describe("spoken grammar", () => {
     "recognises %s as dictation formats it", (_say, example) => {
       const spoken = example.say[0].toUpperCase() + example.say.slice(1) + ".";
       if (example.projectAction) expect(parseProjectControl(spoken)).toBe(example.projectAction);
+      else if (example.viewAction) expect(parseViewControl(spoken)).toBe(example.viewAction);
       else expect(parseLocal(spoken)).toEqual(example.command);
     });
 
   it.each(grammarExamples.map(example => [example.say, example] as const))("produces a valid command for %s", (_say, example) => {
     if (example.command) expect(commandSchema.safeParse(example.command).success).toBe(true);
-    else expect(["save","open"]).toContain(example.projectAction);
+    else if (example.projectAction) expect(["save", "open"]).toContain(example.projectAction);
+    else expect(["arrange", "compact_on", "compact_off"]).toContain(example.viewAction);
   });
 
   it.each(modelOnly.map(entry => [entry.say] as const))("leaves %s to the model", say => {

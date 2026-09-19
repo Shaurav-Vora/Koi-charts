@@ -1,5 +1,6 @@
 import type { GraphCommand } from "./schema";
 import type { ProjectAction } from "../projects/ProjectControls";
+import type { ViewAction } from "./view-control";
 
 /**
  * The spoken syntax of Koi charts: every phrase shape that is guaranteed to run on this machine,
@@ -26,8 +27,9 @@ export const rules: string[] = [
 ];
 
 export type GrammarExample =
-  | { say: string; command: GraphCommand; projectAction?: never }
-  | { say: string; projectAction: ProjectAction; command?: never };
+  | { say: string; command: GraphCommand; projectAction?: never; viewAction?: never }
+  | { say: string; projectAction: ProjectAction; command?: never; viewAction?: never }
+  | { say: string; viewAction: ViewAction; command?: never; projectAction?: never };
 export type GrammarEntry = {
   /** The canonical shape, with <placeholders>, as an author should learn it. */
   form: string;
@@ -303,6 +305,29 @@ export const grammar: GrammarSection[] = [
           { say: "previous issue", command: { kind: "audit", action: "previous" } },
           { say: "repeat issue", command: { kind: "audit", action: "repeat" } },
           { say: "close check", command: { kind: "audit", action: "close" } },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Arrange the canvas",
+    entries: [
+      {
+        form: "arrange chart",
+        purpose: "Repositions the whole chart, fits it into view, and centres the selected shape.",
+        alternatives: ["arrange the chart", "auto arrange chart", "auto arrange the chart"],
+        examples: [
+          { say: "arrange chart", viewAction: "arrange" },
+          { say: "auto arrange the chart", viewAction: "arrange" },
+        ],
+      },
+      {
+        form: "use compact nodes / use standard nodes",
+        purpose: "Switches between smaller compact shapes and the standard readable shape size.",
+        alternatives: ["compact nodes", "turn compact mode on", "turn compact mode off"],
+        examples: [
+          { say: "use compact nodes", viewAction: "compact_on" },
+          { say: "use standard nodes", viewAction: "compact_off" },
         ],
       },
     ],

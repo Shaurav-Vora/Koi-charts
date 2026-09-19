@@ -2,6 +2,7 @@ import type { EngineState, CommandResult } from "../graph/types";
 import { commandSchema, type GraphCommand } from "../commands/schema";
 import { previewCommand } from "../commands/preview";
 import { parseControl, parseProjectControl } from "../commands/fast-path";
+import { parseViewControl, type ViewAction, type ViewActionResult } from "../commands/view-control";
 import { parseLocal } from "../commands/local";
 import { parseChoice } from "../commands/choice";
 import { describeChoices } from "../feedback/choices";
@@ -13,7 +14,7 @@ export type Turn={sessionId:string;turnId:string;text:string;final:boolean};
 export type CommandSource="local"|"model";
 export type Presentation={status:VoiceStatus;preview:GraphCommand|null;text:string;error?:string;source?:CommandSource};
 export type Interpret=(text:string,state:EngineState,signal:AbortSignal)=>Promise<GraphCommand>;
-type Options={getState:()=>EngineState;apply:(command:GraphCommand)=>CommandResult;choose:(id:string)=>CommandResult;interpret:Interpret;present:(value:Presentation)=>void;preferLocal?:()=>boolean;runProject?:(action:ProjectAction)=>Promise<ProjectActionResult>|ProjectActionResult};
+type Options={getState:()=>EngineState;apply:(command:GraphCommand)=>CommandResult;choose:(id:string)=>CommandResult;interpret:Interpret;present:(value:Presentation)=>void;preferLocal?:()=>boolean;runProject?:(action:ProjectAction)=>Promise<ProjectActionResult>|ProjectActionResult;runView?:(action:ViewAction)=>Promise<ViewActionResult>|ViewActionResult};
 export class TurnCoordinator {
  private session:string|null=null;
  private generation=0;
@@ -42,6 +43,16 @@ export class TurnCoordinator {
   // time, and a pending deletion cannot wait on a model that may answer differently.
   let source:CommandSource|undefined;
   try {
+   const viewAction=parseViewControl(turn.text);
+   if(viewAction){
+    source="local";
+    const viewResult=this.options.runView
+     ?await this.options.runView(viewAction)
+     :{outcome:"error" as const,message:"Canvas view controls are unavailable."};
+    if(generation!==this.generation)return;
+    this.options.present({status:viewResult.outcome==="error"?"error":"committed",preview:null,text:viewResult.message,source});
+    return;
+   }
    const projectAction=parseProjectControl(turn.text);
    if(projectAction){
     source="local";

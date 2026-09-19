@@ -234,6 +234,7 @@ Koi Charts features an on-device deterministic grammar parser (`src/commands/gra
 | **Navigation** | `next` / `back` / `go to start` / `go to end` | *"Next"* or *"Go to start"* |
 | **Branch Choice** | `take <branch>` | *"Take Yes"* |
 | **Test Chart** | `test chart` / `start test` / `repeat` / `restart test` / `stop test` | *"Test chart"* or *"Stop test"* |
+| **Canvas Layout** | `arrange chart` / `use compact nodes` / `use standard nodes` | *"Arrange chart"* |
 | **Check Chart** | `check chart` / `next issue` / `previous issue` / `repeat issue` / `close check` | *"Check chart"* or *"Next issue"* |
 | **Inspect / Query** | `where am I` / `inspect <shape>` / `describe the chart` | *"Describe the chart"* |
 | **Trace Path** | `trace the path from <shape> [to <shape>]` | *"Trace the path from Start to End"* |

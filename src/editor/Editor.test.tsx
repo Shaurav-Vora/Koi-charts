@@ -155,3 +155,22 @@ it("labels where a command came from and lets the author send everything to the 
   expect(screen.getByRole("region", { name: "Chart structure" })).toHaveTextContent("Interpreted");
   localCommandPreference.write(true);
 });
+it("applies arrange and node-density voice controls through the canvas", async () => {
+  const { act } = await import("@testing-library/react");
+  const { createEditorCoordinator } = await import("./coordinator");
+  const coordinator=createEditorCoordinator(async()=>{throw new Error("View commands must stay local.");});
+  render(<Editor coordinator={coordinator} />);
+  fireEvent.click(screen.getByRole("button",{name:"Insert start"}));
+  fireEvent.click(screen.getByRole("button",{name:"Insert process"}));
+  act(()=>coordinator.turns.start("view"));
+
+  await act(()=>coordinator.turns.accept({sessionId:"view",turnId:"1",text:"Use compact nodes.",final:true}));
+  expect(screen.getByRole("button",{name:"Use compact nodes"})).toHaveAttribute("aria-pressed","true");
+  expect(screen.getByRole("region",{name:"Command feedback"})).toHaveTextContent("Compact nodes enabled.");
+
+  await act(()=>coordinator.turns.accept({sessionId:"view",turnId:"2",text:"Use standard nodes.",final:true}));
+  expect(screen.getByRole("button",{name:"Use compact nodes"})).toHaveAttribute("aria-pressed","false");
+
+  await act(()=>coordinator.turns.accept({sessionId:"view",turnId:"3",text:"Arrange chart.",final:true}));
+  expect(screen.getByRole("region",{name:"Command feedback"})).toHaveTextContent("Chart arranged.");
+});

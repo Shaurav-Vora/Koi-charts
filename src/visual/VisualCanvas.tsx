@@ -65,6 +65,7 @@ export interface VisualCanvasProps {
   onSelectionComplete?: (nodeIds: string[]) => void;
   onDeleteSelected?: (nodeIds: string[]) => void;
   compactNodes?: boolean;
+  arrangeRequestKey?: number;
   onToggleCompactNodes?: () => void;
   onArrange?: () => void;
   hideNavigationDock?: boolean;
@@ -100,6 +101,7 @@ function Canvas({
   onSelectionComplete,
   onDeleteSelected,
   compactNodes = false,
+  arrangeRequestKey = 0,
   onToggleCompactNodes,
   onArrange,
   hideNavigationDock = false,
@@ -107,6 +109,7 @@ function Canvas({
   const { screenToFlowPosition, flowToScreenPosition, zoomIn, zoomOut, fitView, setCenter, getZoom } = useReactFlow();
   const canvasAreaRef = useRef<HTMLDivElement>(null);
   const frameAfterArrange = useRef(false);
+  const lastArrangeRequestKey = useRef(arrangeRequestKey);
   const [drag, setDrag] = useState<{ id: string; x: number; y: number } | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [connectionDrop, setConnectionDrop] = useState<{
@@ -193,6 +196,11 @@ function Canvas({
       { zoom: Math.max(getZoom(), 1), duration: 220 },
     );
   }, [centerRequest, getZoom, layout.nodes, setCenter]);
+  useEffect(() => {
+    if (arrangeRequestKey === lastArrangeRequestKey.current) return;
+    lastArrangeRequestKey.current = arrangeRequestKey;
+    frameAfterArrange.current = true;
+  }, [arrangeRequestKey]);
   useEffect(() => {
     if (!frameAfterArrange.current) return;
     frameAfterArrange.current = false;

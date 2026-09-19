@@ -235,6 +235,24 @@
   ,say3 rep1t issue
   ,say3 close *eck
 
+,,,>range ! canvas,'
+
+  >range *>t
+  ,reposi;ns ! :ole *>t1 fits x 9to
+    view1 & c5tres ! select$ %ape4
+  ,al3 >range ! *>t2 auto >range *>t2
+    auto >range ! *>t4
+  ,say3 >range *>t
+  ,say3 auto >range ! *>t
+
+  use compact nodes _/ use /&>d nodes
+  ,swit*es 2t small} compact %apes & !
+    /&>d r1dable %ape size4
+  ,al3 compact nodes2 turn compact mode
+    on2 turn compact mode (f4
+  ,say3 use compact nodes
+  ,say3 use /&>d nodes
+
 ,,,keep an $itable project,'
 
   save project
@@ -246,14 +264,14 @@
   ,say3 d{nload project
 
   op5 project
-  ,moves focus to ,op5 project4 ,press
+  ,moves focus to ,op5 project4 ,press
     ,5t} to *oose a ,koi file2 br{s}s
     require t f9al keybo>d ac;n4
   ,al3 import project2 load project4
   ,say3 op5 project
   ,say3 import project
   ,say3 load project
-
+
 ,,,take x back,'
 
   undo _/ r$o
@@ -271,14 +289,14 @@
   ,say3 3firm
   ,say3 3firm delete
   ,say3 3firm dele;n
-  ,say3 yes1 delete x
+  ,say3 yes1 delete x
   ,say3 c.el
 
 ,,,s5t to 2 9t}pret$,'
 
   ,say3 add ?ree /eps = onbo>d+
   ,requires 9t}preta;n ( ! reque/$ numb}
-    & labels ( new nodes4
+    & labels ( new nodes4
 
   ,say3 delete "ey?+
   ,reque/s a bulk op}a;n4 ,de/ructive

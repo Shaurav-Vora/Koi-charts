@@ -22,6 +22,7 @@ import PlaybackPanel from "../playback/PlaybackPanel";
 import AuditPanel from "../audit/AuditPanel";
 import { currentAuditIssue } from "../audit/state";
 import type { GuidedAuditEditTarget } from "../audit/fixes";
+import type { ViewAction, ViewActionResult } from "../commands/view-control";
 
 const editableTarget = (target: EventTarget | null) =>
   target instanceof Element && !!target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]');
@@ -37,6 +38,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
   const [selectionProjectImportKey, setSelectionProjectImportKey] = useState(0);
   const [compactNodes, setCompactNodes] = useState(false);
+  const [arrangeRequestKey, setArrangeRequestKey] = useState(0);
   const coordinator = supplied ?? local;
   const bindProjectControls = useCallback((handle:ProjectControlsHandle|null)=>{
     coordinator.setProjectRunner(handle?action=>handle.run(action):null);
@@ -55,6 +57,24 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
       : { status: "committed", preview: null, text: result.message });
   }, [coordinator]);
   const { graph, focusedNodeId, pending, history, version } = state.engine;
+  const runViewAction = useCallback((action: ViewAction): ViewActionResult => {
+    if (action === "arrange") {
+      if (graph.nodes.length < 2) return { outcome: "error", message: "Add at least two nodes before arranging the chart." };
+      dispatch({ type: "arrange", density: compactNodes ? "compact" : "standard" });
+      setArrangeRequestKey(key => key + 1);
+      return { outcome: "committed", message: "Chart arranged." };
+    }
+    if (action === "compact_on") {
+      setCompactNodes(true);
+      return { outcome: "committed", message: "Compact nodes enabled." };
+    }
+    setCompactNodes(false);
+    return { outcome: "committed", message: "Standard nodes enabled." };
+  }, [compactNodes, dispatch, graph.nodes.length]);
+  useEffect(() => {
+    coordinator.setViewRunner(runViewAction);
+    return () => coordinator.setViewRunner(null);
+  }, [coordinator, runViewAction]);
   const openAuditEditor = useCallback((target: GuidedAuditEditTarget) => {
     if (target.kind === "edge") {
       setInspectEdgeRequest({ key: crypto.randomUUID(), edgeId: target.edgeId, projectImportKey });
@@ -236,6 +256,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
           onSelectionComplete={completeNodeSelection}
           onDeleteSelected={deleteSelectedNodes}
           compactNodes={compactNodes}
+          arrangeRequestKey={arrangeRequestKey}
           onToggleCompactNodes={() => setCompactNodes(compact => !compact)}
           onArrange={() => dispatch({ type: "arrange", density: compactNodes ? "compact" : "standard" })}
           hideNavigationDock={canvasOverlayOpen}

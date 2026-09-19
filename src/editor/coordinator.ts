@@ -9,9 +9,11 @@ import type { PlaybackAction } from "../playback/types";
 import { auditTransition, createAuditState, currentAuditIssue } from "../audit/state";
 import type { AuditAction, AuditState } from "../audit/types";
 import type { ProjectAction, ProjectActionResult } from "../projects/ProjectControls";
+import type { ViewAction, ViewActionResult } from "../commands/view-control";
 export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
  let state={editor:createEditorState(),presentation:null as Presentation|null,playback:createPlaybackState(),audit:createAuditState(),projectImportKey:0};
  let projectRunner: ((action:ProjectAction)=>Promise<ProjectActionResult>|ProjectActionResult)|null=null;
+ let viewRunner: ((action:ViewAction)=>Promise<ViewActionResult>|ViewActionResult)|null=null;
  const listeners=new Set<()=>void>();
  const publish=()=>listeners.forEach(listener=>listener());
  const dispatch=(action:EditorAction)=>{
@@ -127,6 +129,7 @@ export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
  };
  const turns=new TurnCoordinator({getState:()=>state.editor.engine,interpret,preferLocal:localCommandPreference.read,
   runProject:action=>projectRunner?projectRunner(action):{outcome:"error",message:"Project controls are unavailable."},
+  runView:action=>viewRunner?viewRunner(action):{outcome:"error",message:"Canvas view controls are unavailable."},
   apply:applyCommand,
   choose:candidateId=>{dispatch({type:"choose",candidateId,idSeed:crypto.randomUUID()});return result();},
   present:presentation=>{state={...state,presentation};publish();},
@@ -134,5 +137,6 @@ export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
  // The connection layer reports through the same channel as turns, so one status line covers both.
  const present=(value:Presentation)=>{state={...state,presentation:value};publish();};
  const setProjectRunner=(runner:typeof projectRunner)=>{projectRunner=runner;};
- return {turns,dispatch,importProject,openEditor,playbackDispatch,auditDispatch,present,setProjectRunner,getSnapshot:()=>state,subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener);};}};
+ const setViewRunner=(runner:typeof viewRunner)=>{viewRunner=runner;};
+ return {turns,dispatch,importProject,openEditor,playbackDispatch,auditDispatch,present,setProjectRunner,setViewRunner,getSnapshot:()=>state,subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener);};}};
 }
