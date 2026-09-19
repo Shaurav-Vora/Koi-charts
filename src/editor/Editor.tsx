@@ -1,12 +1,13 @@
 "use client";
 import TactileSimulator from "../tactile/TactileSimulator";
-import { Component, useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { Component, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createSpeaker, speechPreference } from "./speech";
 import { localCommandPreference } from "./preference";
 import type { GraphCommand } from "../commands/schema";
 import { layoutGraph } from "../visual/layout";
 import VisualCanvas from "../visual/VisualCanvas";
 import ExportMenu from "../visual/ExportMenu";
+import ProjectControls, { type ProjectActionResult, type ProjectControlsHandle } from "../projects/ProjectControls";
 import { ShapePalette, NodeInspector } from "./ShapePalette";
 import CommandForm from "./CommandForm";
 import ToggleSwitch from "./ToggleSwitch";
@@ -36,6 +37,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
   const [selectionProjectImportKey, setSelectionProjectImportKey] = useState(0);
   const [compactNodes, setCompactNodes] = useState(false);
+  const projectControlsRef = useRef<ProjectControlsHandle>(null);
   const coordinator = supplied ?? local;
   const { editor: state, presentation, playback, audit, projectImportKey } = useSyncExternalStore(coordinator.subscribe, coordinator.getSnapshot, coordinator.getSnapshot);
   const dispatch = coordinator.dispatch;
@@ -45,6 +47,11 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const voice = useVoice(coordinator, speaker.getSnapshot, speaker.interrupt);
   const { active: voiceActive, level: voiceLevel, connectionStatus: voiceConnectionStatus, start: startVoice, stop: stopVoice } = voice;
   const onCommand = useCallback((command: GraphCommand) => dispatch({ type: "command", command, idSeed: crypto.randomUUID() }), [dispatch]);
+  const reportProjectResult = useCallback((result: ProjectActionResult) => {
+    coordinator.present(result.outcome === "error"
+      ? { status: "error", preview: null, text: "", error: result.message }
+      : { status: "committed", preview: null, text: result.message });
+  }, [coordinator]);
   const { graph, focusedNodeId, pending, history, version } = state.engine;
   const openAuditEditor = useCallback((target: GuidedAuditEditTarget) => {
     if (target.kind === "edge") {
@@ -193,7 +200,12 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
     </div>
     <div className="diagram-workbench"><div id="shape-palette" className="palette-column"><ShapePalette lastNodeId={graph.nodes.at(-1)?.id} onCommand={onCommand} /></div>
       <section className="display visual-display" aria-labelledby="visual-title" data-graph-version={version}>
-        <div className="display-heading"><h3 id="visual-title">Visual flowchart</h3><span className="count">{graph.nodes.length} nodes · {graph.edges.length} connections</span><ExportMenu graph={graph} layout={layout} /></div>
+        <div className="display-heading"><h3 id="visual-title">Visual flowchart</h3><span className="count">{graph.nodes.length} nodes · {graph.edges.length} connections</span><ExportMenu graph={graph} layout={layout} projectControls={<ProjectControls
+          ref={projectControlsRef}
+          graph={graph}
+          onImport={(imported, filename) => { coordinator.importProject(imported, filename); }}
+          onResult={reportProjectResult}
+        />} /></div>
         <div className="canvas-wrap"><CanvasBoundary><VisualCanvas
           graph={graph}
           focusedNodeId={focusedNodeId}

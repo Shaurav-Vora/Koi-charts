@@ -85,7 +85,8 @@ Every action—whether initiated via speech, keyboard hotkeys, visual drag-and-d
 - **UEB Embossable Reference Files**: Downloadable Unified English Braille Grade 1 (uncontracted) and Grade 2 (contracted) `.brf` files generated via `liblouis`.
 
 ### 📤 Publication-Ready Vector & Raster Exports
-- Export diagrams at any time to **SVG**, **PDF**, **PNG**, or **JPEG**.
+- Save the complete editable workflow as a versioned **`.koi`** project and reopen it later.
+- Export non-editable diagrams at any time to **SVG**, **PDF**, **PNG**, or **JPEG**.
 - Exports compute total bounding boxes across all shapes and routed paths with uniform padding, ensuring nodes placed above or to the left of the canvas origin are fully preserved.
 
 ---
@@ -188,17 +189,19 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the homepage. The editor is available at [http://localhost:3000/workspace](http://localhost:3000/workspace), and the documentation is available at [http://localhost:3000/docs](http://localhost:3000/docs).
 
-The current workspace stores its chart only in page memory. Reloading or closing the workspace clears the editable chart, so export any work you need to keep. Persistent workflow saving is planned for a future release.
+The active workspace remains in page memory, so use **Save project** before reloading or closing it. The downloaded `.koi` file can be reopened as an editable chart. Browser accounts and automatic cloud persistence are still planned for a future release.
 
 ### Editable Koi project format
 
-Koi Charts now defines a versioned editable project format for the upcoming Save project and Open project controls. A `.koi` file is readable UTF-8 JSON containing a strict project envelope, its save timestamp, and the complete editable graph, including labels, connections, manual positions, and placement hints.
+The **Save project** control downloads a versioned editable Koi project, and **Open project** restores one from disk. A `.koi` file is readable UTF-8 JSON containing a strict project envelope, its save timestamp, and the complete editable graph, including labels, connections, manual positions, and placement hints.
 
 The format is processed locally in the browser. Imports are limited to 2 MiB and must pass both envelope validation and the existing graph-integrity checks before they can be accepted. Project files exclude API keys, environment variables, browser preferences, transcripts, speech data, provider responses, temporary selections, playback state, audit state, and undo history.
 
 The editor now also has an atomic import transaction behind the file boundary. A validated project replaces the current graph as one history entry, focuses its first Start shape (or first available shape), clears pending deletion or clarification state, closes guided playback and chart review, and dismisses stale canvas overlays. **Undo** restores the complete graph and focus from before the import; **Redo** reapplies the imported project. An import that fails graph validation leaves the active workspace and interface modes unchanged.
 
-The workspace does not expose Save project or Open project controls yet. Those compact controls arrive in the next implementation checkpoint, so this transaction is currently covered by automated tests rather than a visible picker.
+**Save project** and **Open project** sit beside the existing SVG, PNG, JPEG, and PDF actions in the Visual flowchart heading. Save remains available for an empty chart because an empty editable project is valid. Open accepts `.koi` files up to 2 MiB, validates the complete file before changing the workspace, and allows the same file to be selected repeatedly. Cancelling the picker makes no change.
+
+A `.koi` project is the option for continuing to edit later. SVG, PNG, JPEG, and PDF are sharing formats and cannot be reopened as editable Koi charts. After opening a project, use **Undo** to restore the chart that was in the workspace and **Redo** to apply the imported project again.
 
 ---
 

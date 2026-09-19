@@ -22,6 +22,16 @@ afterEach(() => vi.restoreAllMocks());
 describe("saving the chart as a picture", () => {
   const mount = (graph = graphFixture()) => render(<ExportMenu graph={graph} layout={layoutGraph(graph)} />);
 
+  it("keeps editable project actions with the image exports in one heading group", () => {
+    render(<ExportMenu graph={empty} layout={layoutGraph(empty)} projectControls={<><button>Save project</button><button>Open project</button></>} />);
+
+    const group = screen.getByRole("group", { name: "Project and image exports" });
+    expect(group).toContainElement(screen.getByRole("button", { name: "Save project" }));
+    expect(group).toContainElement(screen.getByRole("button", { name: "Open project" }));
+    for (const label of ["SVG", "PNG", "JPEG", "PDF"]) expect(screen.getByRole("button", { name: label })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Save project" })).toBeEnabled();
+  });
+
   it("offers each format as its own button, with no menu to open first", () => {
     mount();
     for (const label of ["SVG", "PNG", "JPEG", "PDF"]) expect(screen.getByRole("button", { name: label })).toBeEnabled();

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { FlowGraph } from "../graph/types";
 import type { LayoutFrame } from "./layout";
 import { chartToSvg } from "./export";
@@ -21,7 +21,7 @@ const FORMATS = [
   { id: "pdf", label: "PDF", hint: "A page, with text that stays text" },
 ] as const;
 
-export default function ExportMenu({ graph, layout }: { graph: FlowGraph; layout: LayoutFrame }) {
+export default function ExportMenu({ graph, layout, projectControls }: { graph: FlowGraph; layout: LayoutFrame; projectControls?: ReactNode }) {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const empty = !graph.nodes.length;
@@ -49,7 +49,8 @@ export default function ExportMenu({ graph, layout }: { graph: FlowGraph; layout
     }
   }
 
-  return <div className="export-controls" role="group" aria-label="Save the chart as a picture">
+  return <div className="export-controls" role="group" aria-label="Project and image exports">
+    {projectControls}
     {FORMATS.map(format => <button key={format.id} disabled={empty || busy !== null} title={format.hint}
       onClick={() => void save(format.id)}>{busy === format.id ? "Saving…" : format.label}</button>)}
     {/* aria-live without role="status": the voice readout is already the page's status region,

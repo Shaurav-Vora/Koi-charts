@@ -183,9 +183,12 @@ README explains replacement, transient-mode closure, Undo, and that the picker a
 
 ### Task 3: Compact project controls
 
+**Completed September 19, 2026.** Compact Save project and Open project controls now share the Visual flowchart heading with image exports, validate files locally, publish one result, and feed successful imports into the undoable replacement transaction.
+
 **Files:**
 - Create: `src/projects/ProjectControls.tsx`
 - Create: `src/projects/ProjectControls.test.tsx`
+- Create: `src/editor/project-file-integration.test.tsx`
 - Modify: `src/visual/ExportMenu.tsx`
 - Modify: `src/visual/ExportMenu.test.tsx`
 - Modify: `src/editor/Editor.tsx`
@@ -204,31 +207,31 @@ export type ProjectControlsHandle = {
 
 Props are `graph`, `onImport(graph, filename)`, and `onResult(result)`.
 
-- [ ] **Step 1: Write failing component tests**
+- [x] **Step 1: Write failing component tests**
 
 Assert Save works for an empty graph, downloads the correct MIME and extension, Open exposes `accept=".koi,application/vnd.koi-chart+json"`, valid input calls import once, invalid/oversized input preserves state, value resets after each selection, cancel is silent, imperative Open focuses the visible button, and imperative Save uses the same download path.
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 ```powershell
 node .tools/npm/package/bin/npm-cli.js test -- src/projects/ProjectControls.test.tsx
 ```
 
-- [ ] **Step 3: Implement controls**
+- [x] **Step 3: Implement controls**
 
 Use `forwardRef` and `useImperativeHandle`. The visible Open button calls the hidden input only from its click handler. Imperative Open focuses that button and returns "Open project ready. Press Enter to choose a Koi file." Save serializes and downloads synchronously. Import checks size, reads `arrayBuffer()`, parses, imports only after success, and clears input value in `finally`.
 
 Keep one announcement path: a visible Save click awaits `run("save")` and sends that result to `onResult`; a voice Save returns the same result to TurnCoordinator, which announces it. A valid import calls `onImport`, whose coordinator publication is authoritative. Parse and read failures call `onResult`. Do not call `onResult` again after a successful `onImport`, and add no live region.
 
-- [ ] **Step 4: Integrate without a new row**
+- [x] **Step 4: Integrate without a new row**
 
 Give ExportMenu a `projectControls: ReactNode` slot before image buttons and label the group "Project and image exports". Editor connects import to `coordinator.importProject` and status to the existing feedback path. CSS wraps controls only inside the existing heading and retains 44-pixel mobile targets.
 
-- [ ] **Step 5: Extend regressions**
+- [x] **Step 5: Extend regressions**
 
 Assert Save/Open appear with SVG/PNG/JPEG/PDF. Image buttons stay disabled for an empty chart while Save remains enabled. Add an Editor test that imports, reports once, then Undo restores the old chart.
 
-- [ ] **Step 6: Verify, document, and commit**
+- [x] **Step 6: Verify, document, and commit**
 
 ```powershell
 node .tools/npm/package/bin/npm-cli.js test -- src/projects/ProjectControls.test.tsx src/visual/ExportMenu.test.tsx src/editor/import-project.test.ts

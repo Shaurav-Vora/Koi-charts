@@ -610,6 +610,7 @@ main.docs-layout {
 /* Saving the chart. Sits in the canvas heading, beside the node count, because the picture and
    the count describe the same thing: what is on the canvas right now. */
 .export-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+.project-controls { display: flex; align-items: center; gap: 6px; padding-right: 8px; margin-right: 2px; border-right: 1px solid var(--line); }
 .export-controls button { padding: 6px 12px; font-size: 13px; font-weight: 600; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 7px; cursor: pointer; }
 .export-controls button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
 .export-controls button:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -1065,4 +1066,9 @@ main.home-page { max-width: none; padding: 0; overflow: clip; background: #fff; 
   .home-hero h1 { font-size: 41px; letter-spacing: -1.8px; }
   .home-command-note strong, .home-tactile-note strong { font-size: 10px; }
   .home-tactile-note span { font-size: 10px; letter-spacing: 0; }
+}
+
+@media (max-width: 720px) {
+  .export-controls button { min-height: 44px; }
+  .project-controls { width: 100%; padding: 0 0 8px; margin: 0 0 2px; border-right: 0; border-bottom: 1px solid var(--line); }
 }
