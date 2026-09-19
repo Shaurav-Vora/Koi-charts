@@ -15,15 +15,19 @@
 #c4 ,"n a %ape by xs {n label ",- or1 :5
   ! *>t has only "o ( !m1 by xs k9d3 8!
   deci.n04
+#d4 ,use xs %ort ref};e :5 a label is
+  tir+ to say3 node #c or ,n#c4 ,!
+  ref};e rema9s atta*$ :5 ! %ape is
+  re"nd4
 
 ,,comb9e ,,$its
 
   `<comm&`> !n `<comm&`>
-  ,runs a sequ;e z "o local1 undoable
+  ,runs a sequ;e z "o local1 undoable
     *ange :5 e "p mat*es ! local gramm>4
   ,al3 !n2 & !n2 & 2f a cle> comm& v}b2
     up to t5 $its4
-  ,say3 add a />t !n add a process
+  ,say3 add a />t !n add a process
 
 ,,,build ! *>t,'
 
@@ -44,11 +48,11 @@
   ,say3 add a process call$ ,*eck pay;t
   ,say3 add a deci.n call$ ,approv$8
   ,say3 add a process call$ 8,*eck 2f
-    pay;t0
+    pay;t0
 
   add a `<%ape`> .<call$ `<label`>.>
     `<rela;n`> `<exi/+ %ape`>
-  ,adds a %ape 9 a *os5 posi;n 2s "o alr
+  ,adds a %ape 9 a *os5 posi;n 2s "o alr
     9 ! *>t4
   ,al3 2f2 af2 abv "<ov}">2 2l "<"u">2
     left (2 "r (4
@@ -69,11 +73,11 @@
   ,say3 3nect ,/>t to a new process
   ,say3 3nect x to a new deci.n labell$
     ,approv$8
-  ,say3 3nect ,/>t to a new node labell$
+  ,say3 3nect ,/>t to a new node labell$
     ,review
 
   3nect `<%ape`> to `<%ape`>
-  ,draws an >r{ f ! f/ %ape to ! second4
+  ,draws an >r{ f ! f/ %ape to ! second4
   ,al3 3nect2 l9k2 jo92 draw an >r{ f4
   ,say3 3nect ,/>t to ,*eck pay;t
   ,say3 draw an >r{ f ,*eck pay;t to ,5d
@@ -85,6 +89,25 @@
   ,al3 labell$2 call$2 "nd2 ) label4
   ,say3 3nect ,approv$ to ,refund
     labell$ ,no
+
+  label 3nec;n f `<s|rce`> to
+    `<de/9a;n`> z `<label`>
+  ,adds or replaces ! label on an exi/+
+    >r{4 ,use full %ape labels or %ort
+    ref};es s* z node #a & ,n#b4
+  ,al3 3nec;n2 >r{2 l9k2 $ge2 z2 )
+    label2 labell$4
+  ,say3 label 3nec;n f ,approv$ to
+    ,refund z ,no
+  ,say3 label >r{ f node "o to ,n#b z
+    ,yes
+
+  cle> label on 3nec;n f `<s|rce`> to
+    `<de/9a;n`>
+  ,removes an >r{ label )|t delet+ !
+    3nec;n4
+  ,say3 cle> label on 3nec;n f ,n#a to
+    ,n#b
 
 ,,,*ange :at is "!,'
 
@@ -98,9 +121,9 @@
   ,say3 re"n ? to ,take pay;t
 
   move `<%ape`> `<rela;n`> `<%ape`>
-  ,reposi;ns a %ape 2s ano!r "o4
+  ,reposi;ns a %ape 2s ano!r "o4
   ,say3 move ,refund 2l ,approv$
-
+
   delete `<%ape`>
   ,removes a %ape4 ,a %ape ) >r{s asks =
     3firma;n f/4
@@ -123,9 +146,8 @@
     place4
   ,al3 3nec;n2 >r{2 l9k2 $ge4
   ,say3 delete ! 3nec;n f ,/>t to ,*eck
-    pay;t
-
-,,,te/ ! *>t,'
+    pay;t
+,,,te/ ! *>t,'
 
   te/ *>t _/ />t te/
   ,/>ts guid$ playback at a ,/>t %ape
@@ -147,9 +169,9 @@
   ,say3 next
   ,say3 back
   ,say3 take ,yes
-,,,move ! cursor,'
 
-  next _/ back
+,,,move ! cursor,'
+  next _/ back
   ,walks "o /ep al;g ! >r{s1 & says ": y
     l&$4
   ,al3 next "<g next1 =w>d">2 back "<g
@@ -172,9 +194,9 @@
   focus on `<%ape`> _/ cle> selec;n
   ,selects a %ape by "n1 or drops !
     selec;n 5tirely4
-  ,al3 focus on2 focus2 select2 hi<li<t2
+  ,al3 focus on2 focus2 select2 hi<li<t2
     cle> selec;n2 deselect4
-  ,say3 focus on ,*eck pay;t
+  ,say3 focus on ,*eck pay;t
   ,say3 select ! la/ %ape
   ,say3 cle> selec;n
 
@@ -196,9 +218,10 @@
     f "o4
   ,say3 trace ! pa? f ,/>t to ,5d
   ,say3 trace ! pa? f ,/>t
-  *eck *>t _/ validate ! *>t
+
+  *eck *>t _/ validate ! *>t
   ,op5s a /ructur$ local review (
-    unf9i%$ or ambigu|s *>t /ructure4
+    unf9i%$ or ambigu|s *>t /ructure4
   ,al3 *eck ! *>t4
   ,say3 *eck *>t
   ,say3 validate ! *>t
@@ -221,9 +244,9 @@
   ,say3 save project
   ,say3 export project
   ,say3 d{nload project
-
+
   op5 project
-  ,moves focus to ,op5 project4 ,press
+  ,moves focus to ,op5 project4 ,press
     ,5t} to *oose a ,koi file2 br{s}s
     require t f9al keybo>d ac;n4
   ,al3 import project2 load project4
@@ -246,9 +269,9 @@
   ,al3 3firm2 3firm dele;n2 yes1 delete
     x4
   ,say3 3firm
-  ,say3 3firm delete
+  ,say3 3firm delete
   ,say3 3firm dele;n
-  ,say3 yes1 delete x
+  ,say3 yes1 delete x
   ,say3 c.el
 
 ,,,s5t to 2 9t}pret$,'
@@ -268,9 +291,3 @@
   ,say3 move ,/>t "s": s5sible
   ,does n specify a de/9a;n or a posi;n
     relative to ano!r node4
-
-  ,say3 label ! >r{ 2t ,/>t & ,5d ,yes
-  ,! local gramm> does n support
-    relabell+ an exi/+ >r{ by xs
-    5dpo9ts4 ,select ! >r{ to $it xs
-    label4

@@ -19,11 +19,15 @@
 #c4 ,name a shape by its own label ",-
   or1 when the chart has only one of
   them1 by its kind3 8the decision,74
-
+#d4 ,use its short reference when a
+  label is tiring to say3 node #c or
+  ,n#c4 ,the reference remains attached
+  when the shape is renamed4
+
 ,,combine ,,edits
 
   `<command`> then `<command`>
-  ,runs a sequence as one local1
+  ,runs a sequence as one local1
     undoable change when every part
     matches the local grammar4
   ,also3 then2 and then2 and before a
@@ -43,12 +47,11 @@
     terminal4
   ,say3 add a start
   ,say3 create a decision node
-
-  add a `<shape`> called `<label`>
+  add a `<shape`> called `<label`>
   ,adds a shape with the label you say4
   ,also3 called2 named2 labelled2
     titled2 that says4
-  ,say3 add a process called ,check
+  ,say3 add a process called ,check
     payment
   ,say3 add a decision called ,approved8
   ,say3 add a process called 8,check
@@ -69,11 +72,11 @@
   connect `<source`> to a new `<shape`>
     .<labelled `<label`>.>
   ,creates the destination1 then
-    connects the source to it4 ,labelled
+    connects the source to it4 ,labelled
     names the new node1 not the arrow4
     ,a new node without a shape type
     defaults to ,process4 ,undo removes
-    both changes4
+    both changes4
   ,also3 called2 named2 labeled2
     labelled4
   ,say3 connect ,start to a new process
@@ -94,12 +97,32 @@
   connect `<shape`> to `<shape`>
     labelled `<label`>
   ,draws an arrow and labels it ",- how
-    a decision's branches are named4
+    a decision's branches are named4
   ,also3 labelled2 called2 named2 with
     label4
   ,say3 connect ,approved to ,refund
-    labelled ,no
+    labelled ,no
 
+  label connection from `<source`> to
+    `<destination`> as `<label`>
+  ,adds or replaces the label on an
+    existing arrow4 ,use full shape
+    labels or short references such as
+    node #a and ,n#b4
+  ,also3 connection2 arrow2 link2 edge2
+    as2 with label2 labelled4
+  ,say3 label connection from ,approved
+    to ,refund as ,no
+  ,say3 label arrow from node one to
+    ,n#b as ,yes
+
+  clear label on connection from
+    `<source`> to `<destination`>
+  ,removes an arrow label without
+    deleting the connection4
+  ,say3 clear label on connection from
+    ,n#a to ,n#b
+
 ,,,change what is there,'
 
   rename `<shape`> to `<label`>
@@ -123,8 +146,8 @@
     asks for confirmation first4
   ,also3 delete2 remove2 erase4
   ,say3 delete ,refund
-  ,say3 remove the selected shape
-
+  ,say3 remove the selected shape
+
   `<any command`> the `<shape kind`>
   ,when the chart has only one shape of
     a kind1 its kind names it ",- useful
@@ -147,8 +170,9 @@
     ,start to ,check payment
 
 ,,,test the chart,'
-  test chart _/ start test
-  ,starts guided playback at a ,start
+
+  test chart _/ start test
+  ,starts guided playback at a ,start
     shape without changing the chart4
   ,say3 test chart
   ,say3 start test
@@ -171,8 +195,9 @@
   ,say3 take ,yes
 
 ,,,move the cursor,'
-  next _/ back
-  ,walks one step along the arrows1 and
+
+  next _/ back
+  ,walks one step along the arrows1 and
     says where you landed4
   ,also3 next "<go next1 forward">2 back
     "<go back1 previous">4
@@ -196,8 +221,8 @@
   focus on `<shape`> _/ clear selection
   ,selects a shape by name1 or drops the
     selection entirely4
-  ,also3 focus on2 focus2 select2
-    highlight2 clear selection2
+  ,also3 focus on2 focus2 select2
+    highlight2 clear selection2
     deselect4
   ,say3 focus on ,check payment
   ,say3 select the last shape
@@ -221,8 +246,8 @@
     `<shape`>.>
   ,follows the route between two shapes1
     or onward from one4
-  ,say3 trace the path from ,start to
-    ,end
+  ,say3 trace the path from ,start to
+    ,end
   ,say3 trace the path from ,start
 
   check chart _/ validate the chart
@@ -246,8 +271,8 @@
 
   save project
   ,downloads the current chart as an
-    editable ,koi project file without
-    using ,gemini4
+    editable ,koi project file without
+    using ,gemini4
   ,also3 export project2 download
     project4
   ,say3 save project
@@ -271,8 +296,8 @@
     edits4 ,walking the chart is not an
     edit4
   ,say3 undo
-  ,say3 redo
-
+  ,say3 redo
+
   confirm delete _/ cancel
   ,confirms or cancels a pending
     deletion4 ,confirmation is
@@ -296,8 +321,8 @@
   ,say3 delete everything
   ,requests a bulk operation4
     ,destructive changes require
-    confirmation4
-
+    confirmation4
+
   ,say3 do not add a start node
   ,contains negation and is not treated
     as a local add command4
@@ -305,10 +330,3 @@
   ,say3 move ,start somewhere sensible
   ,does not specify a destination or a
     position relative to another node4
-
-  ,say3 label the arrow between ,start
-    and ,end ,yes
-  ,the local grammar does not support
-    relabelling an existing arrow by its
-    endpoints4 ,select the arrow to edit
-    its label4

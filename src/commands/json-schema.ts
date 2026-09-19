@@ -12,10 +12,10 @@ const ref = { anyOf: [variant("id", { value: str }), variant("label", { value: s
 const placement = obj({
   relation: en("before", "after", "above", "below", "left_of", "right_of"), reference: ref,
 });
-const target = { anyOf: [variant("node", { node: ref }), variant("edge_id", { id: str }),
-  variant("edge", { source: ref, target: ref, label: nullable(str) })] };
+const edgeTarget = { anyOf: [variant("edge_id", { id: str }), variant("edge", { source: ref, target: ref, label: nullable(str) })] };
+const target = { anyOf: [variant("node", { node: ref }), ...edgeTarget.anyOf] };
 const edits = [
-  variant("label_edge", { edgeId: str, label: nullable(str) }),
+  variant("label_edge", { target: edgeTarget, label: nullable(str) }),
   variant("connect_new", { source: ref, type: en("start", "process", "decision", "end"), label: str }),
   variant("add_node", { type: en("start", "process", "decision", "end"), label: str, placement: nullable(placement) }),
   variant("connect", { source: ref, target: ref, label: nullable(str) }),

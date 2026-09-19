@@ -18,14 +18,17 @@ export const spokenRefSchema = z.discriminatedUnion("kind", [
 export const placementRefSchema = z.strictObject({
   relation: z.enum(placementRelations), reference: spokenRefSchema,
 });
-export const spokenElementRefSchema = z.discriminatedUnion("kind", [
-  z.strictObject({ kind: z.literal("node"), node: spokenRefSchema }),
+export const spokenEdgeRefSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("edge_id"), id: text }),
   z.strictObject({ kind: z.literal("edge"), source: spokenRefSchema, target: spokenRefSchema, label: text.nullable() }),
 ]);
+export const spokenElementRefSchema = z.discriminatedUnion("kind", [
+  z.strictObject({ kind: z.literal("node"), node: spokenRefSchema }),
+  ...spokenEdgeRefSchema.options,
+]);
 const editVariants = [
   z.strictObject({ kind: z.literal("connect_new"), source: spokenRefSchema, type: z.enum(nodeTypes), label: text }),
-  z.strictObject({ kind: z.literal("label_edge"), edgeId: text, label: text.nullable() }),
+  z.strictObject({ kind: z.literal("label_edge"), target: spokenEdgeRefSchema, label: text.nullable() }),
   z.strictObject({ kind: z.literal("add_node"), type: z.enum(nodeTypes), label: text, placement: placementRefSchema.nullable() }),
   z.strictObject({ kind: z.literal("connect"), source: spokenRefSchema, target: spokenRefSchema, label: text.nullable() }),
   z.strictObject({ kind: z.literal("rename"), node: spokenRefSchema, newLabel: text }),
@@ -55,6 +58,7 @@ export const commandEnvelopeSchema = z.strictObject({ command: commandSchema });
 
 export type SpokenRef = z.infer<typeof spokenRefSchema>;
 export type PlacementRef = z.infer<typeof placementRefSchema>;
+export type SpokenEdgeRef = z.infer<typeof spokenEdgeRefSchema>;
 export type SpokenElementRef = z.infer<typeof spokenElementRefSchema>;
 export type EditCommand = z.infer<typeof editCommandSchema>;
 export type GraphCommand = z.infer<typeof commandSchema>;

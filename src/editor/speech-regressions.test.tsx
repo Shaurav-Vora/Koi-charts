@@ -38,7 +38,7 @@ it("never reads a transcript aloud while interpreting it",()=>{
 });
 it("uses natural default-label feedback and keeps custom labels",()=>{
  render(<Editor/>);fireEvent.click(screen.getByRole("button",{name:"Insert start"}));
- expect(screen.getByRole("region",{name:"Command feedback"})).toHaveTextContent("Added Start node.");
+ expect(screen.getByRole("region",{name:"Command feedback"})).toHaveTextContent("Added Start node, node 1.");
 });
 it("speaks a short navigation reply but retains visible and requested details",()=>{
  const speech=browserSpeech();

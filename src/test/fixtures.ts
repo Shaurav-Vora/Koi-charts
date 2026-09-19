@@ -21,6 +21,7 @@ export const validCommands: { name: string; command: Record<string, unknown> }[]
   ...["before", "after", "above", "below", "left_of", "right_of"].map(relation => ({ name: `placement ${relation}`, command: { kind: "add_node", type: "process", label: "Check", placement: { relation, reference: { kind: "label", value: "Begin" } } } })),
   { name: "connect with label", command: { kind: "connect", source: { kind: "id", value: "n1" }, target: { kind: "label", value: "End" }, label: "yes" } },
   { name: "connect without label", command: { kind: "connect", source: { kind: "focus" }, target: { kind: "recent" }, label: null } },
+  { name: "label edge", command: { kind: "label_edge", target: { kind: "edge_id", id: "e1" }, label: "next" } },
   { name: "rename", command: { kind: "rename", node: { kind: "focus" }, newLabel: "Updated" } },
   { name: "move", command: { kind: "move", node: { kind: "id", value: "n1" }, placement: { relation: "below", reference: { kind: "recent" } } } },
   { name: "delete node", command: { kind: "delete", target: { kind: "node", node: { kind: "label", value: "Begin" } } } },

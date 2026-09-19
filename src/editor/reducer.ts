@@ -8,6 +8,23 @@ import type { CommandResult, EngineState, FlowGraph } from "../graph/types";
 export type EditorState = { displayIds: Record<string, string>; engine: EngineState; outcome: CommandResult["outcome"] | "idle"; message: string };
 export type EditorAction = { type: "example" } | { type: "clear" } | { type: "arrange"; density: NodeDensity } | { type: "command"; command: GraphCommand; idSeed: string } | { type: "delete_selection"; nodeIds: string[]; idSeed: string } | { type: "choose"; candidateId: string; idSeed: string } | { type: "interface_focus"; focusedNodeId: string | null; message: string } | { type: "import_project"; graph: FlowGraph; filename: string };
 export function createEditorState(): EditorState { return { displayIds: {}, engine: createEngineState(), outcome: "idle", message: "Add a node to begin your chart." }; }
+
+function resolveDisplayReferences(command: GraphCommand, displayIds: Record<string,string>): GraphCommand {
+  const resolved=structuredClone(command);
+  const byDisplay=new Map(Object.entries(displayIds).map(([id,display])=>[display.toUpperCase(),id]));
+  const visit=(value:unknown):void=>{
+    if (!value||typeof value!=="object") return;
+    if (Array.isArray(value)) { value.forEach(visit); return; }
+    const record=value as Record<string,unknown>;
+    if (record.kind==="id"&&typeof record.value==="string") {
+      const id=byDisplay.get(record.value.toUpperCase());
+      if (id) record.value=id;
+    }
+    Object.values(record).forEach(visit);
+  };
+  visit(resolved);
+  return resolved;
+}
 export function editorReducer(state: EditorState, action: EditorAction): EditorState {
   if (action.type === "import_project") {
     try {
@@ -36,7 +53,7 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     if (!state.engine.graph.nodes.length) return state;
     const { graph: previousGraph, focusedNodeId, recentNodeId } = state.engine;
     return {
-      displayIds: {},
+      displayIds: state.displayIds,
       engine: {
         ...createEngineState(),
         version: state.engine.version + 1,
@@ -66,12 +83,17 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     // The event supplies a seed so React's repeated reducer calls produce the same IDs.
     let index = 0; const newId = () => `${action.idSeed}-${++index}`;
     result = action.type === "command"
-      ? execute(state.engine, action.command, newId)
+      ? execute(state.engine, resolveDisplayReferences(action.command, state.displayIds), newId)
       : action.type === "delete_selection"
         ? executeNodeSelectionDeletion(state.engine, action.nodeIds, newId)
         : resolveClarification(state.engine, action.candidateId, newId);
   }
   const displayIds = { ...state.displayIds };
   for (const node of result.state.graph.nodes) if (!displayIds[node.id]) displayIds[node.id] = `N${Object.keys(displayIds).length + 1}`;
-  return { displayIds, engine: result.state, outcome: result.outcome, message: result.outcome === "error" && result.message.startsWith("[") ? "Check your input. Labels must contain 1 to 200 characters, and node selections must be valid." : result.message };
+  const added=result.state.graph.nodes.filter(node=>!state.engine.graph.nodes.some(existing=>existing.id===node.id));
+  const addedReference=added.length===1&&result.outcome==="committed"&&result.message.startsWith("Added")
+    ? `, node ${displayIds[added[0].id].slice(1)}.`
+    : "";
+  const message=addedReference?result.message.replace(/\.$/,"")+addedReference:result.message;
+  return { displayIds, engine: result.state, outcome: result.outcome, message: result.outcome === "error" && message.startsWith("[") ? "Check your input. Labels must contain 1 to 200 characters, and node selections must be valid." : message };
 }

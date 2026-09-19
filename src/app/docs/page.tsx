@@ -154,6 +154,7 @@ export default function Documentation() {
               <h3>Reading command syntax</h3>
               <ul>
                 <li>Replace angle-bracket terms such as <code>&lt;shape&gt;</code> and <code>&lt;label&gt;</code> with your own values.</li>
+                <li>Every shape also has a short reference such as <code>N3</code>. Say <code>node three</code> or <code>N3</code> anywhere a full shape label is accepted; the reference remains attached when you rename the shape.</li>
                 <li>Square brackets mark optional wording.</li>
                 <li>Quote labels containing command words: <code>add a process called &ldquo;Sign in with Google&rdquo;</code>.</li>
                 <li><strong>Fast local commands</strong> handles common phrases without a network request. Join recognised commands with <code>then</code>, <code>and then</code>, or <code>and</code> to apply them together. If any clause is not recognised, Koi Charts sends the complete request to Gemini.</li>

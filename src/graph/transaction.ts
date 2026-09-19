@@ -4,7 +4,7 @@ import { assertSnapshot, snapshot } from "./history";
 import { resolveNode } from "../commands/resolve";
 import { describeChoices } from "../feedback/choices";
 import { editKinds } from "../commands/schema";
-import type { EditCommand, GraphCommand, PendingClarification, SpokenRef } from "../commands/schema";
+import type { EditCommand, GraphCommand, PendingClarification, SpokenEdgeRef, SpokenRef } from "../commands/schema";
 
 export class ClarificationRequired extends Error {
   constructor(public readonly pending: PendingClarification, message: string) { super(message); }
@@ -79,6 +79,19 @@ export function prepareTransaction(
     replaceReference(command, path, { kind: "id", value: result.id });
     return result.id;
   };
+  const edge = (ref: SpokenEdgeRef, path: string) => {
+    if (ref.kind === "edge_id") {
+      const found=working.graph.edges.find(item=>item.id===ref.id);
+      if (!found) throw new Error("Connection not found. Name its source and destination shapes.");
+      return found;
+    }
+    const source=node(ref.source,`${path}/source`), target=node(ref.target,`${path}/target`);
+    const candidates=working.graph.edges.filter(item=>item.source===source&&item.target===target&&(ref.label===null||item.label===ref.label)).sort((a,b)=>a.id.localeCompare(b.id));
+    if (!candidates.length) throw new Error("Connection not found. Name an existing source and destination.");
+    if (candidates.length>1) return clarify(candidates.map(item=>item.id),path,"edge");
+    replaceReference(command,path,{kind:"edge_id",id:candidates[0].id});
+    return candidates[0];
+  };
   const affect = (id: string) => { working.focusedNodeId = id; working.recentNodeId = id; };
   const apply = (edit: EditCommand, prefix: string) => {
     switch (edit.kind) {
@@ -115,10 +128,11 @@ export function prepareTransaction(
         affect(target); message = "Connected nodes."; break;
       }
       case "label_edge": {
-        const edge = working.graph.edges.find(item => item.id === edit.edgeId);
-        if (!edge) throw new Error("Connection not found. Select an existing arrow.");
-        if (edit.label === null) delete edge.label; else edge.label = edit.label;
-        message = edit.label === null ? "Cleared connection label." : `Labeled connection ${edit.label}.`;
+        const selected=edge(edit.target,`${prefix}/target`);
+        const source=working.graph.nodes.find(item=>item.id===selected.source)!.label;
+        const target=working.graph.nodes.find(item=>item.id===selected.target)!.label;
+        if (edit.label === null) delete selected.label; else selected.label = edit.label;
+        message = edit.label === null ? `Cleared label from connection from ${source} to ${target}.` : `Labeled connection from ${source} to ${target} as ${edit.label}.`;
         break;
       }
       case "rename": {

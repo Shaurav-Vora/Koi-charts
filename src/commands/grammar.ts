@@ -22,6 +22,7 @@ export const rules: string[] = [
   "Join up to ten exact local edits with \"then\" or \"and\". If any part is uncertain, the whole request goes to Gemini.",
   "Quote a label that contains grammar words: add a process called \"Check before payment\".",
   "Name a shape by its own label — or, when the chart has only one of them, by its kind: \"the decision\".",
+  "Use its short reference when a label is tiring to say: node 3 or N3. The reference remains attached when the shape is renamed.",
 ];
 
 export type GrammarExample =
@@ -117,6 +118,22 @@ export const grammar: GrammarSection[] = [
         alternatives: ["labelled", "called", "named", "with label"],
         examples: [
           { say: "connect Approved to Refund labelled No", command: { kind: "connect", source: label("Approved"), target: label("Refund"), label: "No" } },
+        ],
+      },
+      {
+        form: "label connection from <source> to <destination> as <label>",
+        purpose: "Adds or replaces the label on an existing arrow. Use full shape labels or short references such as node 1 and N2.",
+        alternatives: ["connection", "arrow", "link", "edge", "as", "with label", "labelled"],
+        examples: [
+          { say: "label connection from Approved to Refund as No", command: { kind: "label_edge", target: { kind: "edge", source: label("Approved"), target: label("Refund"), label: null }, label: "No" } },
+          { say: "label arrow from node one to N2 as Yes", command: { kind: "label_edge", target: { kind: "edge", source: { kind: "id", value: "N1" }, target: { kind: "id", value: "N2" }, label: null }, label: "Yes" } },
+        ],
+      },
+      {
+        form: "clear label on connection from <source> to <destination>",
+        purpose: "Removes an arrow label without deleting the connection.",
+        examples: [
+          { say: "clear label on connection from N1 to N2", command: { kind: "label_edge", target: { kind: "edge", source: { kind: "id", value: "N1" }, target: { kind: "id", value: "N2" }, label: null }, label: null } },
         ],
       },
     ],
@@ -352,7 +369,6 @@ export const modelOnly: { say: string; why: string }[] = [
   { say: "delete everything", why: "Requests a bulk operation. Destructive changes require confirmation." },
   { say: "do not add a start node", why: "Contains negation and is not treated as a local add command." },
   { say: "move Start somewhere sensible", why: "Does not specify a destination or a position relative to another node." },
-  { say: "label the arrow between Start and End Yes", why: "The local grammar does not support relabelling an existing arrow by its endpoints. Select the arrow to edit its label." },
 ];
 
 export const grammarEntries = grammar.flatMap(section => section.entries);

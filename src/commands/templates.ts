@@ -36,7 +36,7 @@ const norm = collapse;
  * step, while "Review and connect it to End" is two requests. Neither may be split here, so an
  * utterance that looks like a chain is handed to the model whole.
  */
-const CHAINED = /\bthen\b|\b(?:and|,)\s+(?:also\s+)?(?:connect|link|join|delete|remove|erase|rename|relabel|add|create|insert|make|focus|select|move|undo|redo|draw)\b/i;
+const CHAINED = /\bthen\b|\b(?:and|,)\s+(?:also\s+)?(?:connect|link|join|delete|remove|erase|rename|relabel|add|create|insert|make|focus|select|move|undo|redo|draw|label|clear)\b/i;
 /**
  * A shape described rather than named. "A new decision" does not exist yet, and an indefinite
  * "a process" picks none of the ones that do — both are the model's to expand.
@@ -70,7 +70,32 @@ function cleanLabel(raw: string, keepQuestion = false): string | null {
   return length >= 1 && length <= 200 ? value : null;
 }
 
+const SMALL_NUMBERS: Record<string, number> = {
+  one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9,
+  ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15,
+  sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19,
+};
+const TENS: Record<string, number> = { twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90 };
+
+function spokenNumber(raw: string): number | null {
+  if (/^\d+$/.test(raw)) { const value=Number(raw); return value > 0 ? value : null; }
+  const words=raw.toLowerCase().replace(/-/g," ").trim().split(/\s+/);
+  if (words.length===1) return SMALL_NUMBERS[words[0]]??TENS[words[0]]??null;
+  if (words.length===2 && TENS[words[0]] && SMALL_NUMBERS[words[1]] && SMALL_NUMBERS[words[1]]<10) return TENS[words[0]]+SMALL_NUMBERS[words[1]];
+  return null;
+}
+
+function shortNodeRef(raw: string): SpokenRef | null {
+  const cleaned=norm(raw).replace(/[.!?]+$/,"");
+  if (cleaned.startsWith('"')) return null;
+  const match=/^(?:node\s+|n\s*)(.+)$/i.exec(cleaned);
+  if (!match) return null;
+  const number=spokenNumber(match[1]);
+  return number===null?null:{kind:"id",value:`N${number}`};
+}
 function ref(raw: string): SpokenRef | null {
+  const short = shortNodeRef(raw);
+  if (short) return short;
   const value = cleanLabel(raw);
   if (!value) return null;
   if (PRONOUN.test(value)) return { kind: "focus" };
@@ -88,6 +113,12 @@ function pair(rest: string, joiner = "to"): [string, string] | null {
   if (quoted) return [`"${quoted[1]}"`, quoted[2]];
   const plain = new RegExp(`^(.+?) (?:${joiner}) (.+)$`, "i").exec(rest);
   return plain ? [plain[1], plain[2]] : null;
+}
+function connectionTarget(raw: string) {
+  const ends=pair(raw.replace(/^from\s+/i,""));
+  if (!ends) return null;
+  const source=ref(ends[0]), target=ref(ends[1]);
+  return source&&target?{kind:"edge" as const,source,target,label:null}:null;
 }
 
 /** A placement is only ever accepted whole: a relation with no shape beside it is not one. */
@@ -107,6 +138,22 @@ function addNode(type: string, rawLabel: string | undefined, relation?: string, 
 }
 
 const patterns: { pattern: RegExp; build: (match: RegExpExecArray) => GraphCommand | null }[] = [
+  { // label a connection named by its two endpoints
+    pattern: /^(?:label|name|relabel) (?:the )?(?:connection|arrow|link|edge) (.+)$/i,
+    build: match => {
+      const named=/^(.+) (?:as|with label|labelled|labeled) (.+)$/i.exec(match[1]);
+      if (!named) return null;
+      const target=connectionTarget(named[1]), label=cleanLabel(named[2]);
+      return target&&label?{kind:"label_edge",target,label}:null;
+    },
+  },
+  { // remove a connection label without deleting the connection
+    pattern: /^clear (?:the )?label (?:on|from) (?:the )?(?:connection|arrow|link|edge) (.+)$/i,
+    build: match => {
+      const target=connectionTarget(match[1]);
+      return target?{kind:"label_edge",target,label:null}:null;
+    },
+  },
   { // add, named in quotes: the quotes protect a label that contains command grammar
     pattern: new RegExp(`^(?:${VERB}) (?:a |an |the )?(${TYPES})(?: (?:${SHAPE}))? (?:${NAMING}) "([^"]+)"(?: (${RELATIONS}) (.+?))?[.!?]*$`, "i"),
     build: match => addNode(match[1], `"${match[2]}"`, match[3], match[4]),

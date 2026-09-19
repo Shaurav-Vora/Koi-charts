@@ -7,7 +7,7 @@ export default function ArrowInspector({ edge, source, target, onCommand, onClos
  edge: FlowEdge; source: FlowNode; target: FlowNode; onCommand: (command: GraphCommand) => void; onClose: () => void;
 }) {
  const [label, setLabel] = useState(edge.label ?? "");
- const apply = (value: string) => { setLabel(value); onCommand({ kind: "label_edge", edgeId: edge.id, label: value.trim() || null }); };
+ const apply = (value: string) => { setLabel(value); onCommand({ kind: "label_edge", target: { kind: "edge_id", id: edge.id }, label: value.trim() || null }); };
  return <form className="arrow-inspector canvas-inspector nodrag nopan" aria-label="Selected arrow" onSubmit={event => { event.preventDefault(); apply(label); }}
    onKeyDown={event => { event.stopPropagation(); if (event.key === "Escape") onClose(); }}>
   <div className="inspector-header"><h3>Selected arrow</h3><button type="button" className="inspector-close" aria-label="Close arrow editor" onClick={onClose}>×</button></div>

@@ -51,6 +51,7 @@ Every action—whether initiated via speech, keyboard hotkeys, visual drag-and-d
 
 ### 🎙️ Dual-Engine Voice Interaction
 - **Hybrid Execution**: Zero-latency local parsing for common workflow phrases (`add a start`, `connect A to B labelled Yes`), combined with server-side Google Gemini 3.1 Flash Lite structured output for natural, conversational multi-step commands.
+- **Short Spoken References**: Every shape receives a stable session reference such as **N1**. Say “node one” or “N1” anywhere a full shape label is accepted; renaming and Undo/Redo retain the reference.
 - **Local Command Sequences**: Join up to ten recognised edits with “then,” “and then,” or “and.” The sequence runs atomically on-device only when every clause is understood; otherwise the complete request is sent to Gemini.
 - **Real-Time Streaming**: Browser-based `AudioWorklet` capturing 16 kHz mono PCM audio streamed directly over WebSockets to AssemblyAI Streaming v3.
 - **Audio Duplex & Echo Protection**: Automated microphone silencing and a 400 ms safety guard while spoken replies play, preventing synthetic feedback loops.
@@ -225,6 +226,7 @@ Koi Charts features an on-device deterministic grammar parser (`src/commands/gra
 | **Add Shape** | `add a <shape> [called <label>] [<relation> <shape>]` | *"Add a process called Verify Credentials"* |
 | **Connect** | `connect <shape> to <shape> [labelled <label>]` | *"Connect Verify to Process Payment labelled Valid"* |
 | **Inline Add & Connect** | `connect <shape> to a new <shape> [labelled <label>]` | *"Connect Start to a new process labelled Login"* |
+| **Label Arrow** | `label connection from <source> to <destination> as <label>` / `clear label on connection from <source> to <destination>` | *"Label connection from node one to N2 as Yes"* |
 | **Rename** | `rename <shape> to <label>` | *"Rename Verify Credentials to Authenticate User"* |
 | **Relative Move** | `move <shape> <relation> <shape>` | *"Move Authenticate User below Start"* |
 | **Delete Node** | `delete <shape>` / `delete the <kind>` | *"Delete the decision"* |
@@ -239,7 +241,7 @@ Koi Charts features an on-device deterministic grammar parser (`src/commands/gra
 | **History & Guard** | `undo` / `redo` / `confirm delete` / `confirm deletion` / `yes, delete it` / `cancel` | *"Undo"* or *"Confirm delete"* |
 
 ### Grammar Rules
-1. **Shapes**: `start`, `process`, `decision`, `end` (with synonyms `step`, `choice`, `finish`).
+1. **Shapes**: `start`, `process`, `decision`, `end` (with synonyms `step`, `choice`, `finish`). Full labels and short references such as `node 3` or `N3` can be used interchangeably.
 2. **Relative Positions**: `above`, `below`, `left of`, `right of`, `before`, `after`.
 3. **Compound Utterances**: Requests with multiple sequential actions (e.g. *"Add three steps for checkout"*) are routed cleanly to Gemini.
 4. **Collision Disambiguation**: Duplicate labels are automatically disambiguated using phonetic indices (*"Process"*, *"Process (2)"*).
