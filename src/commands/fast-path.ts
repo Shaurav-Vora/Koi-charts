@@ -1,6 +1,7 @@
 import type { GraphCommand } from "./schema";
 import { bestMatch } from "./similarity";
 import { stripFillers } from "./phrasing";
+import type { ProjectAction } from "../projects/ProjectControls";
 
 // Match the whole utterance: modifiers, names, negation and compound requests must
 // still go through interpretation. Basic insertion never needs an existing focus.
@@ -19,7 +20,7 @@ export function parseSimpleAddition(text: string): GraphCommand | null {
  */
 const controls: { phrase: string; command: GraphCommand; exactOnly?: true }[] = [
  {phrase:"undo",command:{kind:"undo"}}, {phrase:"redo",command:{kind:"redo"}},
- {phrase:"confirm",command:{kind:"confirm"},exactOnly:true}, {phrase:"confirm deletion",command:{kind:"confirm"},exactOnly:true},
+ {phrase:"confirm",command:{kind:"confirm"},exactOnly:true}, {phrase:"confirm delete",command:{kind:"confirm"},exactOnly:true}, {phrase:"confirm deletion",command:{kind:"confirm"},exactOnly:true}, {phrase:"yes, delete it",command:{kind:"confirm"},exactOnly:true},
  {phrase:"cancel",command:{kind:"cancel"}},
  ...["start test","test chart"].map(phrase=>({phrase,command:{kind:"playback",action:"start",choice:null} as GraphCommand})),
  {phrase:"stop test",command:{kind:"playback",action:"stop",choice:null}},
@@ -45,6 +46,17 @@ const controls: { phrase: string; command: GraphCommand; exactOnly?: true }[] = 
 // was sent to the provider instead: a pending deletion then hung on a non-deterministic answer.
 const clean=(text:string)=>stripFillers(text).replace(/[.!?]+$/,"");
 
+const projectControls: { phrase: string; action: ProjectAction }[] = [
+ ...["save project","export project","download project"].map(phrase=>({phrase,action:"save" as const})),
+ ...["open project","import project","load project"].map(phrase=>({phrase,action:"open" as const})),
+];
+
+// File controls stay deliberately small and exact. A phrase such as "export this project to
+// PDF" must continue to the normal command path rather than silently downloading a .koi file.
+export function parseProjectControl(text: string): ProjectAction | null {
+ const spoken=clean(text).toLowerCase();
+ return projectControls.find(entry=>entry.phrase===spoken)?.action??null;
+}
 export function parseControl(text: string): GraphCommand | null {
  const spoken=clean(text).toLowerCase();
  const control=controls.find(entry=>entry.phrase===spoken);

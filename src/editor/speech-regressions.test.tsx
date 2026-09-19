@@ -83,3 +83,24 @@ it("stops a reply part-way and releases the microphone",()=>{
   expect(screen.getByRole("button",{name:"Stop speaking"})).toBeDisabled();
  } finally { vi.useRealTimers(); }
 });
+
+it("uses the existing project controls for local Save and Open voice commands",async()=>{
+ const speech=browserSpeech();
+ const createObjectURL=vi.fn(()=>"blob:koi-project");
+ const revokeObjectURL=vi.fn();
+ vi.stubGlobal("URL",{...URL,createObjectURL,revokeObjectURL});
+ const downloadClick=vi.spyOn(HTMLAnchorElement.prototype,"click").mockImplementation(()=>{});
+ const interpret=vi.fn(async():Promise<never>=>{throw new Error("Project commands must stay local.");});
+ const coordinator=createEditorCoordinator(interpret);
+ render(<Editor coordinator={coordinator}/>);speech.speak.mockClear();
+ act(()=>coordinator.turns.start("project-controls"));
+ await act(()=>coordinator.turns.accept({sessionId:"project-controls",turnId:"save",text:"Save project.",final:true}));
+ expect(downloadClick).toHaveBeenCalledOnce();
+ expect(interpret).not.toHaveBeenCalled();
+ expect(screen.getByRole("region",{name:"Command feedback"})).toHaveTextContent(/Saved koi-chart-.*\.koi\./);
+ await act(()=>coordinator.turns.accept({sessionId:"project-controls",turnId:"open",text:"Open project.",final:true}));
+ expect(screen.getByRole("button",{name:"Open project"})).toHaveFocus();
+ expect(screen.getByRole("region",{name:"Command feedback"})).toHaveTextContent("Open project ready. Press Enter to choose a Koi file.");
+ expect(speech.speak.mock.calls.at(-1)?.[0].text).toBe("Open project ready. Press Enter to choose a Koi file.");
+ expect(interpret).not.toHaveBeenCalled();
+});

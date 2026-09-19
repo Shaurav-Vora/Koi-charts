@@ -1,4 +1,5 @@
 import type { GraphCommand } from "./schema";
+import type { ProjectAction } from "../projects/ProjectControls";
 
 /**
  * The spoken syntax of Koi charts: every phrase shape that is guaranteed to run on this machine,
@@ -23,7 +24,9 @@ export const rules: string[] = [
   "Name a shape by its own label — or, when the chart has only one of them, by its kind: \"the decision\".",
 ];
 
-export type GrammarExample = { say: string; command: GraphCommand };
+export type GrammarExample =
+  | { say: string; command: GraphCommand; projectAction?: never }
+  | { say: string; projectAction: ProjectAction; command?: never };
 export type GrammarEntry = {
   /** The canonical shape, with <placeholders>, as an author should learn it. */
   form: string;
@@ -288,6 +291,31 @@ export const grammar: GrammarSection[] = [
     ],
   },
   {
+    title: "Keep an editable project",
+    entries: [
+      {
+        form: "save project",
+        purpose: "Downloads the current chart as an editable Koi project file without using Gemini.",
+        alternatives: ["export project", "download project"],
+        examples: [
+          { say: "save project", projectAction: "save" },
+          { say: "export project", projectAction: "save" },
+          { say: "download project", projectAction: "save" },
+        ],
+      },
+      {
+        form: "open project",
+        purpose: "Moves focus to Open project. Press Enter to choose a Koi file; browsers require that final keyboard action.",
+        alternatives: ["import project", "load project"],
+        examples: [
+          { say: "open project", projectAction: "open" },
+          { say: "import project", projectAction: "open" },
+          { say: "load project", projectAction: "open" },
+        ],
+      },
+    ],
+  },
+  {
     title: "Take it back",
     entries: [
       {
@@ -299,10 +327,14 @@ export const grammar: GrammarSection[] = [
         ],
       },
       {
-        form: "confirm / cancel",
-        purpose: "Answers a pending question. Confirming a deletion is recognised word for word only, never approximately.",
+        form: "confirm delete / cancel",
+        purpose: "Confirms or cancels a pending deletion. Confirmation is recognised word for word only, never approximately.",
+        alternatives: ["confirm", "confirm deletion", "yes, delete it"],
         examples: [
           { say: "confirm", command: { kind: "confirm" } },
+          { say: "confirm delete", command: { kind: "confirm" } },
+          { say: "confirm deletion", command: { kind: "confirm" } },
+          { say: "yes, delete it", command: { kind: "confirm" } },
           { say: "cancel", command: { kind: "cancel" } },
         ],
       },

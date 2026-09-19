@@ -203,6 +203,8 @@ The editor now also has an atomic import transaction behind the file boundary. A
 
 A `.koi` project is the option for continuing to edit later. SVG, PNG, JPEG, and PDF are sharing formats and cannot be reopened as editable Koi charts. After opening a project, use **Undo** to restore the chart that was in the workspace and **Redo** to apply the imported project again.
 
+The exact voice phrases **Save project**, **Export project**, and **Download project** download the editable file locally without calling Gemini. **Open project**, **Import project**, and **Load project** focus the visible Open project button and say what to do next; press **Enter** to open the system file picker because browsers require a direct keyboard or pointer action. For a pending connected-node deletion, say **Confirm delete**, **Confirm deletion**, or **Yes, delete it**. These safety phrases are exact local controls and never use approximate matching.
+
 ---
 
 ## Voice Command Grammar
@@ -224,7 +226,8 @@ Koi Charts features an on-device deterministic grammar parser (`src/commands/gra
 | **Check Chart** | `check chart` / `next issue` / `previous issue` / `repeat issue` / `close check` | *"Check chart"* or *"Next issue"* |
 | **Inspect / Query** | `where am I` / `inspect <shape>` / `describe the chart` | *"Describe the chart"* |
 | **Trace Path** | `trace the path from <shape> [to <shape>]` | *"Trace the path from Start to End"* |
-| **History & Guard** | `undo` / `redo` / `confirm` / `cancel` | *"Undo"* or *"Confirm"* |
+| **Project Files** | `save project` / `export project` / `download project` / `open project` / `import project` / `load project` | *"Save project"* or *"Open project"* |
+| **History & Guard** | `undo` / `redo` / `confirm delete` / `confirm deletion` / `yes, delete it` / `cancel` | *"Undo"* or *"Confirm delete"* |
 
 ### Grammar Rules
 1. **Shapes**: `start`, `process`, `decision`, `end` (with synonyms `step`, `choice`, `finish`).

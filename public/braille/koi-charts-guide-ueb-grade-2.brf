@@ -212,6 +212,25 @@
   ,say3 rep1t issue
   ,say3 close *eck
 
+,,,keep an $itable project,'
+
+  save project
+  ,d{nloads ! curr5t *>t z an $itable
+    ,koi project file )|t us+ ,gem9i4
+  ,al3 export project2 d{nload project4
+  ,say3 save project
+  ,say3 export project
+  ,say3 d{nload project
+
+  op5 project
+  ,moves focus to ,op5 project4 ,press
+    ,5t} to *oose a ,koi file2 br{s}s
+    require t f9al keybo>d ac;n4
+  ,al3 import project2 load project4
+  ,say3 op5 project
+  ,say3 import project
+  ,say3 load project
+
 ,,,take x back,'
 
   undo _/ r$o
@@ -220,11 +239,16 @@
   ,say3 undo
   ,say3 r$o
 
-  3firm _/ c.el
-  ,answ}s a p5d+ "q4 ,3firm+ a dele;n is
-    recognis$ ~w = ~w only1 n"e
-    approximately4
+  3firm delete _/ c.el
+  ,3firms or c.els a p5d+ dele;n4
+    ,3firma;n is recognis$ ~w = ~w only1
+    n"e approximately4
+  ,al3 3firm2 3firm dele;n2 yes1 delete
+    x4
   ,say3 3firm
+  ,say3 3firm delete
+  ,say3 3firm dele;n
+  ,say3 yes1 delete x
   ,say3 c.el
 
 ,,,s5t to 2 9t}pret$,'
@@ -246,7 +270,7 @@
     relative to ano!r node4
 
   ,say3 label ! >r{ 2t ,/>t & ,5d ,yes
-  ,! local gramm> does n support
-    relabell+ an exi/+ >r{ by xs
+  ,! local gramm> does n support
+    relabell+ an exi/+ >r{ by xs
     5dpo9ts4 ,select ! >r{ to $it xs
     label4

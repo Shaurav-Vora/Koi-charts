@@ -249,10 +249,14 @@ README distinguishes editable `.koi` from image/PDF sharing.
 
 ### Task 4: Local project voice and confirm-delete phrases
 
+**Completed September 19, 2026.** Exact local project phrases now call the shared Save/Open controls without Gemini, voice Open focuses its visible button for keyboard activation, and three exact deletion phrases safely confirm only an existing pending deletion.
+
 **Files:**
 - Create: `src/commands/project-controls.test.ts`
 - Modify: `src/commands/fast-path.ts`
-- Modify: `src/commands/fast-path.test.ts`
+- Modify: `src/commands/grammar.test.ts`
+- Regenerate: `public/braille/koi-charts-guide-ueb-grade-1.brf`
+- Regenerate: `public/braille/koi-charts-guide-ueb-grade-2.brf`
 - Modify: `src/commands/grammar.ts`
 - Modify: `src/streaming/turns.ts`
 - Modify: `src/streaming/turns.test.ts`
@@ -266,7 +270,7 @@ README distinguishes editable `.koi` from image/PDF sharing.
 - `parseProjectControl(text: string): ProjectAction | null`
 - TurnCoordinator option `runProject?: (action: ProjectAction) => Promise<ProjectActionResult> | ProjectActionResult`
 
-- [ ] **Step 1: Write failing parser tests**
+- [x] **Step 1: Write failing parser tests**
 
 ```ts
 it.each([
@@ -279,32 +283,32 @@ it.each([
 
 Assert `confirm delete`, `confirm deletion`, and `yes, delete it` map exactly to Confirm. Assert "confirm delete process" and "export this project to PDF" do not trigger.
 
-- [ ] **Step 2: Write failing coordinator tests**
+- [x] **Step 2: Write failing coordinator tests**
 
 Prove project phrases call `runProject`, never call `interpret`, remain local when Fast local is off, and present one result. Prove all confirmation phrases use the prepared deletion and no pending deletion says "There is no deletion to confirm."
 
-- [ ] **Step 3: Run RED**
+- [x] **Step 3: Run RED**
 
 ```powershell
 node .tools/npm/package/bin/npm-cli.js test -- src/commands/project-controls.test.ts src/streaming/turns.test.ts
 ```
 
-- [ ] **Step 4: Implement project controls outside provider schema**
+- [x] **Step 4: Implement project controls outside provider schema**
 
 Add a separate exact `parseProjectControl` table using the existing punctuation cleanup. Do not add project actions to Zod or JSON provider schemas. TurnCoordinator checks project phrases before graph controls, awaits `runProject`, preserves generation checks, presents source `local`, and returns before interpretation.
 
-- [ ] **Step 5: Wire the shared handle**
+- [x] **Step 5: Wire the shared handle**
 
 Editor supplies `runProject` by calling the current ProjectControls handle. If unavailable, return `{ outcome: "error", message: "Project controls are unavailable." }`. Visible buttons and voice use the same methods.
 
-- [ ] **Step 6: Implement safe deletion phrases**
+- [x] **Step 6: Implement safe deletion phrases**
 
 Add the three exact-only phrases to `parseControl`. Change executor copy from "No deletion to confirm." to "There is no deletion to confirm." Add grammar examples for the documentation and Braille generator.
 
-- [ ] **Step 7: Verify, document, and commit**
+- [x] **Step 7: Verify, document, and commit**
 
 ```powershell
-node .tools/npm/package/bin/npm-cli.js test -- src/commands/project-controls.test.ts src/commands/fast-path.test.ts src/streaming/turns.test.ts src/editor/speech-regressions.test.tsx
+node .tools/npm/package/bin/npm-cli.js test -- src/commands/project-controls.test.ts src/commands/grammar.test.ts src/streaming/turns.test.ts src/editor/speech-regressions.test.tsx
 node .tools/npm/package/bin/npm-cli.js run typecheck
 node .tools/npm/package/bin/npm-cli.js run lint
 git add src/commands/project-controls.test.ts src/commands/fast-path.ts src/commands/fast-path.test.ts src/commands/grammar.ts src/streaming/turns.ts src/streaming/turns.test.ts src/editor/coordinator.ts src/editor/Editor.tsx src/commands/execute.ts src/editor/speech-regressions.test.tsx README.md

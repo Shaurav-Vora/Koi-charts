@@ -1,6 +1,6 @@
 "use client";
 import TactileSimulator from "../tactile/TactileSimulator";
-import { Component, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { Component, useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createSpeaker, speechPreference } from "./speech";
 import { localCommandPreference } from "./preference";
 import type { GraphCommand } from "../commands/schema";
@@ -37,8 +37,10 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
   const [selectionProjectImportKey, setSelectionProjectImportKey] = useState(0);
   const [compactNodes, setCompactNodes] = useState(false);
-  const projectControlsRef = useRef<ProjectControlsHandle>(null);
   const coordinator = supplied ?? local;
+  const bindProjectControls = useCallback((handle:ProjectControlsHandle|null)=>{
+    coordinator.setProjectRunner(handle?action=>handle.run(action):null);
+  },[coordinator]);
   const { editor: state, presentation, playback, audit, projectImportKey } = useSyncExternalStore(coordinator.subscribe, coordinator.getSnapshot, coordinator.getSnapshot);
   const dispatch = coordinator.dispatch;
   const speaker = useMemo(() => createSpeaker(), []);
@@ -201,7 +203,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
     <div className="diagram-workbench"><div id="shape-palette" className="palette-column"><ShapePalette lastNodeId={graph.nodes.at(-1)?.id} onCommand={onCommand} /></div>
       <section className="display visual-display" aria-labelledby="visual-title" data-graph-version={version}>
         <div className="display-heading"><h3 id="visual-title">Visual flowchart</h3><span className="count">{graph.nodes.length} nodes · {graph.edges.length} connections</span><ExportMenu graph={graph} layout={layout} projectControls={<ProjectControls
-          ref={projectControlsRef}
+          ref={bindProjectControls}
           graph={graph}
           onImport={(imported, filename) => { coordinator.importProject(imported, filename); }}
           onResult={reportProjectResult}

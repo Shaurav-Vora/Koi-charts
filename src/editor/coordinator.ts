@@ -8,8 +8,10 @@ import { createPlaybackState, playbackTransition } from "../playback/engine";
 import type { PlaybackAction } from "../playback/types";
 import { auditTransition, createAuditState, currentAuditIssue } from "../audit/state";
 import type { AuditAction, AuditState } from "../audit/types";
+import type { ProjectAction, ProjectActionResult } from "../projects/ProjectControls";
 export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
  let state={editor:createEditorState(),presentation:null as Presentation|null,playback:createPlaybackState(),audit:createAuditState(),projectImportKey:0};
+ let projectRunner: ((action:ProjectAction)=>Promise<ProjectActionResult>|ProjectActionResult)|null=null;
  const listeners=new Set<()=>void>();
  const publish=()=>listeners.forEach(listener=>listener());
  const dispatch=(action:EditorAction)=>{
@@ -124,11 +126,13 @@ export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
   dispatch({type:"command",command,idSeed:crypto.randomUUID()});return result();
  };
  const turns=new TurnCoordinator({getState:()=>state.editor.engine,interpret,preferLocal:localCommandPreference.read,
+  runProject:action=>projectRunner?projectRunner(action):{outcome:"error",message:"Project controls are unavailable."},
   apply:applyCommand,
   choose:candidateId=>{dispatch({type:"choose",candidateId,idSeed:crypto.randomUUID()});return result();},
   present:presentation=>{state={...state,presentation};publish();},
  });
  // The connection layer reports through the same channel as turns, so one status line covers both.
  const present=(value:Presentation)=>{state={...state,presentation:value};publish();};
- return {turns,dispatch,importProject,openEditor,playbackDispatch,auditDispatch,present,getSnapshot:()=>state,subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener);};}};
+ const setProjectRunner=(runner:typeof projectRunner)=>{projectRunner=runner;};
+ return {turns,dispatch,importProject,openEditor,playbackDispatch,auditDispatch,present,setProjectRunner,getSnapshot:()=>state,subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener);};}};
 }

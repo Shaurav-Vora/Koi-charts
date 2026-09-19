@@ -50,7 +50,7 @@ export function execute(state: EngineState, input: unknown, newId: () => string)
     if (command.kind === "clear_focus") return { state: { ...state, focusedNodeId: null }, outcome: "focused", message: "Selection cleared." };
     if (command.kind === "cancel") return { state: { ...state, pending: null }, outcome: "cancelled", message: "Cancelled." };
     if (command.kind === "confirm") {
-      if (state.pending?.kind !== "deletion") return failure(state, "No deletion to confirm.");
+      if (state.pending?.kind !== "deletion") return failure(state, "There is no deletion to confirm.");
       if (state.pending.graphVersion !== state.version) return failure({ ...state, pending: null }, "The chart changed. Repeat the deletion command.");
       assertSnapshot(state);
       if (state.pending.command.kind === "compound" && state.pending.command.commands.length > 10) {

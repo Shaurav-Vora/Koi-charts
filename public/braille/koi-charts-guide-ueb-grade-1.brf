@@ -242,21 +242,48 @@
   ,say3 repeat issue
   ,say3 close check
 
+,,,keep an editable project,'
+
+  save project
+  ,downloads the current chart as an
+    editable ,koi project file without
+    using ,gemini4
+  ,also3 export project2 download
+    project4
+  ,say3 save project
+  ,say3 export project
+  ,say3 download project
+
+  open project
+  ,moves focus to ,open project4 ,press
+    ,enter to choose a ,koi file2
+    browsers require that final keyboard
+    action4
+  ,also3 import project2 load project4
+  ,say3 open project
+  ,say3 import project
+  ,say3 load project
+
 ,,,take it back,'
 
   undo _/ redo
   ,steps back or forward through your
-    edits4 ,walking the chart is not an
+    edits4 ,walking the chart is not an
     edit4
   ,say3 undo
-  ,say3 redo
+  ,say3 redo
 
-  confirm _/ cancel
-  ,answers a pending question4
-    ,confirming a deletion is recognised
-    word for word only1 never
+  confirm delete _/ cancel
+  ,confirms or cancels a pending
+    deletion4 ,confirmation is
+    recognised word for word only1 never
     approximately4
+  ,also3 confirm2 confirm deletion2 yes1
+    delete it4
   ,say3 confirm
+  ,say3 confirm delete
+  ,say3 confirm deletion
+  ,say3 yes1 delete it
   ,say3 cancel
 
 ,,,sent to be interpreted,'
@@ -269,8 +296,9 @@
   ,say3 delete everything
   ,requests a bulk operation4
     ,destructive changes require
-    confirmation4
-  ,say3 do not add a start node
+    confirmation4
+
+  ,say3 do not add a start node
   ,contains negation and is not treated
     as a local add command4
 

@@ -4,15 +4,16 @@ import { createEngineState, execute, resolveClarification } from "../commands/ex
 import { previewCommand } from "../commands/preview";
 import { parseControl } from "../commands/fast-path";
 import type { GraphCommand } from "../commands/schema";
+import type { ProjectAction, ProjectActionResult } from "../projects/ProjectControls";
 const add=(label:string):GraphCommand=>({kind:"add_node",type:"process",label,placement:null});
 function deferred<T>() {let resolve!:(value:T)=>void;const promise=new Promise<T>(r=>{resolve=r;});return {promise,resolve};}
-function harness(interpret:Interpret=async text=>add(text),preferLocal?:()=>boolean) {
+function harness(interpret:Interpret=async text=>add(text),preferLocal?:()=>boolean,runProject?: (action:ProjectAction)=>Promise<ProjectActionResult>|ProjectActionResult) {
  let state=createEngineState(),count=0;
  const presentations:Presentation[]=[];
  const apply=vi.fn((command:GraphCommand)=>{const result=execute(state,command,()=>`n${++count}`);state=result.state;return result;});
  const choose=vi.fn((id:string)=>{const result=resolveClarification(state,id,()=>`n${++count}`);state=result.state;return result;});
  const interpretSpy=vi.fn(interpret);
- const coordinator=new TurnCoordinator({getState:()=>state,apply,choose,interpret:interpretSpy,present:p=>presentations.push(p),preferLocal});
+ const coordinator=new TurnCoordinator({getState:()=>state,apply,choose,interpret:interpretSpy,present:p=>presentations.push(p),preferLocal,runProject});
  coordinator.start("s1");
  return {coordinator,apply,choose,interpret:interpretSpy,getState:()=>state,presentations,turn:(text:string,final=false,turnId="1",sessionId="s1")=>coordinator.accept({text,final,turnId,sessionId})};
 }
@@ -55,6 +56,16 @@ describe("speech turn coordination",()=>{
   expect(h.presentations.at(-1)).toMatchObject({source:"model"});
   await h.turn("Undo.",true,"3");
   expect(h.presentations.at(-1)).toMatchObject({source:"local"});
+ });
+ it.each([["Save project.","save"],["Open project.","open"]] as const)("runs %s as a local project action even when local edits are off",async(text,action)=>{
+  const runProject=vi.fn(async(value:ProjectAction):Promise<ProjectActionResult>=>({outcome:"committed",message:value==="save"?"Saved test.koi.":"Open project ready. Press Enter to choose a Koi file."}));
+  const h=harness(async()=>add("Model result"),()=>false,runProject);
+  await h.turn(text,true,"project");
+  expect(runProject).toHaveBeenCalledWith(action);
+  expect(h.interpret).not.toHaveBeenCalled();
+  expect(h.apply).not.toHaveBeenCalled();
+  expect(h.presentations.filter(presentation=>presentation.status==="committed"||presentation.status==="error")).toHaveLength(1);
+  expect(h.presentations.at(-1)).toMatchObject({status:"committed",source:"local"});
  });
  // Turning templates off is the escape hatch for a template that reads a phrase wrongly. It must
  // not disarm the control words: a pending deletion cannot wait on a non-deterministic answer.
@@ -125,6 +136,22 @@ describe("speech turn coordination",()=>{
  // arrives here spelled "Confirm." — matching the bare word left every one of them unrecognised.
  it.each([["Confirm.",{kind:"confirm"}],["Undo!",{kind:"undo"}],["Cancel.",{kind:"cancel"}],["Next.",{kind:"walk",direction:"next",branch:null}],["Go to start.",{kind:"walk",direction:"first",branch:null}],["Where am I?",{kind:"walk",direction:"stay",branch:null}],["Take yes.",{kind:"walk",direction:"next",branch:"yes"}]])("recognises %s as spoken, punctuation and all",(text,command)=>{
   expect(parseControl(text)).toEqual(command);
+ });
+ it.each(["Confirm delete.","Confirm deletion.","Yes, delete it."])("commits a prepared deletion with %s",async phrase=>{
+  const h=harness();
+  h.apply(add("One"));h.apply(add("Two"));
+  h.apply({kind:"connect",source:{kind:"label",value:"One"},target:{kind:"label",value:"Two"},label:null});
+  await h.turn("Delete One.",true,"delete");
+  expect(h.getState().pending?.kind).toBe("deletion");
+  await h.turn(phrase,true,"confirm");
+  expect(h.getState().graph.nodes.map(node=>node.label)).toEqual(["Two"]);
+  expect(h.interpret).not.toHaveBeenCalled();
+ });
+ it("explains when spoken confirmation has no prepared deletion",async()=>{
+  const h=harness();
+  await h.turn("Confirm delete.",true,"confirm");
+  expect(h.presentations.at(-1)).toMatchObject({status:"error",source:"local",text:"There is no deletion to confirm."});
+  expect(h.interpret).not.toHaveBeenCalled();
  });
  // A pending deletion that waits on the provider to recognise "Confirm." answers differently
  // each time, which is why clearing a chart by voice took several attempts.
