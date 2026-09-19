@@ -5,9 +5,16 @@ import { createProviderState } from "./provider-http";
 import { ApiError, errorResponse, json } from "./errors";
 import { RateLimiter, checkOrigin, readJson } from "./limits";
 import { parseInput } from "./input";
+function browserGeminiKey(request:Request){
+ const header=request.headers.get("x-koi-gemini-key");
+ if(header===null)return null;
+ const key=header.trim();
+ if(!/^[A-Za-z0-9._-]{20,256}$/.test(key))throw new ApiError("INVALID_INPUT","Enter a valid Gemini API key.");
+ return key;
+}
 export function createRoutes(options:{transport?:typeof fetch;env?:()=>Record<string,string|undefined>;limiter?:RateLimiter}={}){
  const limiter=options.limiter??new RateLimiter();
- // Shared per process, keyed by provider URL/model; never shared between Google and AssemblyAI.
+ // Shared per process and isolated by provider URL/model plus a non-reversible credential scope.
  const providerState=createProviderState();
  async function handle(kind:"token"|"interpret",request:Request){
   const requestId=crypto.randomUUID(),env=options.env?.()??process.env,model=kind==="interpret"?(env.GEMINI_MODEL?.trim()||DEFAULT_GEMINI_MODEL):"streaming";
@@ -20,8 +27,9 @@ export function createRoutes(options:{transport?:typeof fetch;env?:()=>Record<st
    const input=kind==="interpret"?parseInput(body):null;
    if(kind==="token"&&(!body||Array.isArray(body)||typeof body!=="object"||Object.keys(body).length))throw new ApiError("INVALID_INPUT","Token requests must contain an empty JSON object.");
    if(input){
-    if(!env.GEMINI_API_KEY?.trim())throw new ApiError("CONFIGURATION","Set GEMINI_API_KEY in .env.local and restart the server to enable Google command interpretation.");
-    return json(await new GeminiProvider(env.GEMINI_API_KEY.trim(),model,options.transport,providerState).interpret(input,request.signal));
+    const apiKey=browserGeminiKey(request)??env.GEMINI_API_KEY?.trim();
+    if(!apiKey)throw new ApiError("CONFIGURATION","Add a Gemini key in the workspace, or set GEMINI_API_KEY on the server.");
+    return json(await new GeminiProvider(apiKey,model,options.transport,providerState).interpret(input,request.signal));
    }
    if(!env.ASSEMBLYAI_API_KEY?.trim())throw new ApiError("CONFIGURATION","Set ASSEMBLYAI_API_KEY in .env.local to enable speech transcription.");
    return json(await new AssemblyProvider(env.ASSEMBLYAI_API_KEY.trim(),options.transport,providerState).token(request.signal));

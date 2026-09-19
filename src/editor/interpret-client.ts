@@ -1,7 +1,11 @@
 import { commandEnvelopeSchema } from "../commands/schema";
 import type { Interpret } from "../streaming/turns";
+import { geminiKeyPreference } from "./gemini-key";
 export const interpretOnServer:Interpret=async(transcript,state,signal)=>{
- const response=await fetch("/api/commands/interpret",{method:"POST",headers:{"content-type":"application/json"},signal,body:JSON.stringify({transcript,graph:state.graph,focusedNodeId:state.focusedNodeId,recentNodeId:state.recentNodeId,pending:state.pending})});
+ const key=geminiKeyPreference.read();
+ const headers:Record<string,string>={"content-type":"application/json"};
+ if(key)headers["x-koi-gemini-key"]=key;
+ const response=await fetch("/api/commands/interpret",{method:"POST",headers,signal,body:JSON.stringify({transcript,graph:state.graph,focusedNodeId:state.focusedNodeId,recentNodeId:state.recentNodeId,pending:state.pending})});
  // The route returns reader-safe messages naming what to fix; a generic fallback hides them.
  if(!response.ok){
   const detail=await response.json().catch(()=>null) as {error?:{message?:unknown}}|null;

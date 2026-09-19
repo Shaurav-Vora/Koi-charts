@@ -11,6 +11,7 @@ import ProjectControls, { type ProjectActionResult, type ProjectControlsHandle }
 import { ShapePalette, NodeInspector } from "./ShapePalette";
 import CommandForm from "./CommandForm";
 import ToggleSwitch from "./ToggleSwitch";
+import GeminiKeyControl from "./GeminiKeyControl";
 import { createEditorCoordinator } from "./coordinator";
 import { useVoice } from "./useVoice";
 import { statusLabels } from "./status";
@@ -198,6 +199,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
           <button className="stop-speech-button" disabled={!inputPaused} aria-keyshortcuts="Control+Alt+S" title="Keyboard shortcut: Ctrl+Alt+S" onClick={stopSpeaking}><span>Stop speaking</span><kbd className="shortcut-key" aria-hidden="true">Ctrl Alt S</kbd></button>
           <ToggleSwitch className="local-switch" label="Fast local commands" checked={fastLocal} title="Recognise common phrases on this device instead of sending them to be interpreted." onChange={next => localCommandPreference.write(next)} />
           <ToggleSwitch className="speech-switch" label="Speak replies" checked={speaks} disabled={!supported} title={supported ? undefined : "This browser has no speech engine."} onChange={toggleSpeech} />
+          <GeminiKeyControl />
         </div>
       </div>
       <section className={`command-feedback ${hasError ? "has-error" : ""}`} data-tone={outcomeTone} aria-label="Command feedback">

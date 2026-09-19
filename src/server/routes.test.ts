@@ -16,6 +16,36 @@ describe("server routes",()=>{
  it("keeps a client named global separate from the global bucket",()=>{const limiter=new RateLimiter();for(let i=0;i<6;i++)expect(()=>limiter.check("token","global",0)).not.toThrow();expect(()=>limiter.check("token","global",0)).toThrow();expect(()=>limiter.check("token","another",0)).not.toThrow();});
  it.each(["token","interpret"] as const)("returns safe configuration errors for %s without a key",async kind=>{const h=setup(undefined,"");const result=await h.routes[kind](request(kind==="token"?{}:body()));expect(result.status).toBe(503);expect(result.headers.get("cache-control")).toBe("no-store");expect((await result.json()).error.code).toBe("CONFIGURATION");expect(h.transport).not.toHaveBeenCalled();});
  it("mints a short-lived token with the session cap in query parameters",async()=>{const h=setup(async()=>Response.json({token:"temporary",expires_in_seconds:60}));const response=await h.routes.token(request());expect(response.status).toBe(200);expect(await response.json()).toMatchObject({token:"temporary",expiresAt:expect.any(String)});const [url,init]=h.transport.mock.calls[0] as unknown as [string,RequestInit];expect(url).toContain("expires_in_seconds=60&max_session_duration_seconds=1800");expect(init.method).toBe("GET");});
+ it("uses a valid browser Gemini key before the deployment fallback",async()=>{
+  const h=setup();
+  const response=await h.routes.interpret(request(body(),{"x-koi-gemini-key":"user-browser-key-1234567890"}));
+  expect(response.status).toBe(200);
+  const [,init]=h.transport.mock.calls[0] as unknown as [string,RequestInit];
+  const headers=new Headers(init.headers);
+  expect(headers.get("x-goog-api-key")).toBe("user-browser-key-1234567890");
+  expect(JSON.stringify(init)).not.toContain("test-server-secret");
+ });
+ it("accepts a browser Gemini key when no deployment key exists",async()=>{
+  const transport=vi.fn(async()=>completion());
+  const routes=createRoutes({transport:transport as typeof fetch,env:()=>({})});
+  expect((await routes.interpret(request(body(),{"x-koi-gemini-key":"user-browser-key-1234567890"}))).status).toBe(200);
+ });
+ it.each(["short","contains spaces","x".repeat(257)])("rejects invalid browser Gemini key %s",async key=>{
+  const h=setup();
+  expect((await h.routes.interpret(request(body(),{"x-koi-gemini-key":key}))).status).toBe(400);
+  expect(h.transport).not.toHaveBeenCalled();
+ });
+ it("keeps Gemini cooldowns separate for different browser keys",async()=>{
+  const transport=vi.fn()
+   .mockResolvedValueOnce(new Response("rate limit",{status:429,headers:{"retry-after":"60"}}))
+   .mockResolvedValueOnce(completion());
+  const routes=createRoutes({transport:transport as typeof fetch,env:()=>({})});
+  const first=await routes.interpret(request(body(),{"x-koi-gemini-key":"first-browser-key-1234567890"}));
+  const second=await routes.interpret(request(body(),{"x-koi-gemini-key":"second-browser-key-1234567890"}));
+  expect(first.status).toBe(429);
+  expect(second.status).toBe(200);
+  expect(transport).toHaveBeenCalledTimes(2);
+ });
  it("uses Google's JSON schema and token cap while omitting layout coordinates",async()=>{const h=setup();const input=body();input.graph.nodes.push({id:"a",type:"start",label:"A",position:{x:20,y:30}});const response=await h.routes.interpret(request(input));expect(await response.json()).toEqual({command});const [,init]=h.transport.mock.calls[0] as unknown as [string,RequestInit];const sent=JSON.parse(init.body as string);expect(sent.generationConfig.maxOutputTokens).toBe(1024);expect(sent.generationConfig.responseJsonSchema.additionalProperties).toBe(false);expect(sent.generationConfig.responseJsonSchema.properties.command.anyOf[0].properties.kind.enum).toEqual(["label_edge"]);expect(sent.contents[0].parts[0].text).not.toContain('"position"');});
  // Google rejects the entire request with an unexplained 400 when maxItems appears anywhere,
  // so it is translated away while every other constraint stays on the wire.

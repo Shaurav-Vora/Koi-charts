@@ -42,12 +42,13 @@ async function errorDetail(response: Response) {
 }
 
 export class ProviderHttp {
- constructor(private name: "Google Gemini" | "AssemblyAI", private headers: Record<string, string>, private transport: typeof fetch = fetch, private state = createProviderState()) {}
+ constructor(private name: "Google Gemini" | "AssemblyAI", private headers: Record<string, string>, private transport: typeof fetch = fetch, private state = createProviderState(), private cooldownScope = "shared") {}
  private throttled(seconds: number) {
   return new ApiError("RATE_LIMITED", `${this.name} is rate-limited. Wait ${seconds} seconds, then repeat your command. If this persists, check your provider's model limits and account quota.`, "", seconds);
  }
  async request(url: string, init: RequestInit, parent?: AbortSignal): Promise<unknown> {
-  const until = this.state.cooldowns.get(url) ?? 0;
+  const cooldownKey = url + ":" + this.cooldownScope;
+  const until = this.state.cooldowns.get(cooldownKey) ?? 0;
   if (until > Date.now()) throw this.throttled(Math.ceil((until - Date.now()) / 1000));
   const controller = new AbortController(), abort = () => controller.abort();
   parent?.addEventListener("abort", abort, { once: true }); if (parent?.aborted) abort();
@@ -60,10 +61,10 @@ export class ProviderHttp {
     if (response.status === 429) {
      if (/insufficient.{0,30}(?:credit|balance)|billing|payment required|quota.{0,20}exhausted/i.test(detail)) throw new ApiError("CONFIGURATION", `${this.name} rejected this request because of account billing or quota. Check your provider account before trying again.`);
      const seconds = retryDelay(response.headers.get("retry-after"), detail);
-     this.state.cooldowns.set(url, Date.now() + seconds * 1000);
+     this.state.cooldowns.set(cooldownKey, Date.now() + seconds * 1000);
      throw this.throttled(seconds);
     }
-    if (response.status === 401 || response.status === 403) throw new ApiError("CONFIGURATION", `${this.name} rejected the server API key or account access. Check the key and API permissions.`);
+    if (response.status === 401 || response.status === 403) throw new ApiError("CONFIGURATION", `${this.name} rejected the API key or account access. Check the key and API permissions.`);
     if (response.status === 404 && this.name === "Google Gemini") throw new ApiError("CONFIGURATION", "The configured Gemini model is unavailable. Check GEMINI_MODEL and your Google API access.");
     throw new ApiError("UPSTREAM", `${this.name} could not complete the request (HTTP ${response.status}).`);
    }

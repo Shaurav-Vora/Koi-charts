@@ -1,5 +1,6 @@
 import "server-only";
 import { z } from "zod";
+import { createHash } from "node:crypto";
 import { commandEnvelopeSchema } from "../commands/schema";
 import { commandJsonSchema } from "../commands/json-schema";
 import { ApiError } from "./errors";
@@ -89,7 +90,8 @@ export class GeminiProvider {
  private http: ProviderHttp;
  constructor(key: string, private model = DEFAULT_GEMINI_MODEL, transport?: typeof fetch, state?: ProviderState) {
   if (!/^gemini-[a-zA-Z0-9.-]+$/.test(model)) throw new ApiError("CONFIGURATION", "GEMINI_MODEL must be a Gemini model ID, such as gemini-3.1-flash-lite.");
-  this.http = new ProviderHttp("Google Gemini", { "x-goog-api-key": key }, transport, state);
+  const keyScope = createHash("sha256").update(key).digest("base64url").slice(0, 16);
+  this.http = new ProviderHttp("Google Gemini", { "x-goog-api-key": key }, transport, state, keyScope);
  }
  async interpret(input: InterpretationInput, signal?: AbortSignal) {
   const simple = simpleShapeConnection(input);

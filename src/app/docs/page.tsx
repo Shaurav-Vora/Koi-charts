@@ -320,6 +320,38 @@ export default function Documentation() {
             <CommandGuide />
           </section>
 
+          <section id="guide-model" className="docs-section" aria-labelledby="guide-model-title">
+            <div className="docs-section-heading">
+              <p>Gemini requests</p>
+              <h2 id="guide-model-title">Use your own Gemini key</h2>
+              <span>Local commands need no Gemini key. Add one only for natural-language requests that do not match the local grammar.</span>
+            </div>
+            <ol className="docs-workflow">
+              <li>
+                <div>
+                  <h3>Open key setup</h3>
+                  <p>In the workspace voice toolbar, select <strong>Set up Gemini</strong>. Paste a Google AI Studio API key and choose <strong>Save key</strong>.</p>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <h3>Use Gemini when needed</h3>
+                  <p>The control changes to <strong>Gemini key set</strong>. The key is attached only to requests sent for Gemini interpretation; exact local commands continue to run without it.</p>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <h3>Remove or replace it</h3>
+                  <p>Open <strong>Gemini key set</strong> to enter a replacement or remove the current key. The key is stored only for the current browser tab and is cleared when that tab closes.</p>
+                </div>
+              </li>
+            </ol>
+            <div className="docs-access-note">
+              <h3>Key handling</h3>
+              <p>The key is masked in the workspace, excluded from saved Koi projects, and sent through the Koi Charts server to Google. A key configured on the deployment remains the fallback when this tab has no key.</p>
+            </div>
+          </section>
+
           <section id="exports" className="docs-section" aria-labelledby="exports-title">
             <div className="docs-section-heading">
               <p>Projects and exports</p>
