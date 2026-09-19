@@ -39,6 +39,7 @@ export interface VisualCanvasProps {
   graph: FlowGraph;
   layout: LayoutFrame;
   focusedNodeId: string | null;
+  displayIds?: Record<string, string>;
   onCommand: (command: GraphCommand) => void;
   canUndo?: boolean;
   canRedo?: boolean;
@@ -73,6 +74,7 @@ function Canvas({
   graph,
   layout,
   focusedNodeId,
+  displayIds = {},
   onCommand,
   canUndo,
   canRedo,
@@ -221,11 +223,11 @@ function Canvas({
     const box = layout.nodes.find(item => item.id === node.id)!;
     const playbackState: PlaybackMark | undefined = node.id === currentRouteStep?.nodeId ? "current" : visitedNodeIds.has(node.id) ? "visited" : undefined;
     return { id: node.id, type: "flowNode", selectable: true, selected: controlledNodeSelection.includes(node.id), position: { x: box.x, y: box.y }, width: box.width, height: box.height, measured: { width: box.width, height: box.height },
-      style: { width: box.width, height: box.height }, data: { label: node.label, nodeType: node.type, focused: node.id === focusedNodeId, compact: compactNodes,
+      style: { width: box.width, height: box.height }, data: { label: node.label, displayId: displayIds[node.id], nodeType: node.type, focused: node.id === focusedNodeId, compact: compactNodes,
         playbackState,
         onRename: (newLabel: string) => onCommand({ kind: "rename", node: { kind: "id", value: node.id }, newLabel }),
         onFocus: () => { lastInspectedEdgeId.current = null; setSelectedEdgeId(null); onSelectedNodeIdsChange?.([node.id]); onCommand({ kind: "focus", node: { kind: "id", value: node.id } }); } } };
-  }), [graph, layout, focusedNodeId, compactNodes, onCommand, onSelectedNodeIdsChange, controlledNodeSelection, currentRouteStep?.nodeId, visitedNodeIds]);
+  }), [graph, layout, focusedNodeId, displayIds, compactNodes, onCommand, onSelectedNodeIdsChange, controlledNodeSelection, currentRouteStep?.nodeId, visitedNodeIds]);
   const liveLayout = useMemo(() => drag ? routeEdges(graph, layout.nodes.map(node => node.id === drag.id ? { ...node, x: drag.x, y: drag.y } : node)) : layout.edges, [drag, graph, layout]);
   const edges: RoutedEdge[] = useMemo(() => graph.edges.map(edge => {
     const playbackState: PlaybackMark | undefined = edge.id === currentRouteStep?.viaEdgeId ? "current" : visitedEdgeIds.has(edge.id) ? "visited" : undefined;

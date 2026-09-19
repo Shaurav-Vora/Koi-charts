@@ -30,7 +30,7 @@ vi.mock("@xyflow/react", async () => {
       zoomOut: vi.fn(),
     }),
     ReactFlow: ({ nodes, edges, children, onEdgeClick, onEdgesChange, onConnectEnd, onSelectionChange, onSelectionEnd, selectionOnDrag, selectionMode, panOnDrag }: {
-      nodes: Array<{ id: string; selected?: boolean; data: { playbackState?: string; compact?: boolean } }>;
+      nodes: Array<{ id: string; selected?: boolean; data: { playbackState?: string; compact?: boolean; displayId?: string } }>;
       edges: Array<{ id: string; ariaLabel?: string; data: { playbackState?: string } }>;
       children: ReactNode;
       onEdgeClick?: (event: unknown, edge: unknown) => void;
@@ -50,6 +50,7 @@ vi.mock("@xyflow/react", async () => {
         "data-playback-state": node.data.playbackState,
         "data-selected": node.selected,
         "data-compact": node.data.compact,
+        "data-display-id": node.data.displayId,
       })),
       ...edges.map(edge => React.createElement("div", {
         key: edge.id,
@@ -102,6 +103,12 @@ const graph: FlowGraph = {
 };
 
 describe("VisualCanvas playback route", () => {
+  it("passes stable short references to visual nodes", () => {
+    render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId={null} onCommand={vi.fn()} displayIds={{ start: "N1", review: "N2" }} />);
+
+    expect(screen.getByTestId("node-start")).toHaveAttribute("data-display-id", "N1");
+    expect(screen.getByTestId("node-review")).toHaveAttribute("data-display-id", "N2");
+  });
   it("hides the navigation dock while another canvas overlay is open", () => {
     const navigationProps = {
       onWalk: vi.fn(),

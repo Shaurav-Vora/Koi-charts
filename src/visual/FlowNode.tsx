@@ -3,12 +3,13 @@ import { useCallback, useState } from "react";
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
 import type { NodeType } from "../graph/types";
 import { nodeDimensions } from "./layout";
-export type CanvasNode = Node<{ label: string; nodeType: NodeType; focused: boolean; compact?: boolean; playbackState?: "visited" | "current"; onFocus: () => void; onRename: (label: string) => void }, "flowNode">;
+export type CanvasNode = Node<{ label: string; displayId?: string; nodeType: NodeType; focused: boolean; compact?: boolean; playbackState?: "visited" | "current"; onFocus: () => void; onRename: (label: string) => void }, "flowNode">;
 export default function FlowNode({ data }: NodeProps<CanvasNode>) {
   const focusInput = useCallback((input: HTMLInputElement | null) => { if (input) { input.focus(); input.select(); } }, []);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const dimensions = nodeDimensions(data.nodeType, data.compact ? "compact" : "standard");
+  const accessibleLabel = `Focus ${data.displayId ? `${data.displayId}, ` : ""}${data.label}`;
   return <div className={`flow-node ${data.nodeType} ${data.compact ? "is-compact" : ""} ${data.focused ? "is-focused" : ""}`} data-playback-state={data.playbackState}>
     <Handle id="top" type="source" position={Position.Top} title="Drag to a dot on another shape to connect" />
     <Handle id="left" type="source" position={Position.Left} title="Drag to a dot on another shape to connect" />
@@ -20,8 +21,9 @@ export default function FlowNode({ data }: NodeProps<CanvasNode>) {
     </svg>
     {editing ? <form className="node-content nodrag nopan" onSubmit={event => { event.preventDefault(); data.onRename(draft); setEditing(false); }} onDoubleClick={event => event.stopPropagation()}>
       <input className="inline-node-label" aria-label="Rename shape" value={draft} ref={focusInput} onChange={event => setDraft(event.target.value)} onKeyDown={event => { event.stopPropagation(); if(event.key === "Escape") setEditing(false); }} onBlur={() => setEditing(false)} />
-    </form> : <button className="node-content nopan" onDoubleClick={event => { event.stopPropagation(); setDraft(data.label); setEditing(true); }} onClick={data.onFocus} aria-label={`Focus ${data.label}`} title={data.label}>
-      <span className="node-kind">{data.nodeType}</span><strong>{data.label}</strong>{data.focused && <span className="focus-badge">Focused</span>}
+    </form> : <button className="node-content nopan" onDoubleClick={event => { event.stopPropagation(); setDraft(data.label); setEditing(true); }} onClick={data.onFocus} aria-label={accessibleLabel} title={data.displayId ? `${data.displayId} · ${data.label}` : data.label}>
+      <span className="node-meta">{data.displayId && <span className="node-reference">{data.displayId}</span>}<span className="node-kind">{data.nodeType}</span></span>
+      <strong>{data.label}</strong>{data.focused && <span className="focus-badge">Focused</span>}
     </button>}
     <Handle id="bottom" type="source" position={Position.Bottom} title="Drag to a dot on another shape to connect" />
   </div>;

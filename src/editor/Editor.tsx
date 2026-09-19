@@ -211,6 +211,7 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
         <div className="canvas-wrap"><CanvasBoundary><VisualCanvas
           graph={graph}
           focusedNodeId={focusedNodeId}
+          displayIds={state.displayIds}
           onCommand={onCommand}
           layout={layout}
           canUndo={!!history.past.length}

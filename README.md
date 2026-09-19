@@ -51,7 +51,7 @@ Every action—whether initiated via speech, keyboard hotkeys, visual drag-and-d
 
 ### 🎙️ Dual-Engine Voice Interaction
 - **Hybrid Execution**: Zero-latency local parsing for common workflow phrases (`add a start`, `connect A to B labelled Yes`), combined with server-side Google Gemini 3.1 Flash Lite structured output for natural, conversational multi-step commands.
-- **Short Spoken References**: Every shape receives a stable session reference such as **N1**. Say “node one” or “N1” anywhere a full shape label is accepted; renaming and Undo/Redo retain the reference.
+- **Short Spoken References**: Every shape displays a stable session reference such as **N1** on the visual canvas. Say “node one” or “N1” anywhere a full shape label is accepted; renaming and Undo/Redo retain the reference.
 - **Local Command Sequences**: Join up to ten recognised edits with “then,” “and then,” or “and.” The sequence runs atomically on-device only when every clause is understood; otherwise the complete request is sent to Gemini.
 - **Real-Time Streaming**: Browser-based `AudioWorklet` capturing 16 kHz mono PCM audio streamed directly over WebSockets to AssemblyAI Streaming v3.
 - **Audio Duplex & Echo Protection**: Automated microphone silencing and a 400 ms safety guard while spoken replies play, preventing synthetic feedback loops.

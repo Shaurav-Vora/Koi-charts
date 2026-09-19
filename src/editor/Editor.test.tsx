@@ -33,7 +33,7 @@ describe("manual editor", () => {
   it("keeps the real canvas mounted when a selected connected node enters deletion confirmation", () => {
     render(<Editor />); fireEvent.click(screen.getByText("Keyboard editing & advanced commands")); add("Begin"); add("Check"); action("connect");
     fireEvent.click(screen.getByRole("button", { name: "Connect nodes" }));
-    fireEvent.click(within(screen.getByRole("region", { name: "Visual flowchart" })).getByRole("button", { name: "Focus Begin" }));
+    fireEvent.click(within(screen.getByRole("region", { name: "Visual flowchart" })).getByRole("button", { name: "Focus N1, Begin" }));
 
     fireEvent.keyDown(document, { key: "Delete" });
 
@@ -93,12 +93,12 @@ it("renames a shape inline on double click and allows cancelling",()=>{
  render(<Editor />);
  fireEvent.click(screen.getByRole("button",{name:"Insert process"}));
  const canvas=within(screen.getByRole("region",{name:"Visual flowchart"}));
- fireEvent.doubleClick(canvas.getByRole("button",{name:"Focus Process"}));
+ fireEvent.doubleClick(canvas.getByRole("button",{name:"Focus N1, Process"}));
  let input=screen.getByRole("textbox",{name:"Rename shape"});
  fireEvent.change(input,{target:{value:"Validate payment"}});
  fireEvent.submit(input.closest("form")!);
  expect(screen.getByRole("region",{name:"Chart structure"})).toHaveTextContent("Validate payment");
- fireEvent.doubleClick(canvas.getByRole("button",{name:"Focus Validate payment"}));
+ fireEvent.doubleClick(canvas.getByRole("button",{name:"Focus N1, Validate payment"}));
  input=screen.getByRole("textbox",{name:"Rename shape"});
  fireEvent.change(input,{target:{value:"Discard me"}});fireEvent.keyDown(input,{key:"Escape"});
  expect(screen.getByRole("region",{name:"Chart structure"})).not.toHaveTextContent("Discard me");
