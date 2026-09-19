@@ -56,6 +56,7 @@ export interface VisualCanvasProps {
   playbackRoute?: PlaybackRouteStep[];
   centerRequest?: { key: string; nodeId: string } | null;
   inspectEdgeRequest?: { key: string; edgeId: string } | null;
+  selectionResetKey?: number;
   onInspectEdgeRequestHandled?: () => void;
   onInspectEdge?: (edgeId: string) => void;
   selectedNodeIds?: string[];
@@ -89,6 +90,7 @@ function Canvas({
   playbackRoute = [],
   centerRequest = null,
   inspectEdgeRequest = null,
+  selectionResetKey = 0,
   onInspectEdgeRequestHandled,
   onInspectEdge,
   selectedNodeIds = [],
@@ -120,6 +122,18 @@ function Canvas({
   const [selectionActive, setSelectionActive] = useState(false);
   const latestSelectionIds = useRef<string[]>(selectedNodeIds);
   const lastInspectedEdgeId = useRef<string | null>(null);
+  const lastSelectionResetKey = useRef(selectionResetKey);
+  useEffect(() => {
+    if (lastSelectionResetKey.current === selectionResetKey) return;
+    lastSelectionResetKey.current = selectionResetKey;
+    setDrag(null);
+    setConnectionDrop(null);
+    setSelectionActive(false);
+    lastInspectedEdgeId.current = null;
+    setSelectedEdgeId(null);
+    onInspectEdgeRequestHandled?.();
+    onSelectedNodeIdsChange?.([]);
+  }, [onInspectEdgeRequestHandled, onSelectedNodeIdsChange, selectionResetKey]);
   const inspectEdge = (edgeId: string) => {
     setSelectedEdgeId(edgeId);
     if (lastInspectedEdgeId.current === edgeId) return;

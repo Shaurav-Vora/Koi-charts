@@ -3,13 +3,13 @@ import { localCommandPreference } from "./preference";
 import { createEditorState, editorReducer, type EditorAction } from "./reducer";
 import { TurnCoordinator, type Interpret, type Presentation } from "../streaming/turns";
 import type { GraphCommand } from "../commands/schema";
-import type { CommandResult } from "../graph/types";
+import type { CommandResult, FlowGraph } from "../graph/types";
 import { createPlaybackState, playbackTransition } from "../playback/engine";
 import type { PlaybackAction } from "../playback/types";
 import { auditTransition, createAuditState, currentAuditIssue } from "../audit/state";
 import type { AuditAction, AuditState } from "../audit/types";
 export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
- let state={editor:createEditorState(),presentation:null as Presentation|null,playback:createPlaybackState(),audit:createAuditState()};
+ let state={editor:createEditorState(),presentation:null as Presentation|null,playback:createPlaybackState(),audit:createAuditState(),projectImportKey:0};
  const listeners=new Set<()=>void>();
  const publish=()=>listeners.forEach(listener=>listener());
  const dispatch=(action:EditorAction)=>{
@@ -28,6 +28,12 @@ export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
   state={...state,editor,presentation:null,playback,audit};publish();
  };
  const result=():CommandResult=>({state:state.editor.engine,outcome:state.editor.outcome==="idle"?"error":state.editor.outcome,message:state.editor.message});
+ const importProject=(graph:FlowGraph,filename:string):CommandResult=>{
+  const editor=editorReducer(state.editor,{type:"import_project",graph,filename});
+  if(editor.outcome!=="committed")return {state:state.editor.engine,outcome:"error",message:editor.message};
+  state={...state,editor,presentation:null,playback:createPlaybackState(),audit:createAuditState(),projectImportKey:state.projectImportKey+1};publish();
+  return result();
+ };
  const openEditor=(target:{kind:"node";nodeId:string}|{kind:"edge";edgeId:string}):CommandResult=>{
   if(target.kind==="node"){
    const node=state.editor.engine.graph.nodes.find(candidate=>candidate.id===target.nodeId);
@@ -124,5 +130,5 @@ export function createEditorCoordinator(interpret:Interpret=interpretOnServer) {
  });
  // The connection layer reports through the same channel as turns, so one status line covers both.
  const present=(value:Presentation)=>{state={...state,presentation:value};publish();};
- return {turns,dispatch,openEditor,playbackDispatch,auditDispatch,present,getSnapshot:()=>state,subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener);};}};
+ return {turns,dispatch,importProject,openEditor,playbackDispatch,auditDispatch,present,getSnapshot:()=>state,subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener);};}};
 }

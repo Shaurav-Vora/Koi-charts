@@ -1,12 +1,37 @@
 import { largeGraph } from "../test/large-graph";
 import { arrangeNodes, createEngineState, execute, executeNodeSelectionDeletion, resolveClarification } from "../commands/execute";
+import { assertGraph } from "../graph/invariants";
+import { commit } from "../graph/history";
 import type { NodeDensity } from "../visual/layout";
 import type { GraphCommand } from "../commands/schema";
-import type { CommandResult, EngineState } from "../graph/types";
+import type { CommandResult, EngineState, FlowGraph } from "../graph/types";
 export type EditorState = { displayIds: Record<string, string>; engine: EngineState; outcome: CommandResult["outcome"] | "idle"; message: string };
-export type EditorAction = { type: "example" } | { type: "clear" } | { type: "arrange"; density: NodeDensity } | { type: "command"; command: GraphCommand; idSeed: string } | { type: "delete_selection"; nodeIds: string[]; idSeed: string } | { type: "choose"; candidateId: string; idSeed: string } | { type: "interface_focus"; focusedNodeId: string | null; message: string };
+export type EditorAction = { type: "example" } | { type: "clear" } | { type: "arrange"; density: NodeDensity } | { type: "command"; command: GraphCommand; idSeed: string } | { type: "delete_selection"; nodeIds: string[]; idSeed: string } | { type: "choose"; candidateId: string; idSeed: string } | { type: "interface_focus"; focusedNodeId: string | null; message: string } | { type: "import_project"; graph: FlowGraph; filename: string };
 export function createEditorState(): EditorState { return { displayIds: {}, engine: createEngineState(), outcome: "idle", message: "Add a node to begin your chart." }; }
 export function editorReducer(state: EditorState, action: EditorAction): EditorState {
+  if (action.type === "import_project") {
+    try {
+      assertGraph(action.graph);
+      const graph = structuredClone(action.graph);
+      const focus = graph.nodes.find(node => node.type === "start") ?? graph.nodes[0] ?? null;
+      const engine = commit(state.engine, {
+        graph,
+        focusedNodeId: focus?.id ?? null,
+        recentNodeId: focus?.id ?? null,
+      });
+      const displayIds = { ...state.displayIds };
+      for (const node of graph.nodes) if (!displayIds[node.id]) displayIds[node.id] = `N${Object.keys(displayIds).length + 1}`;
+      const filename = action.filename.split(/[\\/]/).at(-1)?.trim() || "project.koi";
+      const nodeCount = graph.nodes.length;
+      const edgeCount = graph.edges.length;
+      const message = nodeCount === 0 && edgeCount === 0
+        ? `Loaded an empty chart from ${filename}. Undo restores your previous chart.`
+        : `Loaded ${nodeCount} ${nodeCount === 1 ? "shape" : "shapes"} and ${edgeCount} ${edgeCount === 1 ? "connection" : "connections"} from ${filename}. Undo restores your previous chart.`;
+      return { displayIds, engine, outcome: "committed", message };
+    } catch {
+      return { ...state, outcome: "error", message: "This Koi project contains an invalid chart and was not loaded." };
+    }
+  }
   if (action.type === "clear") {
     if (!state.engine.graph.nodes.length) return state;
     const { graph: previousGraph, focusedNodeId, recentNodeId } = state.engine;

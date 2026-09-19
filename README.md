@@ -196,7 +196,9 @@ Koi Charts now defines a versioned editable project format for the upcoming Save
 
 The format is processed locally in the browser. Imports are limited to 2 MiB and must pass both envelope validation and the existing graph-integrity checks before they can be accepted. Project files exclude API keys, environment variables, browser preferences, transcripts, speech data, provider responses, temporary selections, playback state, audit state, and undo history.
 
-This checkpoint establishes and tests the file boundary only. The workspace does not expose Save project or Open project controls yet; those arrive in a later implementation checkpoint.
+The editor now also has an atomic import transaction behind the file boundary. A validated project replaces the current graph as one history entry, focuses its first Start shape (or first available shape), clears pending deletion or clarification state, closes guided playback and chart review, and dismisses stale canvas overlays. **Undo** restores the complete graph and focus from before the import; **Redo** reapplies the imported project. An import that fails graph validation leaves the active workspace and interface modes unchanged.
+
+The workspace does not expose Save project or Open project controls yet. Those compact controls arrive in the next implementation checkpoint, so this transaction is currently covered by automated tests rather than a visible picker.
 
 ---
 

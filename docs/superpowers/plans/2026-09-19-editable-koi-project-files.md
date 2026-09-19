@@ -107,6 +107,8 @@ git commit -m "feat: define editable Koi project format"
 
 ### Task 2: Undoable import transaction
 
+**Completed September 19, 2026.** Validated graphs now enter the editor as one undoable replacement, reset graph-bound modes and canvas overlays, preserve display-ID allocation, and retain the current workspace when validation fails.
+
 **Files:**
 - Create: `src/editor/import-project.test.ts`
 - Modify: `src/editor/reducer.ts`
@@ -120,7 +122,7 @@ git commit -m "feat: define editable Koi project format"
 - Coordinator method: `importProject(graph: FlowGraph, filename: string): CommandResult`
 - VisualCanvas prop: `selectionResetKey?: number`
 
-- [ ] **Step 1: Write failing reducer tests**
+- [x] **Step 1: Write failing reducer tests**
 
 ```ts
 const imported = editorReducer(current, {
@@ -137,17 +139,17 @@ expect(imported.engine.version).toBe(current.engine.version + 1);
 
 Assert first Start focus, first-node fallback, empty graph focus, singular/plural message, one-step Undo restoration, and Redo re-import.
 
-- [ ] **Step 2: Write failing coordinator tests**
+- [x] **Step 2: Write failing coordinator tests**
 
 Start playback and audit, call `importProject`, and assert playback idle, audit closed, presentation cleared, and one committed version change.
 
-- [ ] **Step 3: Run RED**
+- [x] **Step 3: Run RED**
 
 ```powershell
 node .tools/npm/package/bin/npm-cli.js test -- src/editor/import-project.test.ts
 ```
 
-- [ ] **Step 4: Implement the reducer transaction**
+- [x] **Step 4: Implement the reducer transaction**
 
 Validate and clone before commit. Focus first Start or first node, set recent focus, call existing `commit`, preserve and extend display IDs, clear pending via commit, and create:
 
@@ -155,15 +157,15 @@ Validate and clone before commit. Focus first Start or first node, set recent fo
 
 Sanitize the displayed basename. On boundary failure, return original state with an error outcome.
 
-- [ ] **Step 5: Implement coordinator cleanup**
+- [x] **Step 5: Implement coordinator cleanup**
 
 Add `importProject`. Reset playback and audit only after a committed import, publish once, and return the standard result.
 
-- [ ] **Step 6: Clear canvas overlays**
+- [x] **Step 6: Clear canvas overlays**
 
 Increment an Editor `selectionResetKey` after successful import. VisualCanvas watches it and clears selected edge, dropped-connection chooser, multi-selection callbacks, and inspection refs without announcing a second selection message. Test reused edge IDs.
 
-- [ ] **Step 7: Verify, document, and commit**
+- [x] **Step 7: Verify, document, and commit**
 
 ```powershell
 node .tools/npm/package/bin/npm-cli.js test -- src/editor/import-project.test.ts src/editor/delete-shortcut.test.tsx src/editor/playback-integration.test.tsx

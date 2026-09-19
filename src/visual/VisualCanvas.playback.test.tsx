@@ -213,6 +213,28 @@ describe("VisualCanvas playback route", () => {
     expect(screen.getByRole("form", { name: "Selected arrow" })).toBeVisible();
   });
 
+  it("clears stale canvas overlays when a project import reuses element IDs", async () => {
+    const onSelectedNodeIdsChange = vi.fn();
+    const onInspectEdgeRequestHandled = vi.fn();
+    const shared = {
+      graph,
+      layout: layoutGraph(graph),
+      focusedNodeId: null,
+      onCommand: vi.fn(),
+      selectedNodeIds: ["start", "review"],
+      onSelectedNodeIdsChange,
+      onInspectEdgeRequestHandled,
+    };
+    const { rerender } = render(<VisualCanvas {...shared} selectionResetKey={0} />);
+    fireEvent.click(screen.getByRole("img", { name: "Edit arrow from Review to Approved labelled yes" }));
+    expect(screen.getByRole("form", { name: "Selected arrow" })).toBeVisible();
+
+    rerender(<VisualCanvas {...shared} selectionResetKey={1} />);
+
+    await waitFor(() => expect(screen.queryByRole("form", { name: "Selected arrow" })).not.toBeInTheDocument());
+    expect(onSelectedNodeIdsChange).toHaveBeenCalledWith([]);
+    expect(onInspectEdgeRequestHandled).toHaveBeenCalled();
+  });
   it("keeps the release point on the new shape edge when a connection is dropped on empty canvas", () => {
     const onCommand = vi.fn();
     render(<VisualCanvas graph={graph} layout={layoutGraph(graph)} focusedNodeId="review" onCommand={onCommand} />);

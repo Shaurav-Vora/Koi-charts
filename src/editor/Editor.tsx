@@ -32,11 +32,12 @@ class CanvasBoundary extends Component<{ children: ReactNode }, { failed: boolea
 }
 export default function Editor({ coordinator: supplied }: { coordinator?: ReturnType<typeof createEditorCoordinator> } = {}) {
   const [local] = useState(() => createEditorCoordinator());
-  const [inspectEdgeRequest, setInspectEdgeRequest] = useState<{ key: string; edgeId: string } | null>(null);
+  const [inspectEdgeRequest, setInspectEdgeRequest] = useState<{ key: string; edgeId: string; projectImportKey: number } | null>(null);
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
+  const [selectionProjectImportKey, setSelectionProjectImportKey] = useState(0);
   const [compactNodes, setCompactNodes] = useState(false);
   const coordinator = supplied ?? local;
-  const { editor: state, presentation, playback, audit } = useSyncExternalStore(coordinator.subscribe, coordinator.getSnapshot, coordinator.getSnapshot);
+  const { editor: state, presentation, playback, audit, projectImportKey } = useSyncExternalStore(coordinator.subscribe, coordinator.getSnapshot, coordinator.getSnapshot);
   const dispatch = coordinator.dispatch;
   const speaker = useMemo(() => createSpeaker(), []);
   // Talking over a reply stops it: the microphone is muted while one plays, so without this
@@ -47,11 +48,11 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const { graph, focusedNodeId, pending, history, version } = state.engine;
   const openAuditEditor = useCallback((target: GuidedAuditEditTarget) => {
     if (target.kind === "edge") {
-      setInspectEdgeRequest({ key: crypto.randomUUID(), edgeId: target.edgeId });
+      setInspectEdgeRequest({ key: crypto.randomUUID(), edgeId: target.edgeId, projectImportKey });
     }
     coordinator.auditDispatch({ type: "close", graphVersion: version });
     coordinator.openEditor(target);
-  }, [coordinator, version]);
+  }, [coordinator, projectImportKey, version]);
   // Laid out once, here, because the canvas and the picture that gets exported have to be the
   // same chart: two independent layouts would drift the moment either one changed.
   const layout = useMemo(() => layoutGraph(graph, compactNodes ? "compact" : "standard"), [compactNodes, graph]);
@@ -63,15 +64,17 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   }, [audit]);
   const hasError = presentation ? presentation.status === "error" : state.outcome === "error";
   const focused = graph.nodes.find(node => node.id === focusedNodeId);
+  const activeInspectEdgeRequest = inspectEdgeRequest?.projectImportKey === projectImportKey ? inspectEdgeRequest : null;
   const activeSelectedNodeIds = useMemo(() => {
     const available = new Set(graph.nodes.map(node => node.id));
-    return selectedNodeIds.filter(id => available.has(id));
-  }, [graph.nodes, selectedNodeIds]);
-  const nodeInspectorOpen = !!focused && activeSelectedNodeIds.length < 2 && !inspectEdgeRequest && audit.status !== "open" && playback.status === "idle";
-  const canvasOverlayOpen = nodeInspectorOpen || activeSelectedNodeIds.length > 1 || !!inspectEdgeRequest || audit.status === "open" || playback.status !== "idle";
+    return selectionProjectImportKey === projectImportKey ? selectedNodeIds.filter(id => available.has(id)) : [];
+  }, [graph.nodes, projectImportKey, selectedNodeIds, selectionProjectImportKey]);
+  const nodeInspectorOpen = !!focused && activeSelectedNodeIds.length < 2 && !activeInspectEdgeRequest && audit.status !== "open" && playback.status === "idle";
+  const canvasOverlayOpen = nodeInspectorOpen || activeSelectedNodeIds.length > 1 || !!activeInspectEdgeRequest || audit.status === "open" || playback.status !== "idle";
   const updateSelectedNodeIds = useCallback((nodeIds: string[]) => {
+    setSelectionProjectImportKey(projectImportKey);
     setSelectedNodeIds(current => current.length === nodeIds.length && current.every((id, index) => id === nodeIds[index]) ? current : nodeIds);
-  }, []);
+  }, [projectImportKey]);
   const completeNodeSelection = useCallback((nodeIds: string[]) => {
     setInspectEdgeRequest(null);
     if (nodeIds.length === 1) coordinator.openEditor({ kind: "node", nodeId: nodeIds[0] });
@@ -211,7 +214,8 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
           onInspect={() => onCommand({ kind: "inspect", node: null })}
           playbackRoute={playback.route}
           centerRequest={auditCenterRequest}
-          inspectEdgeRequest={inspectEdgeRequest}
+          inspectEdgeRequest={activeInspectEdgeRequest}
+          selectionResetKey={projectImportKey}
           selectedNodeIds={activeSelectedNodeIds}
           onSelectedNodeIdsChange={updateSelectedNodeIds}
           onSelectionComplete={completeNodeSelection}
