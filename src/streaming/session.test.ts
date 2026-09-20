@@ -66,9 +66,16 @@ describe("streaming session",()=>{
   expect(url.searchParams.get("token")).toBe("t1");
   expect(url.searchParams.get("sample_rate")).toBe("16000");
   expect(url.searchParams.get("speech_model")).toBe("universal-3-5-pro");
+  expect(url.searchParams.get("mode")).toBe("balanced");
   await h.session.stop();
  });
 
+ it("updates turn timing during an active voice session",async()=>{
+  const h=harness();await h.session.start();h.sockets[0].begin();
+  h.session.setTurnMode("max_accuracy");
+  expect(h.sockets[0].messages).toEqual([{type:"UpdateConfiguration",mode:"max_accuracy"}]);
+  await h.session.stop();
+ });
  it("holds microphone audio until the Begin message arrives",async()=>{
   const h=harness();await h.session.start();
   const socket=h.sockets[0],microphone=h.microphones[0];

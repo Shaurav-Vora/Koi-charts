@@ -56,6 +56,7 @@ Every action—whether initiated via speech, keyboard hotkeys, visual drag-and-d
 - **Real-Time Streaming**: Browser-based `AudioWorklet` capturing 16 kHz mono PCM audio streamed directly over WebSockets to AssemblyAI Streaming v3.
 - **Audio Duplex & Echo Protection**: Automated microphone silencing and a 400 ms safety guard while spoken replies play, preventing synthetic feedback loops.
 - **Live Voice Interruption**: Press **Ctrl+Alt+S** or choose **Stop speaking** to cut short a spoken reply and immediately resume editing without feeding that reply back into voice input.
+- **Adjustable Voice Timing**: Choose Quick, Balanced, or Patient turn detection in the existing voice toolbar. Balanced is the default, and the saved choice updates an active AssemblyAI session without restarting the microphone.
 
 ### 🖲️ Digital Tactile Graphics Simulator
 - **120 × 80 Pin Matrix**: Deterministic rasterization of flowchart elements into raised and lowered pins matching modern refreshable tactile display proportions.

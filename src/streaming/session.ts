@@ -1,5 +1,6 @@
 import type { Turn } from "./turns";
 import type { VoiceStatus } from "../editor/status";
+import type { VoiceTurnMode } from "../editor/voice-timing";
 
 /** Verified against AssemblyAI Streaming v3 documentation on 2026-09-06. */
 const ENDPOINT = "wss://streaming.assemblyai.com/v3/ws";
@@ -31,6 +32,7 @@ export interface SessionOptions {
   onSessionStart?: (sessionId: string) => void;
   onSessionEnd?: () => void;
   isInputSuppressed?: () => boolean;
+  turnMode?: VoiceTurnMode;
 }
 
 /**
@@ -45,7 +47,19 @@ export class StreamingSession {
   private ready = false;
   private stopping = false;
   private timer: ReturnType<typeof setTimeout> | null = null;
-  constructor(private options: SessionOptions) {}
+  private turnMode: VoiceTurnMode;
+  private configuredTurnMode: VoiceTurnMode | null = null;
+  constructor(private options: SessionOptions) { this.turnMode = options.turnMode ?? "balanced"; }
+
+  setTurnMode(mode: VoiceTurnMode): void {
+    if (mode === this.turnMode) return;
+    this.turnMode = mode;
+    if (!this.socket || !this.ready) return;
+    try {
+      this.socket.send(JSON.stringify({ type: "UpdateConfiguration", mode }));
+      this.configuredTurnMode = mode;
+    } catch { /* a closing socket is handled by onclose */ }
+  }
 
   /** True once the provider has acknowledged the session with a Begin message. */
   get listening(): boolean { return this.ready; }
@@ -84,6 +98,7 @@ export class StreamingSession {
     url.searchParams.set("token", token);
     url.searchParams.set("sample_rate", String(SAMPLE_RATE));
     url.searchParams.set("speech_model", SPEECH_MODEL);
+    url.searchParams.set("mode", this.turnMode);
     let socket: SocketLike;
     try {
       socket = this.options.openSocket(url.toString());
@@ -92,6 +107,7 @@ export class StreamingSession {
       return;
     }
     this.socket = socket;
+    this.configuredTurnMode = this.turnMode;
     socket.onmessage = data => this.receive(generation, data);
     socket.onerror = () => { if (generation === this.generation && !this.stopping) void this.lost(generation); };
     socket.onclose = () => { if (generation === this.generation && !this.stopping) void this.lost(generation); };
@@ -115,7 +131,7 @@ export class StreamingSession {
     this.stopping = true;
     if (this.timer) { clearTimeout(this.timer); this.timer = null; }
     const socket = this.socket, microphone = this.microphone;
-    this.socket = null; this.microphone = null; this.ready = false; this.sessionId = null;
+    this.socket = null; this.microphone = null; this.ready = false; this.sessionId = null; this.configuredTurnMode = null;
     if (socket) {
       try { socket.send(JSON.stringify({ type: "Terminate" })); } catch { /* already closed */ }
       try { socket.close(); } catch { /* already closed */ }
@@ -138,7 +154,7 @@ export class StreamingSession {
     this.stopping = true;
     if (this.timer) { clearTimeout(this.timer); this.timer = null; }
     const microphone = this.microphone;
-    this.socket = null; this.microphone = null; this.ready = false; this.sessionId = null;
+    this.socket = null; this.microphone = null; this.ready = false; this.sessionId = null; this.configuredTurnMode = null;
     // A dropped socket arrives from an event handler nobody awaits, so report the status
     // before releasing the device; otherwise the UI lags a microtask behind the loss.
     this.options.onSessionEnd?.();
@@ -154,6 +170,9 @@ export class StreamingSession {
     const payload = message as Record<string, unknown>;
     if (payload.type === "Begin" && typeof payload.id === "string") {
       this.sessionId = payload.id; this.ready = true;
+      if (this.configuredTurnMode !== this.turnMode) {
+        try { this.socket?.send(JSON.stringify({ type: "UpdateConfiguration", mode: this.turnMode })); this.configuredTurnMode = this.turnMode; } catch { /* handled by socket events */ }
+      }
       this.options.onSessionStart?.(payload.id);
       this.options.onStatus("listening");
       return;

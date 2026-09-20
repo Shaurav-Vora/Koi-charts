@@ -60,3 +60,16 @@ it("exposes Ctrl Alt S and interrupts a spoken reply", () => {
   expect(cancel).toHaveBeenCalledOnce();
   expect(button).toBeDisabled();
 });
+
+it("offers a remembered patient voice timing without changing the balanced default", () => {
+  const first = render(<Editor />);
+  const timing = screen.getByRole("combobox", { name: "Voice timing" });
+  expect(timing).toHaveValue("balanced");
+  fireEvent.change(timing, { target: { value: "max_accuracy" } });
+  expect(timing).toHaveValue("max_accuracy");
+  expect(localStorage.getItem("koi-voice-timing")).toBe("max_accuracy");
+
+  first.unmount();
+  render(<Editor />);
+  expect(screen.getByRole("combobox", { name: "Voice timing" })).toHaveValue("max_accuracy");
+});

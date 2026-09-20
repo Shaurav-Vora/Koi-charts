@@ -14,6 +14,7 @@ import ToggleSwitch from "./ToggleSwitch";
 import ApiKeyControl from "./ApiKeyControl";
 import { createEditorCoordinator } from "./coordinator";
 import { useOptionalEditorSessionCoordinator } from "./EditorSession";
+import { voiceTimingPreference, type VoiceTurnMode } from "./voice-timing";
 import { useVoice } from "./useVoice";
 import { statusLabels } from "./status";
 import { voiceIndicator } from "./voice-status";
@@ -49,9 +50,10 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
   const { editor: state, presentation, playback, audit, projectImportKey } = useSyncExternalStore(coordinator.subscribe, coordinator.getSnapshot, coordinator.getSnapshot);
   const dispatch = coordinator.dispatch;
   const speaker = useMemo(() => createSpeaker(), []);
+  const voiceTiming = useSyncExternalStore(voiceTimingPreference.subscribe, voiceTimingPreference.read, voiceTimingPreference.readOnServer);
   // Keep synthesized replies out of transcription. Authors can release input immediately with
   // Stop speaking or Ctrl+Alt+S before saying the next command.
-  const voice = useVoice(coordinator, speaker.getSnapshot);
+  const voice = useVoice(coordinator, speaker.getSnapshot, voiceTiming);
   const { active: voiceActive, level: voiceLevel, connectionStatus: voiceConnectionStatus, start: startVoice, stop: stopVoice } = voice;
   const onCommand = useCallback((command: GraphCommand) => dispatch({ type: "command", command, idSeed: crypto.randomUUID() }), [dispatch]);
   const reportProjectResult = useCallback((result: ProjectActionResult) => {
@@ -201,6 +203,14 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
           <button className="stop-speech-button" disabled={!inputPaused} aria-keyshortcuts="Control+Alt+S" title="Keyboard shortcut: Ctrl+Alt+S" onClick={stopSpeaking}><span>Stop speaking</span><kbd className="shortcut-key" aria-hidden="true">Ctrl Alt S</kbd></button>
           <ToggleSwitch className="local-switch" label="Fast local commands" checked={fastLocal} title="Recognise common phrases on this device instead of sending them to be interpreted." onChange={next => localCommandPreference.write(next)} />
           <ToggleSwitch className="speech-switch" label="Speak replies" checked={speaks} disabled={!supported} title={supported ? undefined : "This browser has no speech engine."} onChange={toggleSpeech} />
+          <label className="voice-timing-control" title="Choose how long Koi Charts waits through a pause before applying a spoken command.">
+            <span>Voice timing</span>
+            <select value={voiceTiming} onChange={event => voiceTimingPreference.write(event.target.value as VoiceTurnMode)}>
+              <option value="min_latency">Quick</option>
+              <option value="balanced">Balanced</option>
+              <option value="max_accuracy">Patient</option>
+            </select>
+          </label>
           <ApiKeyControl />
         </div>
       </div>

@@ -4,12 +4,13 @@ import { StreamingSession } from "../streaming/session";
 import { fetchStreamingToken, openBrowserSocket, openMicrophone } from "../streaming/browser";
 import type { createEditorCoordinator } from "./coordinator";
 import type { VoiceStatus } from "./status";
+import type { VoiceTurnMode } from "./voice-timing";
 
 /**
  * Owns one StreamingSession for the editor. The session is created on first use so
  * loading the page never opens a microphone, a socket, or a billed provider session.
  */
-export function useVoice(coordinator: ReturnType<typeof createEditorCoordinator>, isInputSuppressed?: () => boolean) {
+export function useVoice(coordinator: ReturnType<typeof createEditorCoordinator>, isInputSuppressed?: () => boolean, turnMode: VoiceTurnMode = "balanced") {
   const [active, setActive] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<VoiceStatus>("idle");
   const [level, setLevel] = useState(0);
@@ -17,7 +18,7 @@ export function useVoice(coordinator: ReturnType<typeof createEditorCoordinator>
   const ensure = useCallback(() => {
     session.current ??= new StreamingSession({
       fetchToken: fetchStreamingToken, openSocket: openBrowserSocket, openMicrophone,
-      isInputSuppressed,
+      isInputSuppressed, turnMode,
       onSessionStart: id => coordinator.turns.start(id),
       onSessionEnd: () => coordinator.turns.stop(),
       onTurn: turn => { void coordinator.turns.accept(turn); },
@@ -31,7 +32,8 @@ export function useVoice(coordinator: ReturnType<typeof createEditorCoordinator>
       onError: message => coordinator.present({ status: "error", preview: null, text: "", error: message }),
     });
     return session.current;
-  }, [coordinator, isInputSuppressed]);
+  }, [coordinator, isInputSuppressed, turnMode]);
+  useEffect(() => { session.current?.setTurnMode(turnMode); }, [turnMode]);
   // Streaming is billed for how long the socket stays open, so release it on unmount and on
   // the page going away — a closed tab must not leave a session running.
   useEffect(() => {
