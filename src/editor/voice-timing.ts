@@ -20,3 +20,10 @@ export const voiceTimingPreference = {
     listeners.forEach(listener => listener());
   },
 };
+const gracePeriods: Record<VoiceTurnMode, number> = {
+  min_latency: 250,
+  balanced: 800,
+  max_accuracy: 1600,
+};
+
+export const voiceCommandGraceMs = (mode: VoiceTurnMode): number => gracePeriods[mode];

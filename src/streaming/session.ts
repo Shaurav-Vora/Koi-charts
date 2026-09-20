@@ -1,6 +1,6 @@
 import type { Turn } from "./turns";
 import type { VoiceStatus } from "../editor/status";
-import type { VoiceTurnMode } from "../editor/voice-timing";
+import { voiceCommandGraceMs, type VoiceTurnMode } from "../editor/voice-timing";
 
 /** Verified against AssemblyAI Streaming v3 documentation on 2026-09-06. */
 const ENDPOINT = "wss://streaming.assemblyai.com/v3/ws";
@@ -49,11 +49,14 @@ export class StreamingSession {
   private timer: ReturnType<typeof setTimeout> | null = null;
   private turnMode: VoiceTurnMode;
   private configuredTurnMode: VoiceTurnMode | null = null;
+  private pendingTurn: Turn | null = null;
+  private turnGraceTimer: ReturnType<typeof setTimeout> | null = null;
   constructor(private options: SessionOptions) { this.turnMode = options.turnMode ?? "balanced"; }
 
   setTurnMode(mode: VoiceTurnMode): void {
     if (mode === this.turnMode) return;
     this.turnMode = mode;
+    if (this.pendingTurn) this.schedulePendingTurn();
     if (!this.socket || !this.ready) return;
     try {
       this.socket.send(JSON.stringify({ type: "UpdateConfiguration", mode }));
@@ -126,6 +129,7 @@ export class StreamingSession {
   }
 
   async stop(): Promise<void> {
+    this.clearPendingTurn();
     if (!this.socket && !this.microphone) { this.generation++; return; }
     this.generation++;
     this.stopping = true;
@@ -150,6 +154,7 @@ export class StreamingSession {
   /** An unrequested close keeps committed work and manual editing available. */
   private async lost(generation: number): Promise<void> {
     if (generation !== this.generation) return;
+    this.clearPendingTurn();
     this.generation++;
     this.stopping = true;
     if (this.timer) { clearTimeout(this.timer); this.timer = null; }
@@ -180,10 +185,43 @@ export class StreamingSession {
     if (payload.type === "Turn" && this.sessionId) {
       const text = typeof payload.transcript === "string" ? payload.transcript : "";
       if (!text) return;
-      this.options.onTurn({ sessionId: this.sessionId, turnId: String(payload.turn_order ?? 0),
+      this.acceptTurn({ sessionId: this.sessionId, turnId: String(payload.turn_order ?? 0),
         text, final: payload.end_of_turn === true });
       return;
     }
     if (payload.type === "Termination") void this.stop();
+  }
+
+  private acceptTurn(turn: Turn): void {
+    if (!turn.final) {
+      if (!this.pendingTurn) { this.options.onTurn(turn); return; }
+      this.clearTurnGraceTimer();
+      this.options.onTurn({ ...turn, text: `${this.pendingTurn.text} ${turn.text}`.trim() });
+      return;
+    }
+    this.pendingTurn = this.pendingTurn && this.pendingTurn.turnId !== turn.turnId
+      ? { ...turn, text: `${this.pendingTurn.text} ${turn.text}`.trim() }
+      : turn;
+    this.schedulePendingTurn();
+  }
+
+  private schedulePendingTurn(): void {
+    this.clearTurnGraceTimer();
+    this.turnGraceTimer = setTimeout(() => {
+      this.turnGraceTimer = null;
+      const turn = this.pendingTurn;
+      this.pendingTurn = null;
+      if (turn) this.options.onTurn(turn);
+    }, voiceCommandGraceMs(this.turnMode));
+  }
+
+  private clearTurnGraceTimer(): void {
+    if (this.turnGraceTimer) clearTimeout(this.turnGraceTimer);
+    this.turnGraceTimer = null;
+  }
+
+  private clearPendingTurn(): void {
+    this.clearTurnGraceTimer();
+    this.pendingTurn = null;
   }
 }

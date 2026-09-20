@@ -159,7 +159,7 @@ export default function Documentation() {
                 <li>Quote labels containing command words: <code>add a process called &ldquo;Sign in with Google&rdquo;</code>.</li>
                 <li><strong>Fast local commands</strong> handles common phrases without a network request. Join recognised commands with <code>then</code>, <code>and then</code>, or <code>and</code> to apply them together. If any clause is not recognised, Koi Charts sends the complete request to Gemini.</li>
                 <li><strong>Speak replies</strong> controls spoken feedback.</li>
-                <li><strong>Voice timing</strong> controls how patiently transcription waits through pauses. Balanced is the default; choose Patient for longer instructions or Quick for short commands.</li>
+                <li><strong>Voice timing</strong> controls the pause after a complete phrase: Quick waits 0.25 seconds, Balanced waits 0.8 seconds, and Patient waits 1.6 seconds. Speech resumed during that pause is joined to the same command. Balanced is the default.</li>
               </ul>
             </div>
           </section>

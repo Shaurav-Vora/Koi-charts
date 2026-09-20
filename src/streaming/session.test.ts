@@ -76,6 +76,36 @@ describe("streaming session",()=>{
   expect(h.sockets[0].messages).toEqual([{type:"UpdateConfiguration",mode:"max_accuracy"}]);
   await h.session.stop();
  });
+ it("waits for the balanced grace period before applying a finalized command",async()=>{
+  vi.useFakeTimers();
+  try {
+   const h=harness();await h.session.start();h.sockets[0].begin();
+   h.sockets[0].turn("add decision",true,0);
+   expect(h.turns).toEqual([]);
+   await vi.advanceTimersByTimeAsync(799);
+   expect(h.turns).toEqual([]);
+   await vi.advanceTimersByTimeAsync(1);
+   expect(h.turns).toEqual([{sessionId:"session-1",turnId:"0",text:"add decision",final:true}]);
+   await h.session.stop();
+  } finally { vi.useRealTimers(); }
+ });
+
+ it("combines speech that resumes during the command grace period",async()=>{
+  vi.useFakeTimers();
+  try {
+   const h=harness();await h.session.start();h.sockets[0].begin();
+   h.sockets[0].turn("add decision",true,0);
+   await vi.advanceTimersByTimeAsync(500);
+   h.sockets[0].turn("called approved",false,1);
+   expect(h.turns).toEqual([{sessionId:"session-1",turnId:"1",text:"add decision called approved",final:false}]);
+   await vi.advanceTimersByTimeAsync(800);
+   expect(h.turns).toHaveLength(1);
+   h.sockets[0].turn("called approved",true,1);
+   await vi.advanceTimersByTimeAsync(800);
+   expect(h.turns.at(-1)).toEqual({sessionId:"session-1",turnId:"1",text:"add decision called approved",final:true});
+   await h.session.stop();
+  } finally { vi.useRealTimers(); }
+ });
  it("holds microphone audio until the Begin message arrives",async()=>{
   const h=harness();await h.session.start();
   const socket=h.sockets[0],microphone=h.microphones[0];
@@ -88,15 +118,16 @@ describe("streaming session",()=>{
  });
 
  it("translates Turn messages into coordinator turns keyed by session and turn order",async()=>{
-  const h=harness();await h.session.start();
-  const socket=h.sockets[0];socket.open();socket.begin("abc");
-  socket.turn("add process",false,0);socket.turn("add process node",true,0);socket.turn("connect them",false,1);
-  expect(h.turns).toEqual([
-   {sessionId:"abc",turnId:"0",text:"add process",final:false},
-   {sessionId:"abc",turnId:"0",text:"add process node",final:true},
-   {sessionId:"abc",turnId:"1",text:"connect them",final:false},
-  ]);
-  await h.session.stop();
+  vi.useFakeTimers();
+  try {
+   const h=harness();await h.session.start();
+   const socket=h.sockets[0];socket.open();socket.begin("abc");
+   socket.turn("add process",false,0);socket.turn("add process node",true,0);
+   expect(h.turns).toEqual([{sessionId:"abc",turnId:"0",text:"add process",final:false}]);
+   await vi.advanceTimersByTimeAsync(800);
+   expect(h.turns.at(-1)).toEqual({sessionId:"abc",turnId:"0",text:"add process node",final:true});
+   await h.session.stop();
+  } finally { vi.useRealTimers(); }
  });
 
  it("terminates explicitly and releases the microphone on stop",async()=>{

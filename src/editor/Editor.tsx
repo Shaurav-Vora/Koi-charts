@@ -206,9 +206,9 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
           <label className="voice-timing-control" title="Choose how long Koi Charts waits through a pause before applying a spoken command.">
             <span>Voice timing</span>
             <select value={voiceTiming} onChange={event => voiceTimingPreference.write(event.target.value as VoiceTurnMode)}>
-              <option value="min_latency">Quick</option>
-              <option value="balanced">Balanced</option>
-              <option value="max_accuracy">Patient</option>
+              <option value="min_latency">Quick · 0.25s</option>
+              <option value="balanced">Balanced · 0.8s</option>
+              <option value="max_accuracy">Patient · 1.6s</option>
             </select>
           </label>
           <ApiKeyControl />
