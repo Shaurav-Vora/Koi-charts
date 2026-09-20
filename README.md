@@ -192,7 +192,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the homepage. The editor is available at [http://localhost:3000/workspace](http://localhost:3000/workspace), and the documentation is available at [http://localhost:3000/docs](http://localhost:3000/docs).
 
-The active workspace remains in page memory, so use **Save project** before reloading or closing it. The downloaded `.koi` file can be reopened as an editable chart. Browser accounts and automatic cloud persistence are still planned for a future release.
+The active workspace remains in page memory while moving between Home, Documentation, and Workspace. A full reload or closing the tab clears it, so use **Save project** first. The downloaded `.koi` file can be reopened as an editable chart. Browser accounts and automatic cloud persistence are still planned for a future release.
 
 ### Editable Koi project format
 

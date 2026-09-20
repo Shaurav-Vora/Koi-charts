@@ -13,6 +13,7 @@ import CommandForm from "./CommandForm";
 import ToggleSwitch from "./ToggleSwitch";
 import ApiKeyControl from "./ApiKeyControl";
 import { createEditorCoordinator } from "./coordinator";
+import { useOptionalEditorSessionCoordinator } from "./EditorSession";
 import { useVoice } from "./useVoice";
 import { statusLabels } from "./status";
 import { voiceIndicator } from "./voice-status";
@@ -34,13 +35,14 @@ class CanvasBoundary extends Component<{ children: ReactNode }, { failed: boolea
   render() { return this.state.failed ? <div className="canvas-error" role="alert"><p>Visual canvas unavailable. Your chart is preserved in the outline below.</p><button onClick={() => this.setState({ failed: false })}>Retry canvas</button></div> : this.props.children; }
 }
 export default function Editor({ coordinator: supplied }: { coordinator?: ReturnType<typeof createEditorCoordinator> } = {}) {
+  const shared = useOptionalEditorSessionCoordinator();
   const [local] = useState(() => createEditorCoordinator());
   const [inspectEdgeRequest, setInspectEdgeRequest] = useState<{ key: string; edgeId: string; projectImportKey: number } | null>(null);
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
   const [selectionProjectImportKey, setSelectionProjectImportKey] = useState(0);
   const [compactNodes, setCompactNodes] = useState(false);
   const [arrangeRequestKey, setArrangeRequestKey] = useState(0);
-  const coordinator = supplied ?? local;
+  const coordinator = supplied ?? shared ?? local;
   const bindProjectControls = useCallback((handle:ProjectControlsHandle|null)=>{
     coordinator.setProjectRunner(handle?action=>handle.run(action):null);
   },[coordinator]);
