@@ -196,22 +196,26 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
         <div className="voice-readout">
           <div className="status" role="status" aria-live="polite"><span className="status-dot" aria-hidden="true" />{indicator.label}</div>
           <p className="voice-hint">{indicator.hint}</p>
+          {voiceActive && <span className="mic-level" aria-hidden="true"><span className="mic-level-fill" style={{ width: `${Math.round(Math.min(1, voiceLevel * 4) * 100)}%` }} /></span>}
         </div>
-        {voiceActive && <span className="mic-level" aria-hidden="true"><span className="mic-level-fill" style={{ width: `${Math.round(Math.min(1, voiceLevel * 4) * 100)}%` }} /></span>}
         <div className="voice-actions">
-          <button className={`voice-button${voiceActive ? " is-active" : ""}`} aria-pressed={voiceActive} aria-keyshortcuts="Control+Alt+V" title="Keyboard shortcut: Ctrl+Alt+V" onClick={toggleVoice}><span>{voiceActive ? "Stop voice" : "Start voice"}</span><kbd className="shortcut-key" aria-hidden="true">Ctrl Alt V</kbd></button>
-          <button className="stop-speech-button" disabled={!inputPaused} aria-keyshortcuts="Control+Alt+S" title="Keyboard shortcut: Ctrl+Alt+S" onClick={stopSpeaking}><span>Stop speaking</span><kbd className="shortcut-key" aria-hidden="true">Ctrl Alt S</kbd></button>
-          <ToggleSwitch className="local-switch" label="Fast local commands" checked={fastLocal} title="Recognise common phrases on this device instead of sending them to be interpreted." onChange={next => localCommandPreference.write(next)} />
-          <ToggleSwitch className="speech-switch" label="Speak replies" checked={speaks} disabled={!supported} title={supported ? undefined : "This browser has no speech engine."} onChange={toggleSpeech} />
-          <label className="voice-timing-control" title="Choose how long Koi Charts waits through a pause before applying a spoken command.">
-            <span>Voice timing</span>
-            <select value={voiceTiming} onChange={event => voiceTimingPreference.write(event.target.value as VoiceTurnMode)}>
-              <option value="min_latency">Quick · 0.25s</option>
-              <option value="balanced">Balanced · 0.8s</option>
-              <option value="max_accuracy">Patient · 1.6s</option>
-            </select>
-          </label>
-          <ApiKeyControl />
+          <div className="voice-primary-actions">
+            <button className={`voice-button${voiceActive ? " is-active" : ""}`} aria-pressed={voiceActive} aria-keyshortcuts="Control+Alt+V" title="Keyboard shortcut: Ctrl+Alt+V" onClick={toggleVoice}><span>{voiceActive ? "Stop voice" : "Start voice"}</span><kbd className="shortcut-key" aria-hidden="true">Ctrl Alt V</kbd></button>
+            <button className="stop-speech-button" disabled={!inputPaused} aria-keyshortcuts="Control+Alt+S" title="Keyboard shortcut: Ctrl+Alt+S" onClick={stopSpeaking}><span>Stop speaking</span><kbd className="shortcut-key" aria-hidden="true">Ctrl Alt S</kbd></button>
+            <ApiKeyControl />
+          </div>
+          <div className="voice-preference-actions">
+            <ToggleSwitch className="local-switch" label="Fast local commands" checked={fastLocal} title="Recognise common phrases on this device instead of sending them to be interpreted." onChange={next => localCommandPreference.write(next)} />
+            <ToggleSwitch className="speech-switch" label="Speak replies" checked={speaks} disabled={!supported} title={supported ? undefined : "This browser has no speech engine."} onChange={toggleSpeech} />
+            <label className="voice-timing-control" title="Choose how long Koi Charts waits through a pause before applying a spoken command.">
+              <span>Voice timing</span>
+              <select value={voiceTiming} onChange={event => voiceTimingPreference.write(event.target.value as VoiceTurnMode)}>
+                <option value="min_latency">Quick · 0.25s</option>
+                <option value="balanced">Balanced · 0.8s</option>
+                <option value="max_accuracy">Patient · 1.6s</option>
+              </select>
+            </label>
+          </div>
         </div>
       </div>
       <section className={`command-feedback ${hasError ? "has-error" : ""}`} data-tone={outcomeTone} aria-label="Command feedback">
