@@ -5,7 +5,7 @@ import "./home-responsive.css";
 import { EditorSessionProvider } from "../editor/EditorSession";
 
 export const metadata: Metadata = {
-  title: "Koi charts — Your flowchart workspace",
+  title: "Koi charts — Voice-powered flowcharts for visually impaired creators",
   icons: { icon: "/koi.svg" },
   description: "An accessible workspace for exploring flowcharts through sight, simulated touch, and voice. Application shell preview.",
 };
