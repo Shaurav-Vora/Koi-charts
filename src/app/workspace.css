@@ -1198,3 +1198,50 @@ kbd { font-family: inherit; font-size: .9em; border: 1px solid #c7d3e5; border-b
  #workspace .audit-popover { max-height: 390px; }
  #workspace .canvas-area { height: 580px; }
 }
+
+/* Contextual voice syntax stays inside Activity, so guidance follows the current task without
+   taking another row from the canvas. The orange rule echoes the spoken-command path in the brand. */
+#workspace .contextual-commands {
+  min-width: 0;
+  margin-top: 6px;
+  padding-top: 7px;
+  border-top: 1px solid color-mix(in srgb, var(--fb-border) 78%, transparent);
+  white-space: normal;
+}
+#workspace .contextual-commands-label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--fb-label);
+  font-size: 10px;
+  font-weight: 700;
+}
+#workspace .contextual-command-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+#workspace .contextual-command-list li { min-width: 0; max-width: 100%; }
+#workspace .contextual-command-list code {
+  display: block;
+  max-width: 100%;
+  padding: 3px 7px;
+  border: 1px solid #e7c4a9;
+  border-left: 2px solid var(--accent);
+  border-radius: 4px;
+  background: #fffaf5;
+  color: #67310d;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 10px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+#workspace .command-feedback .pending-actions {
+  padding-top: 6px;
+  border-top: 1px solid color-mix(in srgb, var(--fb-border) 78%, transparent);
+}
+@media (forced-colors: active) {
+  #workspace .contextual-command-list code { border-color: ButtonText; }
+}

@@ -26,6 +26,7 @@ import AuditPanel from "../audit/AuditPanel";
 import { currentAuditIssue } from "../audit/state";
 import type { GuidedAuditEditTarget } from "../audit/fixes";
 import type { ViewAction, ViewActionResult } from "../commands/view-control";
+import { suggestedCommands } from "./suggested-commands";
 
 const editableTarget = (target: EventTarget | null) =>
   target instanceof Element && !!target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]');
@@ -103,6 +104,17 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
     const available = new Set(graph.nodes.map(node => node.id));
     return selectionProjectImportKey === projectImportKey ? selectedNodeIds.filter(id => available.has(id)) : [];
   }, [graph.nodes, projectImportKey, selectedNodeIds, selectionProjectImportKey]);
+  const suggestions = useMemo(() => suggestedCommands({
+    graph,
+    displayIds: state.displayIds,
+    focusedNodeId,
+    selectedEdgeId: activeInspectEdgeRequest?.edgeId ?? null,
+    selectedNodeCount: activeSelectedNodeIds.length,
+    pendingKind: pending?.kind ?? null,
+    auditOpen: audit.status === "open",
+    playbackStatus: playback.status,
+    playbackChoices: playback.choices,
+  }), [activeInspectEdgeRequest?.edgeId, activeSelectedNodeIds.length, audit.status, focusedNodeId, graph, pending?.kind, playback.choices, playback.status, state.displayIds]);
   const nodeInspectorOpen = !!focused && activeSelectedNodeIds.length < 2 && !activeInspectEdgeRequest && audit.status !== "open" && playback.status === "idle";
   const canvasOverlayOpen = nodeInspectorOpen || activeSelectedNodeIds.length > 1 || !!activeInspectEdgeRequest || audit.status === "open" || playback.status !== "idle";
   const updateSelectedNodeIds = useCallback((nodeIds: string[]) => {
@@ -232,6 +244,12 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
             {message || (isIdle ? "Ready · Say a voice command or click a shape to begin." : "")}
           </p>
         </div>
+        <aside className="contextual-commands" aria-label="Suggested voice commands">
+          <span className="contextual-commands-label">Suggested next · {suggestions.context}</span>
+          <ul className="contextual-command-list">
+            {suggestions.commands.map(command => <li key={command}><code>&ldquo;{command}&rdquo;</code></li>)}
+          </ul>
+        </aside>
         {pending && <div className="pending-actions">
           {pending.kind === "deletion" ? <button className="danger-button" onClick={() => onCommand({ kind: "confirm" })}>Confirm deletion</button> : choiceLabels(graph, pending.candidates, pending.elementKind).map((label, index) => <button key={pending.candidates[index]} onClick={() => dispatch({ type: "choose", candidateId: pending.candidates[index], idSeed: crypto.randomUUID() })}>{`${index + 1}. ${label}`}</button>)}
           <button onClick={() => onCommand({ kind: "cancel" })}>Cancel</button>
