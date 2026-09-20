@@ -16,7 +16,6 @@ export default function AppHeader({ page }: { page: AppPage }) {
    <div>{page === "workspace" ? <h1 className="header-wordmark">Koi charts</h1> : <span className="header-wordmark">Koi charts</span>}
     <p className="header-tagline">Flowcharts through sight, touch, and voice.</p>
    </div>
-   <span className="header-preview">Preview</span>
   </div>
   <nav className="header-navigation" aria-label="Main navigation">
    {navItems.map(item => item.page === page
