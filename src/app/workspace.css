@@ -903,7 +903,7 @@
   background: #fff4f4;
   border-color: #d19e9e;
 }
-#workspace .display-heading { background: #fff; padding: 14px 20px; gap: 10px 16px; }
+#workspace .display-heading { background: #fff; padding: 8px 20px; gap: 10px 16px; }
 #workspace .display-heading h3 { font-size: 15px; font-weight: 650; }
 #workspace .display-heading .count { font-size: 12px; padding: 4px 8px; border-radius: 4px; background: #f1f4f9; }
 #workspace .export-controls { gap: 6px; margin-left: auto; display: flex; align-items: center; }
@@ -1165,7 +1165,7 @@ kbd { font-family: inherit; font-size: .9em; border: 1px solid #c7d3e5; border-b
 @media(max-width: 900px) {
  #workspace { padding: 22px 18px 28px; }
  #workspace .diagram-workbench { grid-template-columns: 152px minmax(0,1fr); }
- #workspace .display-heading { padding: 12px; }
+ #workspace .display-heading { padding: 8px 12px; }
  #workspace .export-controls { flex-basis: 100%; margin-left: 0; }
  #workspace .tactile-surface { grid-template-columns: 1fr; }
 }

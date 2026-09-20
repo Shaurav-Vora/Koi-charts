@@ -50,9 +50,9 @@ describe("saving the chart as a picture", () => {
     await waitFor(() => expect(saved.at(-1)!.name).toMatch(/\.pdf$/));
   });
 
-  it("refuses an empty chart and explains what is missing", () => {
+  it("disables image exports for an empty chart without adding another header line", () => {
     mount(empty);
     expect(screen.getByRole("button", { name: "SVG" })).toBeDisabled();
-    expect(screen.getByTestId("export-status")).toHaveTextContent("Add a shape before saving a picture.");
+    expect(screen.getByTestId("export-status")).toBeEmptyDOMElement();
   });
 });

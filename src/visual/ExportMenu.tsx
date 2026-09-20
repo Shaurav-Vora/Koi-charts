@@ -56,6 +56,6 @@ export default function ExportMenu({ graph, layout, projectControls }: { graph: 
     {/* aria-live without role="status": the voice readout is already the page's status region,
         and a second one competes with it for the same announcement queue. Polite, because
         saving a file is not worth cutting off a reply about the chart itself. */}
-    <span className="export-status" data-testid="export-status" aria-live="polite">{empty ? "Add a shape before saving a picture." : message}</span>
+    <span className="export-status" data-testid="export-status" aria-live="polite">{message}</span>
   </div>;
 }
