@@ -1,11 +1,15 @@
 import type { MicrophoneLike, SocketLike } from "./session";
+import { assemblyKeyPreference } from "../editor/api-keys";
 
 /** Browser adapters for StreamingSession. Kept apart from the session so its logic stays testable in Node. */
 
 export async function fetchStreamingToken(): Promise<{ token: string; expiresAt: string }> {
   // The provider key never reaches the browser; this app's own route mints a short-lived token.
+  const headers: Record<string, string> = { "content-type": "application/json" };
+  const key = assemblyKeyPreference.read();
+  if (key) headers["x-koi-assemblyai-key"] = key;
   const response = await fetch("/api/assemblyai/token", {
-    method: "POST", headers: { "content-type": "application/json" }, body: "{}",
+    method: "POST", headers, body: "{}",
   });
   if (!response.ok) {
     // The route already returns reader-safe messages; a generic fallback here would

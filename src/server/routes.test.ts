@@ -15,6 +15,35 @@ describe("server routes",()=>{
  it("omits coordinates from a pending manual move",async()=>{const h=setup();const input=body();input.graph.nodes.push({id:"a",type:"process",label:"A",position:{x:30,y:40}});const pending={kind:"clarification",command:{kind:"move_to",node:{kind:"label",value:"A"},position:{x:91,y:92}},referencePath:"node",candidates:["a"],graphVersion:0,elementKind:"node",allocatedIds:[],context:{focusedNodeId:null,recentNodeId:null}};expect((await h.routes.interpret(request({...input,pending}))).status).toBe(200);const [,init]=h.transport.mock.calls[0] as unknown as [string,RequestInit];expect(JSON.parse(init.body as string).contents[0].parts[0].text).not.toContain('"position"');});
  it("keeps a client named global separate from the global bucket",()=>{const limiter=new RateLimiter();for(let i=0;i<6;i++)expect(()=>limiter.check("token","global",0)).not.toThrow();expect(()=>limiter.check("token","global",0)).toThrow();expect(()=>limiter.check("token","another",0)).not.toThrow();});
  it.each(["token","interpret"] as const)("returns safe configuration errors for %s without a key",async kind=>{const h=setup(undefined,"");const result=await h.routes[kind](request(kind==="token"?{}:body()));expect(result.status).toBe(503);expect(result.headers.get("cache-control")).toBe("no-store");expect((await result.json()).error.code).toBe("CONFIGURATION");expect(h.transport).not.toHaveBeenCalled();});
+ it("uses a browser AssemblyAI key before the deployment fallback",async()=>{
+  const h=setup(async()=>Response.json({token:"temporary",expires_in_seconds:60}));
+  const response=await h.routes.token(request({},{"x-koi-assemblyai-key":"user-assembly-key-1234567890"}));
+  expect(response.status).toBe(200);
+  const [,init]=h.transport.mock.calls[0] as unknown as [string,RequestInit];
+  expect(new Headers(init.headers).get("authorization")).toBe("user-assembly-key-1234567890");
+  expect(JSON.stringify(init)).not.toContain("test-server-secret");
+ });
+ it("accepts a browser AssemblyAI key without a deployment key",async()=>{
+  const transport=vi.fn(async()=>Response.json({token:"temporary",expires_in_seconds:60}));
+  const routes=createRoutes({transport:transport as typeof fetch,env:()=>({})});
+  expect((await routes.token(request({},{"x-koi-assemblyai-key":"user-assembly-key-1234567890"}))).status).toBe(200);
+ });
+ it("rejects an invalid browser AssemblyAI key before contacting the provider",async()=>{
+  const h=setup();
+  expect((await h.routes.token(request({},{"x-koi-assemblyai-key":"short"}))).status).toBe(400);
+  expect(h.transport).not.toHaveBeenCalled();
+ });
+ it("keeps AssemblyAI cooldowns separate for different browser keys",async()=>{
+  const transport=vi.fn()
+   .mockResolvedValueOnce(new Response("rate limit",{status:429,headers:{"retry-after":"60"}}))
+   .mockResolvedValueOnce(Response.json({token:"temporary",expires_in_seconds:60}));
+  const routes=createRoutes({transport:transport as typeof fetch,env:()=>({})});
+  const first=await routes.token(request({},{"x-koi-assemblyai-key":"first-assembly-key-1234567890"}));
+  const second=await routes.token(request({},{"x-koi-assemblyai-key":"second-assembly-key-1234567890"}));
+  expect(first.status).toBe(429);
+  expect(second.status).toBe(200);
+  expect(transport).toHaveBeenCalledTimes(2);
+ });
  it("mints a short-lived token with the session cap in query parameters",async()=>{const h=setup(async()=>Response.json({token:"temporary",expires_in_seconds:60}));const response=await h.routes.token(request());expect(response.status).toBe(200);expect(await response.json()).toMatchObject({token:"temporary",expiresAt:expect.any(String)});const [url,init]=h.transport.mock.calls[0] as unknown as [string,RequestInit];expect(url).toContain("expires_in_seconds=60&max_session_duration_seconds=1800");expect(init.method).toBe("GET");});
  it("uses a valid browser Gemini key before the deployment fallback",async()=>{
   const h=setup();

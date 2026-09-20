@@ -1,6 +1,6 @@
 import { commandEnvelopeSchema } from "../commands/schema";
 import type { Interpret } from "../streaming/turns";
-import { geminiKeyPreference } from "./gemini-key";
+import { geminiKeyPreference } from "./api-keys";
 export const interpretOnServer:Interpret=async(transcript,state,signal)=>{
  const key=geminiKeyPreference.read();
  const headers:Record<string,string>={"content-type":"application/json"};

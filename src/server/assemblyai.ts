@@ -1,5 +1,6 @@
 import "server-only";
 import { z } from "zod";
+import { createHash } from "node:crypto";
 import { ApiError } from "./errors";
 import { ProviderHttp, type ProviderState } from "./provider-http";
 
@@ -7,7 +8,8 @@ import { ProviderHttp, type ProviderState } from "./provider-http";
 export class AssemblyProvider {
  private http: ProviderHttp;
  constructor(key: string, transport?: typeof fetch, state?: ProviderState) {
-  this.http = new ProviderHttp("AssemblyAI", { authorization: key }, transport, state);
+  const keyScope = createHash("sha256").update(key).digest("base64url").slice(0, 16);
+  this.http = new ProviderHttp("AssemblyAI", { authorization: key }, transport, state, keyScope);
  }
  async token(signal?: AbortSignal) {
   const started = Date.now();

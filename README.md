@@ -182,7 +182,7 @@ TRUST_PROXY=0
 > - Get an AssemblyAI streaming key at [AssemblyAI Dashboard](https://www.assemblyai.com/).
 > - *Note: The application functions offline for visual authoring, keyboard navigation, and fast local voice commands without active API keys.*
 
-Workspace users can also select **Set up Gemini** and provide their own Google AI Studio key. The key is masked, stored only in that browser tab's session storage, excluded from Koi project files, and sent only with Gemini interpretation requests. Closing the tab clears it. When no browser key is set, the server continues to use GEMINI_API_KEY as the deployment fallback.
+Workspace users can select **API keys** and provide their own [Google AI Studio](https://aistudio.google.com/) and [AssemblyAI](https://www.assemblyai.com/) credentials. Both keys are masked, stored only in that browser tab's session storage, excluded from Koi project files, and sent only to their matching server routes. AssemblyAI's permanent key is used only to mint a short-lived transcription token. Closing the tab clears both credentials. A missing browser key falls back to the matching deployment environment variable.
 
 ### 3. Launch Development Server
 

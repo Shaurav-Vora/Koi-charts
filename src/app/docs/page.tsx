@@ -31,7 +31,7 @@ function DocumentationSections() {
         {grammar.map(section => (
           <a key={section.title} href={guideHref(section.title)}>{section.title}</a>
         ))}
-        <a href="#guide-model">Gemini requests</a>
+        <a href="#guide-api-keys">API keys</a>
       </div>
 
       <div className="docs-nav-group">
@@ -320,35 +320,41 @@ export default function Documentation() {
             <CommandGuide />
           </section>
 
-          <section id="guide-model" className="docs-section" aria-labelledby="guide-model-title">
+          <section id="guide-api-keys" className="docs-section" aria-labelledby="guide-api-keys-title">
             <div className="docs-section-heading">
-              <p>Gemini requests</p>
-              <h2 id="guide-model-title">Use your own Gemini key</h2>
-              <span>Local commands need no Gemini key. Add one only for natural-language requests that do not match the local grammar.</span>
+              <p>Provider access</p>
+              <h2 id="guide-api-keys-title">Use your own API keys</h2>
+              <span>Local editing remains available without provider keys. Add only the services you want to use.</span>
             </div>
             <ol className="docs-workflow">
               <li>
                 <div>
-                  <h3>Open key setup</h3>
-                  <p>In the workspace voice toolbar, select <strong>Set up Gemini</strong>. Paste a Google AI Studio API key and choose <strong>Save key</strong>.</p>
+                  <h3>Open API keys</h3>
+                  <p>In the workspace voice toolbar, select <strong>API keys</strong>. The counter shows how many of the two providers are configured for this tab.</p>
                 </div>
               </li>
               <li>
                 <div>
-                  <h3>Use Gemini when needed</h3>
-                  <p>The control changes to <strong>Gemini key set</strong>. The key is attached only to requests sent for Gemini interpretation; exact local commands continue to run without it.</p>
+                  <h3>Add Gemini</h3>
+                  <p>Gemini interprets natural-language commands outside the fast local grammar. Obtain a key from <a href="https://aistudio.google.com/" target="_blank" rel="noreferrer">Google AI Studio</a>, paste it into the Gemini field, and choose <strong>Save Gemini key</strong>.</p>
                 </div>
               </li>
               <li>
                 <div>
-                  <h3>Remove or replace it</h3>
-                  <p>Open <strong>Gemini key set</strong> to enter a replacement or remove the current key. The key is stored only for the current browser tab and is cleared when that tab closes.</p>
+                  <h3>Add AssemblyAI</h3>
+                  <p>AssemblyAI provides live speech transcription. Obtain a key from <a href="https://www.assemblyai.com/" target="_blank" rel="noreferrer">AssemblyAI</a>, paste it into the AssemblyAI field, and choose <strong>Save AssemblyAI key</strong>.</p>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <h3>Replace or remove a key</h3>
+                  <p>Open <strong>API keys</strong> again to enter a replacement or remove either provider. Each key is stored only for the current browser tab and is cleared when the tab closes.</p>
                 </div>
               </li>
             </ol>
             <div className="docs-access-note">
               <h3>Key handling</h3>
-              <p>The key is masked in the workspace, excluded from saved Koi projects, and sent through the Koi Charts server to Google. A key configured on the deployment remains the fallback when this tab has no key.</p>
+              <p>Keys are masked, excluded from saved Koi projects, and sent only to the matching Koi Charts server route. AssemblyAI returns a short-lived transcription token; its permanent key is never used by the live browser connection. Deployment keys remain the fallback for providers not configured in the tab.</p>
             </div>
           </section>
 
