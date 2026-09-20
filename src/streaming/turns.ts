@@ -12,7 +12,7 @@ export type Turn={sessionId:string;turnId:string;text:string;final:boolean};
 // Which path produced the command. Shown to the author so a surprising result can be traced to
 // a template misreading their words rather than to the model, or the other way round.
 export type CommandSource="local"|"model";
-export type Presentation={status:VoiceStatus;preview:GraphCommand|null;text:string;error?:string;source?:CommandSource};
+export type Presentation={status:VoiceStatus;preview:GraphCommand|null;text:string;transcript?:string;error?:string;source?:CommandSource};
 export type Interpret=(text:string,state:EngineState,signal:AbortSignal)=>Promise<GraphCommand>;
 type Options={getState:()=>EngineState;apply:(command:GraphCommand)=>CommandResult;choose:(id:string)=>CommandResult;interpret:Interpret;present:(value:Presentation)=>void;preferLocal?:()=>boolean;runProject?:(action:ProjectAction)=>Promise<ProjectActionResult>|ProjectActionResult;runView?:(action:ViewAction)=>Promise<ViewActionResult>|ViewActionResult};
 export class TurnCoordinator {
@@ -26,10 +26,10 @@ export class TurnCoordinator {
  stop(){this.generation++;this.session=null;for(const controller of this.controllers)controller.abort();this.controllers.clear();this.tail=Promise.resolve();this.options.present({status:"idle",preview:null,text:""});}
  accept(turn:Turn):Promise<void>{
   if(turn.sessionId!==this.session || !turn.turnId || this.finalized.has(turn.turnId))return Promise.resolve();
-  if(!turn.final){const preview=previewCommand(turn.text);this.options.present({status:preview?"previewing":"speech_detected",preview,text:turn.text});return Promise.resolve();}
+  if(!turn.final){const preview=previewCommand(turn.text);this.options.present({status:preview?"previewing":"speech_detected",preview,text:turn.text,transcript:turn.text});return Promise.resolve();}
   this.finalized.add(turn.turnId);
   const generation=this.generation;
-  this.options.present({status:"interpreting",preview:null,text:turn.text});
+  this.options.present({status:"interpreting",preview:null,text:turn.text,transcript:turn.text});
   const task=this.tail.then(()=>this.finish(turn,generation));
   this.tail=task.catch(()=>{});return task;
  }
@@ -50,7 +50,7 @@ export class TurnCoordinator {
      ?await this.options.runView(viewAction)
      :{outcome:"error" as const,message:"Canvas view controls are unavailable."};
     if(generation!==this.generation)return;
-    this.options.present({status:viewResult.outcome==="error"?"error":"committed",preview:null,text:viewResult.message,source});
+    this.options.present({status:viewResult.outcome==="error"?"error":"committed",preview:null,text:viewResult.message,transcript:turn.text,source});
     return;
    }
    const projectAction=parseProjectControl(turn.text);
@@ -60,7 +60,7 @@ export class TurnCoordinator {
      ?await this.options.runProject(projectAction)
      :{outcome:"error" as const,message:"Project controls are unavailable."};
     if(generation!==this.generation)return;
-    this.options.present({status:projectResult.outcome==="error"?"error":"committed",preview:null,text:projectResult.message,source});
+    this.options.present({status:projectResult.outcome==="error"?"error":"committed",preview:null,text:projectResult.message,transcript:turn.text,source});
     return;
    }
    const control=parseControl(turn.text);
@@ -75,7 +75,7 @@ export class TurnCoordinator {
     const candidates=chosen===null
      ? pending.candidates.filter(id=>id===reply || (pending.elementKind==="node" && state.graph.nodes.find(n=>n.id===id)?.label.toLowerCase()===reply.toLowerCase()))
      : [pending.candidates[chosen]];
-    if(candidates.length!==1) {this.options.present({status:"needs_clarification",preview:null,text:`${describeChoices(state.graph,pending.candidates,pending.elementKind)} Or say cancel.`});return;}
+    if(candidates.length!==1) {this.options.present({status:"needs_clarification",preview:null,text:`${describeChoices(state.graph,pending.candidates,pending.elementKind)} Or say cancel.`,transcript:turn.text});return;}
     result=this.options.choose(candidates[0]);
    }else{
     const local=control ?? (this.options.preferLocal?.()===false?null:parseLocal(turn.text));
@@ -88,8 +88,8 @@ export class TurnCoordinator {
     result=this.options.apply(parsed.data);
    }
    if(generation!==this.generation)return;
-   this.options.present({status:result.outcome==="error"?"error":result.outcome==="clarification"?"needs_clarification":result.outcome==="confirmation"?"confirming_delete":"committed",preview:null,text:result.message,source});
-  }catch(error){if(generation===this.generation)this.options.present({status:"error",preview:null,text:"",error:error instanceof Error?error.message:"Command could not be applied.",source});}
+   this.options.present({status:result.outcome==="error"?"error":result.outcome==="clarification"?"needs_clarification":result.outcome==="confirmation"?"confirming_delete":"committed",preview:null,text:result.message,transcript:turn.text,source});
+  }catch(error){if(generation===this.generation)this.options.present({status:"error",preview:null,text:"",transcript:turn.text,error:error instanceof Error?error.message:"Command could not be applied.",source});}
   finally{this.controllers.delete(controller);}
  }
 }

@@ -243,6 +243,9 @@ export default function Editor({ coordinator: supplied }: { coordinator?: Return
           <p role={!speaks && hasError ? "alert" : undefined} aria-live={speaks || hasError ? undefined : "polite"}>
             {message || (isIdle ? "Ready · Say a voice command or click a shape to begin." : "")}
           </p>
+          {presentation?.transcript && presentation.status !== "speech_detected" && presentation.status !== "previewing" && presentation.status !== "interpreting" && (
+            <p className="spoken-transcript"><span>You said</span> &ldquo;{presentation.transcript}&rdquo;</p>
+          )}
         </div>
         <aside className="contextual-commands" aria-label="Suggested voice commands">
           <span className="contextual-commands-label">Suggested next · {suggestions.context}</span>

@@ -1245,3 +1245,12 @@ kbd { font-family: inherit; font-size: .9em; border: 1px solid #c7d3e5; border-b
 @media (forced-colors: active) {
   #workspace .contextual-command-list code { border-color: ButtonText; }
 }
+#workspace .feedback-body .spoken-transcript {
+  margin-top: 5px;
+  color: #52637d;
+  font-size: 11px;
+}
+#workspace .spoken-transcript span {
+  color: var(--fb-label);
+  font-weight: 700;
+}

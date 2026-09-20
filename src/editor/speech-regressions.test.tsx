@@ -104,3 +104,12 @@ it("uses the existing project controls for local Save and Open voice commands",a
  expect(speech.speak.mock.calls.at(-1)?.[0].text).toBe("Open project ready. Press Enter to choose a Koi file.");
  expect(interpret).not.toHaveBeenCalled();
 });
+it("keeps the final spoken transcript visible after its command executes", async () => {
+ const coordinator=createEditorCoordinator();
+ render(<Editor coordinator={coordinator}/>);
+ act(()=>coordinator.turns.start("visible-transcript"));
+ await act(()=>coordinator.turns.accept({sessionId:"visible-transcript",turnId:"1",text:"Add a start called Begin.",final:true}));
+ const feedback=screen.getByRole("region",{name:"Command feedback"});
+ expect(feedback).toHaveTextContent("Added start Begin, node 1.");
+ expect(feedback).toHaveTextContent("You said “Add a start called Begin.”");
+});
